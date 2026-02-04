@@ -6,6 +6,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/anil-wu/spark-x/internal/config"
 	"github.com/anil-wu/spark-x/internal/handler"
@@ -22,6 +23,10 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+
+	if dsn := os.Getenv("MYSQL_DSN"); dsn != "" {
+		c.MySQL.DSN = dsn
+	}
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
