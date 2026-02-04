@@ -1,0 +1,208 @@
+info (
+	title:   "sparkx api"
+	desc:    "Spark-X 项目 API 服务"
+	version: "v1"
+)
+
+type (
+	BaseResp {
+		code int32
+		msg  string
+	}
+	PageReq {
+		page     int64 //(default:1)
+		pageSize int64 //(default:20)
+	}
+	PageResp {
+		page     int64
+		pageSize int64
+		total    int64
+	}
+	// 用户
+	LoginReq {
+		email    string
+		password string
+	}
+	LoginResp {
+		userId  int64
+		created bool // 如果是注册逻辑则为 true
+	}
+	UpdateUserReq {
+		id       int64
+		username string
+	}
+	UserInfoResp {
+		id           int64
+		username     string
+		email        string
+		passwordHash string
+		createdAt    string
+		updatedAt    string
+	}
+	UserListResp {
+		list []UserInfoResp
+		page PageResp
+	}
+	GetUserByEmailReq {
+		email string
+	}
+	// 项目
+	CreateProjectReq {
+		userId      int64
+		name        string
+		description string
+	}
+	ProjectResp {
+		id          int64
+		name        string
+		description string
+		ownerId     int64
+		status      string // active | archived
+		createdAt   string
+		updatedAt   string
+	}
+	UpdateProjectReq {
+		id          int64
+		name        string
+		description string
+		status      string // active | archived
+	}
+	ProjectListResp {
+		list []ProjectResp
+		page PageResp
+	}
+	GetProjectReq {
+		id int64
+	}
+	DeleteProjectReq {
+		id int64
+	}
+	InviteMemberReq {
+		userId        int64 // 发起者
+		invitedUserId int64 // 被邀请者
+		projectId     int64
+		role          string // owner | admin | developer | viewer
+	}
+	// 文件与版本
+	PreUploadReq {
+		projectId    int64
+		name         string
+		fileCategory string // text | image | video | audio | binary
+		sizeBytes    int64
+		hash         string
+		mimeType     string
+	}
+	PreUploadResp {
+		uploadUrl     string
+		fileId        int64
+		versionId     int64
+		versionNumber int64
+	}
+	ProjectFileItem {
+		id            int64
+		projectId     int64
+		name          string
+		fileCategory  string
+		versionId     int64
+		versionNumber int64
+		sizeBytes     int64
+		hash          string
+		mimeType      string
+		createdAt     string
+		storagePath   string
+	}
+	ProjectFileListResp {
+		list []ProjectFileItem
+		page PageResp
+	}
+	ListProjectFilesReq {
+		projectId int64
+		page      int64
+		pageSize  int64
+	}
+	FileVersionItem {
+		id            int64
+		fileId        int64
+		versionNumber int64
+		sizeBytes     int64
+		hash          string
+		storagePath   string
+		mimeType      string
+		createdAt     string
+		updatedAt     string
+		createdBy     int64
+	}
+	FileVersionListResp {
+		list []FileVersionItem
+		page PageResp
+	}
+	ListFileVersionsReq {
+		id       int64
+		page     int64
+		pageSize int64
+	}
+)
+
+@server (
+	group:  auth
+	prefix: /api/v1
+)
+service sparkx-api {
+	@handler Login
+	post /auth/login (LoginReq) returns (LoginResp)
+}
+
+@server (
+	group:  users
+	prefix: /api/v1
+)
+service sparkx-api {
+	@handler GetUserByEmail
+	get /users/email/:email (GetUserByEmailReq) returns (UserInfoResp)
+
+	@handler UpdateUser
+	put /users/:id (UpdateUserReq) returns (BaseResp)
+
+	@handler ListUsers
+	get /users (PageReq) returns (UserListResp)
+}
+
+@server (
+	group:  projects
+	prefix: /api/v1
+)
+service sparkx-api {
+	@handler CreateProject
+	post /projects (CreateProjectReq) returns (ProjectResp)
+
+	@handler DeleteProject
+	delete /projects/:id (DeleteProjectReq) returns (BaseResp)
+
+	@handler UpdateProject
+	put /projects/:id (UpdateProjectReq) returns (BaseResp)
+
+	@handler ListProjects
+	get /projects (PageReq) returns (ProjectListResp)
+
+	@handler GetProject
+	get /projects/:id (GetProjectReq) returns (ProjectResp)
+
+	@handler InviteMember
+	post /projects/:id/invite (InviteMemberReq) returns (BaseResp)
+}
+
+@server (
+	group:  files
+	prefix: /api/v1
+)
+service sparkx-api {
+	@handler PreUploadFile
+	post /files/preupload (PreUploadReq) returns (PreUploadResp)
+
+	@handler ListProjectFiles
+	get /projects/:projectId/files (ListProjectFilesReq) returns (ProjectFileListResp)
+
+	@handler ListFileVersions
+	get /files/:id/versions (ListFileVersionsReq) returns (FileVersionListResp)
+}
+

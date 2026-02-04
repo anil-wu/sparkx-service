@@ -1,0 +1,11 @@
+Name: sparkx-api
+Host: 0.0.0.0
+Port: 8890
+MySQL:
+  DSN: "user:password@tcp(127.0.0.1:3306)/sparkx?charset=utf8mb4&parseTime=true&loc=Local"
+OSS:
+  Endpoint: "https://oss-your-region.aliyuncs.com"
+  AccessKeyId: ""
+  AccessKeySecret: ""
+  Bucket: "your-bucket-name"
+  ExpireSeconds: 1800
