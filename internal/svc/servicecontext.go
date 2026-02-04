@@ -34,7 +34,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	if c.MySQL.DSN != "" {
 		db, err = gorm.Open(mysql.Open(c.MySQL.DSN), &gorm.Config{})
 		if err != nil {
-			logx.Errorf("mysql init failed: %v", err)
+			panic(err)
 		}
 	}
 	var conn sqlx.SqlConn
