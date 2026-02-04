@@ -6,140 +6,140 @@ info (
 
 type (
 	BaseResp {
-		code int32
-		msg  string
+		code int32  `json:"code"`
+		msg  string `json:"msg"`
 	}
 	PageReq {
-		page     int64 //(default:1)
-		pageSize int64 //(default:20)
+		page     int64 `form:"page,default=1"`
+		pageSize int64 `form:"pageSize,default=20"`
 	}
 	PageResp {
-		page     int64
-		pageSize int64
-		total    int64
+		page     int64 `json:"page"`
+		pageSize int64 `json:"pageSize"`
+		total    int64 `json:"total"`
 	}
 	// 用户
 	LoginReq {
-		email    string
-		password string
+		email    string `json:"email"`
+		password string `json:"password"`
 	}
 	LoginResp {
-		userId  int64
-		created bool // 如果是注册逻辑则为 true
+		userId  int64 `json:"userId"`
+		created bool  `json:"created"` // 如果是注册逻辑则为 true
 	}
 	UpdateUserReq {
-		id       int64
-		username string
+		id       int64  `path:"id"`
+		username string `json:"username"`
 	}
 	UserInfoResp {
-		id           int64
-		username     string
-		email        string
-		passwordHash string
-		createdAt    string
-		updatedAt    string
+		id           int64  `json:"id"`
+		username     string `json:"username"`
+		email        string `json:"email"`
+		passwordHash string `json:"passwordHash"`
+		createdAt    string `json:"createdAt"`
+		updatedAt    string `json:"updatedAt"`
 	}
 	UserListResp {
-		list []UserInfoResp
-		page PageResp
+		list []UserInfoResp `json:"list"`
+		page PageResp       `json:"page"`
 	}
 	GetUserByEmailReq {
-		email string
+		email string `path:"email"`
 	}
 	// 项目
 	CreateProjectReq {
-		userId      int64
-		name        string
-		description string
+		userId      int64  `json:"userId"`
+		name        string `json:"name"`
+		description string `json:"description"`
 	}
 	ProjectResp {
-		id          int64
-		name        string
-		description string
-		ownerId     int64
-		status      string // active | archived
-		createdAt   string
-		updatedAt   string
+		id          int64  `json:"id"`
+		name        string `json:"name"`
+		description string `json:"description"`
+		ownerId     int64  `json:"ownerId"`
+		status      string `json:"status"` // active | archived
+		createdAt   string `json:"createdAt"`
+		updatedAt   string `json:"updatedAt"`
 	}
 	UpdateProjectReq {
-		id          int64
-		name        string
-		description string
-		status      string // active | archived
+		id          int64  `path:"id"`
+		name        string `json:"name"`
+		description string `json:"description"`
+		status      string `json:"status"` // active | archived
 	}
 	ProjectListResp {
-		list []ProjectResp
-		page PageResp
+		list []ProjectResp `json:"list"`
+		page PageResp      `json:"page"`
 	}
 	GetProjectReq {
-		id int64
+		id int64 `path:"id"`
 	}
 	DeleteProjectReq {
-		id int64
+		id int64 `path:"id"`
 	}
 	InviteMemberReq {
-		userId        int64 // 发起者
-		invitedUserId int64 // 被邀请者
-		projectId     int64
-		role          string // owner | admin | developer | viewer
+		userId        int64  `json:"userId"` // 发起者
+		invitedUserId int64  `json:"invitedUserId"` // 被邀请者
+		projectId     int64  `path:"id"`
+		role          string `json:"role"` // owner | admin | developer | viewer
 	}
 	// 文件与版本
 	PreUploadReq {
-		projectId    int64
-		name         string
-		fileCategory string // text | image | video | audio | binary
-		sizeBytes    int64
-		hash         string
-		mimeType     string
+		projectId    int64  `json:"projectId"`
+		name         string `json:"name"`
+		fileCategory string `json:"fileCategory"` // text | image | video | audio | binary
+		sizeBytes    int64  `json:"sizeBytes"`
+		hash         string `json:"hash"`
+		mimeType     string `json:"mimeType"`
 	}
 	PreUploadResp {
-		uploadUrl     string
-		fileId        int64
-		versionId     int64
-		versionNumber int64
+		uploadUrl     string `json:"uploadUrl"`
+		fileId        int64  `json:"fileId"`
+		versionId     int64  `json:"versionId"`
+		versionNumber int64  `json:"versionNumber"`
 	}
 	ProjectFileItem {
-		id            int64
-		projectId     int64
-		name          string
-		fileCategory  string
-		versionId     int64
-		versionNumber int64
-		sizeBytes     int64
-		hash          string
-		mimeType      string
-		createdAt     string
-		storagePath   string
+		id            int64  `json:"id"`
+		projectId     int64  `json:"projectId"`
+		name          string `json:"name"`
+		fileCategory  string `json:"fileCategory"`
+		versionId     int64  `json:"versionId"`
+		versionNumber int64  `json:"versionNumber"`
+		sizeBytes     int64  `json:"sizeBytes"`
+		hash          string `json:"hash"`
+		mimeType      string `json:"mimeType"`
+		createdAt     string `json:"createdAt"`
+		storagePath   string `json:"storagePath"`
 	}
 	ProjectFileListResp {
-		list []ProjectFileItem
-		page PageResp
+		list []ProjectFileItem `json:"list"`
+		page PageResp          `json:"page"`
 	}
 	ListProjectFilesReq {
-		projectId int64
-		page      int64
-		pageSize  int64
+		projectId int64 `path:"projectId"`
+		page      int64 `form:"page,default=1"`
+		pageSize  int64 `form:"pageSize,default=20"`
 	}
 	FileVersionItem {
-		id            int64
-		fileId        int64
-		versionNumber int64
-		sizeBytes     int64
-		hash          string
-		storagePath   string
-		mimeType      string
-		createdAt     string
-		updatedAt     string
-		createdBy     int64
+		id            int64  `json:"id"`
+		fileId        int64  `json:"fileId"`
+		versionNumber int64  `json:"versionNumber"`
+		sizeBytes     int64  `json:"sizeBytes"`
+		hash          string `json:"hash"`
+		storagePath   string `json:"storagePath"`
+		mimeType      string `json:"mimeType"`
+		createdAt     string `json:"createdAt"`
+		updatedAt     string `json:"updatedAt"`
+		createdBy     int64  `json:"createdBy"`
 	}
 	FileVersionListResp {
-		list []FileVersionItem
-		page PageResp
+		list []FileVersionItem `json:"list"`
+		page PageResp          `json:"page"`
 	}
 	ListFileVersionsReq {
-		id       int64
-		page     int64
-		pageSize int64
+		id       int64 `path:"id"`
+		page     int64 `form:"page,default=1"`
+		pageSize int64 `form:"pageSize,default=20"`
 	}
 )
 
