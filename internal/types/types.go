@@ -4,158 +4,158 @@
 package types
 
 type BaseResp struct {
-	Code int32
-	Msg  string
+	Code int32  `json:"code"`
+	Msg  string `json:"msg"`
 }
 
 type CreateProjectReq struct {
-	UserId      int64
-	Name        string
-	Description string
+	UserId      int64  `json:"userId"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 type DeleteProjectReq struct {
-	Id int64
+	Id int64 `path:"id"`
 }
 
 type FileVersionItem struct {
-	Id            int64
-	FileId        int64
-	VersionNumber int64
-	SizeBytes     int64
-	Hash          string
-	StoragePath   string
-	MimeType      string
-	CreatedAt     string
-	UpdatedAt     string
-	CreatedBy     int64
+	Id            int64  `json:"id"`
+	FileId        int64  `json:"fileId"`
+	VersionNumber int64  `json:"versionNumber"`
+	SizeBytes     int64  `json:"sizeBytes"`
+	Hash          string `json:"hash"`
+	StoragePath   string `json:"storagePath"`
+	MimeType      string `json:"mimeType"`
+	CreatedAt     string `json:"createdAt"`
+	UpdatedAt     string `json:"updatedAt"`
+	CreatedBy     int64  `json:"createdBy"`
 }
 
 type FileVersionListResp struct {
-	List []FileVersionItem
-	Page PageResp
+	List []FileVersionItem `json:"list"`
+	Page PageResp          `json:"page"`
 }
 
 type GetProjectReq struct {
-	Id int64
+	Id int64 `path:"id"`
 }
 
 type GetUserByEmailReq struct {
-	Email string
+	Email string `path:"email"`
 }
 
 type InviteMemberReq struct {
-	UserId        int64 // 发起者
-	InvitedUserId int64 // 被邀请者
-	ProjectId     int64
-	Role          string // owner | admin | developer | viewer
+	UserId        int64  `json:"userId"`        // 发起者
+	InvitedUserId int64  `json:"invitedUserId"` // 被邀请者
+	ProjectId     int64  `path:"id"`
+	Role          string `json:"role"` // owner | admin | developer | viewer
 }
 
 type ListFileVersionsReq struct {
-	Id       int64
-	Page     int64
-	PageSize int64
+	Id       int64 `path:"id"`
+	Page     int64 `form:"page,default=1"`
+	PageSize int64 `form:"pageSize,default=20"`
 }
 
 type ListProjectFilesReq struct {
-	ProjectId int64
-	Page      int64
-	PageSize  int64
+	ProjectId int64 `path:"projectId"`
+	Page      int64 `form:"page,default=1"`
+	PageSize  int64 `form:"pageSize,default=20"`
 }
 
 type LoginReq struct {
-	Email    string
-	Password string
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type LoginResp struct {
-	UserId  int64
-	Created bool // 如果是注册逻辑则为 true
+	UserId  int64 `json:"userId"`
+	Created bool  `json:"created"` // 如果是注册逻辑则为 true
 }
 
 type PageReq struct {
-	Page     int64 //(default:1)
-	PageSize int64 //(default:20)
+	Page     int64 `form:"page,default=1"`
+	PageSize int64 `form:"pageSize,default=20"`
 }
 
 type PageResp struct {
-	Page     int64
-	PageSize int64
-	Total    int64
+	Page     int64 `json:"page"`
+	PageSize int64 `json:"pageSize"`
+	Total    int64 `json:"total"`
 }
 
 type PreUploadReq struct {
-	ProjectId    int64
-	Name         string
-	FileCategory string // text | image | video | audio | binary
-	SizeBytes    int64
-	Hash         string
-	MimeType     string
+	ProjectId    int64  `json:"projectId"`
+	Name         string `json:"name"`
+	FileCategory string `json:"fileCategory"` // text | image | video | audio | binary
+	SizeBytes    int64  `json:"sizeBytes"`
+	Hash         string `json:"hash"`
+	MimeType     string `json:"mimeType"`
 }
 
 type PreUploadResp struct {
-	UploadUrl     string
-	FileId        int64
-	VersionId     int64
-	VersionNumber int64
+	UploadUrl     string `json:"uploadUrl"`
+	FileId        int64  `json:"fileId"`
+	VersionId     int64  `json:"versionId"`
+	VersionNumber int64  `json:"versionNumber"`
 }
 
 type ProjectFileItem struct {
-	Id            int64
-	ProjectId     int64
-	Name          string
-	FileCategory  string
-	VersionId     int64
-	VersionNumber int64
-	SizeBytes     int64
-	Hash          string
-	MimeType      string
-	CreatedAt     string
-	StoragePath   string
+	Id            int64  `json:"id"`
+	ProjectId     int64  `json:"projectId"`
+	Name          string `json:"name"`
+	FileCategory  string `json:"fileCategory"`
+	VersionId     int64  `json:"versionId"`
+	VersionNumber int64  `json:"versionNumber"`
+	SizeBytes     int64  `json:"sizeBytes"`
+	Hash          string `json:"hash"`
+	MimeType      string `json:"mimeType"`
+	CreatedAt     string `json:"createdAt"`
+	StoragePath   string `json:"storagePath"`
 }
 
 type ProjectFileListResp struct {
-	List []ProjectFileItem
-	Page PageResp
+	List []ProjectFileItem `json:"list"`
+	Page PageResp          `json:"page"`
 }
 
 type ProjectListResp struct {
-	List []ProjectResp
-	Page PageResp
+	List []ProjectResp `json:"list"`
+	Page PageResp      `json:"page"`
 }
 
 type ProjectResp struct {
-	Id          int64
-	Name        string
-	Description string
-	OwnerId     int64
-	Status      string // active | archived
-	CreatedAt   string
-	UpdatedAt   string
+	Id          int64  `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	OwnerId     int64  `json:"ownerId"`
+	Status      string `json:"status"` // active | archived
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
 }
 
 type UpdateProjectReq struct {
-	Id          int64
-	Name        string
-	Description string
-	Status      string // active | archived
+	Id          int64  `path:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Status      string `json:"status"` // active | archived
 }
 
 type UpdateUserReq struct {
-	Id       int64
-	Username string
+	Id       int64  `path:"id"`
+	Username string `json:"username"`
 }
 
 type UserInfoResp struct {
-	Id           int64
-	Username     string
-	Email        string
-	PasswordHash string
-	CreatedAt    string
-	UpdatedAt    string
+	Id           int64  `json:"id"`
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	PasswordHash string `json:"passwordHash"`
+	CreatedAt    string `json:"createdAt"`
+	UpdatedAt    string `json:"updatedAt"`
 }
 
 type UserListResp struct {
-	List []UserInfoResp
-	Page PageResp
+	List []UserInfoResp `json:"list"`
+	Page PageResp       `json:"page"`
 }
