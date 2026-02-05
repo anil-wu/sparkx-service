@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,7 +15,7 @@ import (
 )
 
 const (
-	defaultBaseURL = "http://localhost:8890/api/v1"
+	defaultBaseURL = "https://localhost:8890/api/v1"
 )
 
 type Response struct {
@@ -30,13 +31,16 @@ type BaseResp struct {
 
 // Data structs matching API
 type LoginReq struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	LoginType string `json:"loginType"` // email | google
+	Email     string `json:"email,optional"`
+	Password  string `json:"password,optional"`
+	IdToken   string `json:"idToken,optional"`
 }
 
 type LoginResp struct {
-	UserId  int64 `json:"userId"`
-	Created bool  `json:"created"`
+	UserId  int64  `json:"userId"`
+	Created bool   `json:"created"`
+	Token   string `json:"token"`
 }
 
 type CreateProjectReq struct {
@@ -51,6 +55,8 @@ type ProjectResp struct {
 	Description string `json:"description"`
 	OwnerId     int64  `json:"ownerId"`
 	Status      string `json:"status"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
 }
 
 type UpdateProjectReq struct {
@@ -155,7 +161,8 @@ type FileVersionListResp struct {
 
 // Helper client
 type Client struct {
-	t *testing.T
+	t     *testing.T
+	token string
 }
 
 func getenvDefault(key, def string) string {
@@ -172,6 +179,10 @@ func getBaseURL() string {
 		return defaultBaseURL
 	}
 	return strings.TrimRight(v, "/")
+}
+
+func (c *Client) SetToken(token string) {
+	c.token = token
 }
 
 func (c *Client) Post(path string, body interface{}, target interface{}) {
@@ -206,7 +217,16 @@ func (c *Client) do(method, path string, body interface{}, target interface{}) {
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 10 * time.Second}
+	// Add JWT token if available
+	if c.token != "" {
+		req.Header.Set("Authorization", "Bearer "+c.token)
+	}
+
+	// Skip TLS verification for self-signed certificates
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Timeout: 10 * time.Second, Transport: tr}
 	resp, err := client.Do(req)
 	if err != nil {
 		c.t.Fatalf("Request failed: %v", err)
@@ -229,13 +249,20 @@ func (c *Client) do(method, path string, body interface{}, target interface{}) {
 	}
 }
 
-func deleteProjectBestEffort(t *testing.T, id int64) {
+func deleteProjectBestEffort(t *testing.T, token string, id int64) {
 	req, err := http.NewRequest("DELETE", getBaseURL()+fmt.Sprintf("/projects/%d", id), nil)
 	if err != nil {
 		t.Logf("Cleanup failed to create request: %v", err)
 		return
 	}
-	client := &http.Client{Timeout: 10 * time.Second}
+	if token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
+	// Skip TLS verification for self-signed certificates
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Timeout: 10 * time.Second, Transport: tr}
 	resp, err := client.Do(req)
 	if err != nil {
 		t.Logf("Cleanup request failed: %v", err)
@@ -264,17 +291,27 @@ func TestWorkflow(t *testing.T) {
 	emailA := getenvDefault("SPARKX_IT_EMAIL_A", "sparkx_it_user_a@example.com")
 	password := getenvDefault("SPARKX_IT_PASSWORD", "password123")
 	t.Logf("Step 1.1: Register User A (%s)", emailA)
-	loginReqA := LoginReq{Email: emailA, Password: password}
+	loginReqA := LoginReq{
+		LoginType: "email",
+		Email:     emailA,
+		Password:  password,
+	}
 	var loginRespA LoginResp
 	client.Post("/auth/login", loginReqA, &loginRespA)
 	if loginRespA.UserId == 0 {
 		t.Fatal("Login A failed")
 	}
+	client.SetToken(loginRespA.Token)
+	t.Logf("User A logged in, token received")
 
 	// Create User B (for invitation)
 	emailB := getenvDefault("SPARKX_IT_EMAIL_B", "sparkx_it_user_b@example.com")
 	t.Logf("Step 1.2: Register User B (%s)", emailB)
-	loginReqB := LoginReq{Email: emailB, Password: password}
+	loginReqB := LoginReq{
+		LoginType: "email",
+		Email:     emailB,
+		Password:  password,
+	}
 	var loginRespB LoginResp
 	client.Post("/auth/login", loginReqB, &loginRespB)
 
@@ -321,7 +358,7 @@ func TestWorkflow(t *testing.T) {
 	t.Logf("Project created with ID: %d", projectResp.Id)
 	t.Cleanup(func() {
 		if projectResp.Id > 0 {
-			deleteProjectBestEffort(t, projectResp.Id)
+			deleteProjectBestEffort(t, loginRespA.Token, projectResp.Id)
 		}
 	})
 

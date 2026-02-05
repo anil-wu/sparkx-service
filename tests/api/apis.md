@@ -13,11 +13,14 @@
 - **方法**: `POST`
 - **路径**: `/auth/login`
 - **请求**: `LoginReq`
-  - `email` (string): 用户邮箱
-  - `password` (string): 用户密码
+  - `loginType` (string): 登录类型 - `email` | `google`
+  - `email` (string, optional): 用户邮箱 (email 登录时需要)
+  - `password` (string, optional): 用户密码 (email 登录时需要)
+  - `idToken` (string, optional): Google ID Token (google 登录时需要)
 - **响应**: `LoginResp`
   - `userId` (int64): 用户 ID
   - `created` (bool): 是否为新创建用户 (注册逻辑)
+  - `token` (string): JWT Token，用于后续请求的认证
 
 ---
 
