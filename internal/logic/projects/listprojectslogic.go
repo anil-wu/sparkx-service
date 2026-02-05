@@ -5,6 +5,8 @@ package projects
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 
 	"github.com/anil-wu/spark-x/internal/model"
 	"github.com/anil-wu/spark-x/internal/svc"
@@ -28,6 +30,12 @@ func NewListProjectsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *List
 }
 
 func (l *ListProjectsLogic) ListProjects(req *types.PageReq) (resp *types.ProjectListResp, err error) {
+	userIdNumber, ok := l.ctx.Value("userId").(json.Number)
+	if !ok {
+		return nil, errors.New("unauthorized")
+	}
+	userId, _ := userIdNumber.Int64()
+
 	page := int(req.Page)
 	size := int(req.PageSize)
 	if page <= 0 {
@@ -42,11 +50,17 @@ func (l *ListProjectsLogic) ListProjects(req *types.PageReq) (resp *types.Projec
 	offset := (page - 1) * size
 
 	var list []model.Projects
-	if err = l.svcCtx.DB.WithContext(l.ctx).Model(&model.Projects{}).Offset(offset).Limit(size).Order("id desc").Find(&list).Error; err != nil {
+	if err = l.svcCtx.DB.WithContext(l.ctx).Model(&model.Projects{}).
+		Joins("JOIN project_members ON project_members.project_id = projects.id").
+		Where("project_members.user_id = ?", userId).
+		Offset(offset).Limit(size).Order("projects.id desc").Find(&list).Error; err != nil {
 		return nil, err
 	}
 	var total int64
-	if err = l.svcCtx.DB.WithContext(l.ctx).Model(&model.Projects{}).Count(&total).Error; err != nil {
+	if err = l.svcCtx.DB.WithContext(l.ctx).Model(&model.Projects{}).
+		Joins("JOIN project_members ON project_members.project_id = projects.id").
+		Where("project_members.user_id = ?", userId).
+		Count(&total).Error; err != nil {
 		return nil, err
 	}
 	items := make([]types.ProjectResp, 0, len(list))

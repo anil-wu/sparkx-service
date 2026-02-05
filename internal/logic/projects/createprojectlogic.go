@@ -6,6 +6,7 @@ package projects
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 
 	"github.com/anil-wu/spark-x/internal/model"
@@ -30,6 +31,12 @@ func NewCreateProjectLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cre
 }
 
 func (l *CreateProjectLogic) CreateProject(req *types.CreateProjectReq) (resp *types.ProjectResp, err error) {
+	userIdNumber, ok := l.ctx.Value("userId").(json.Number)
+	if ok {
+		uid, _ := userIdNumber.Int64()
+		req.UserId = uid
+	}
+
 	if req == nil || req.UserId <= 0 || req.Name == "" {
 		return nil, errors.New("invalid params")
 	}

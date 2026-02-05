@@ -5,6 +5,7 @@ package projects
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"github.com/anil-wu/spark-x/internal/model"
@@ -29,9 +30,25 @@ func NewDeleteProjectLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 }
 
 func (l *DeleteProjectLogic) DeleteProject(req *types.DeleteProjectReq) (resp *types.BaseResp, err error) {
+	userIdNumber, ok := l.ctx.Value("userId").(json.Number)
+	if !ok {
+		return nil, errors.New("unauthorized")
+	}
+	userId, _ := userIdNumber.Int64()
+
 	if req == nil || req.Id <= 0 {
 		return nil, errors.New("id required")
 	}
+
+	// Check ownership
+	var count int64
+	if err := l.svcCtx.DB.WithContext(l.ctx).Model(&model.Projects{}).Where("id = ? AND owner_id = ?", req.Id, userId).Count(&count).Error; err != nil {
+		return nil, err
+	}
+	if count == 0 {
+		return nil, errors.New("project not found or permission denied")
+	}
+
 	tx := l.svcCtx.DB.WithContext(l.ctx).Begin()
 	if tx.Error != nil {
 		return nil, tx.Error

@@ -5,11 +5,12 @@ package users
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
+	"github.com/anil-wu/spark-x/internal/model"
 	"github.com/anil-wu/spark-x/internal/svc"
 	"github.com/anil-wu/spark-x/internal/types"
-	"github.com/anil-wu/spark-x/internal/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -32,6 +33,15 @@ func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserReq) (resp *types.Base
 	if req == nil || req.Id <= 0 {
 		return nil, errors.New("id required")
 	}
+
+	userIdNumber, ok := l.ctx.Value("userId").(json.Number)
+	if ok {
+		uid, _ := userIdNumber.Int64()
+		if uid != req.Id {
+			return nil, errors.New("permission denied")
+		}
+	}
+
 	data := &model.Users{
 		Username: req.Username,
 	}

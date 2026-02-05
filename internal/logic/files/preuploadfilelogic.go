@@ -5,6 +5,8 @@ package files
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/anil-wu/spark-x/internal/model"
@@ -29,9 +31,25 @@ func NewPreUploadFileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Pre
 }
 
 func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types.PreUploadResp, err error) {
+	userIdNumber, ok := l.ctx.Value("userId").(json.Number)
+	if !ok {
+		return nil, errors.New("unauthorized")
+	}
+	userId, _ := userIdNumber.Int64()
+
 	if req == nil || req.ProjectId <= 0 || req.Name == "" || req.FileCategory == "" {
 		return nil, model.InputParamInvalid
 	}
+
+	// Check project membership
+	var count int64
+	if err := l.svcCtx.DB.WithContext(l.ctx).Model(&model.ProjectMembers{}).Where("project_id = ? AND user_id = ?", req.ProjectId, userId).Count(&count).Error; err != nil {
+		return nil, err
+	}
+	if count == 0 {
+		return nil, errors.New("project not found or permission denied")
+	}
+
 	// ensure file exists or create
 	var file *model.Files
 	// try find by unique (project_id,name)
@@ -67,7 +85,7 @@ func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types
 		Hash:          req.Hash,
 		StoragePath:   objectPath,
 		MimeType:      req.MimeType,
-		CreatedBy:     0,
+		CreatedBy:     uint64(userId),
 	}
 	_, err = l.svcCtx.FileVersionsModel.Insert(l.ctx, newVer)
 	if err != nil {
