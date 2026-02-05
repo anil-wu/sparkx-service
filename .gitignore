@@ -1,0 +1,7 @@
+# Binaries
+spark-x.exe
+*.exe
+
+# OS specific
+*.DS_Store
+Thumbs.db
