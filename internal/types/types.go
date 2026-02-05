@@ -64,13 +64,16 @@ type ListProjectFilesReq struct {
 }
 
 type LoginReq struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	LoginType string `json:"loginType"` // email | google
+	Email     string `json:"email,optional"`
+	Password  string `json:"password,optional"`
+	IdToken   string `json:"idToken,optional"`
 }
 
 type LoginResp struct {
-	UserId  int64 `json:"userId"`
-	Created bool  `json:"created"` // 如果是注册逻辑则为 true
+	UserId  int64  `json:"userId"`
+	Created bool   `json:"created"` // 如果是注册逻辑则为 true
+	Token   string `json:"token"`
 }
 
 type PageReq struct {

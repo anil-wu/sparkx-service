@@ -4,10 +4,25 @@ CREATE TABLE IF NOT EXISTS `users` (
   `username` VARCHAR(64) NOT NULL DEFAULT '',
   `email` VARCHAR(128) NOT NULL UNIQUE,
   `password_hash` CHAR(32) NOT NULL,
+  `avatar` VARCHAR(255) NOT NULL DEFAULT '',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_users_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- user_identities
+CREATE TABLE IF NOT EXISTS `user_identities` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT UNSIGNED NOT NULL,
+  `provider` VARCHAR(32) NOT NULL, -- google, apple
+  `provider_uid` VARCHAR(255) NOT NULL, -- sub from google
+  `email` VARCHAR(128) NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_provider_uid` (`provider`, `provider_uid`),
+  KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- projects

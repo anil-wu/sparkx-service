@@ -44,12 +44,12 @@ type (
 	}
 
 	ProjectMembers struct {
-		Id        uint64    `db:"id"`
-		ProjectId uint64    `db:"project_id"`
-		UserId    uint64    `db:"user_id"`
-		Role      string    `db:"role"`
-		CreatedAt time.Time `db:"created_at"`
-		UpdatedAt time.Time `db:"updated_at"`
+		Id        uint64    `db:"id" gorm:"column:id;primaryKey"`
+		ProjectId uint64    `db:"project_id" gorm:"column:project_id"`
+		UserId    uint64    `db:"user_id" gorm:"column:user_id"`
+		Role      string    `db:"role" gorm:"column:role"`
+		CreatedAt time.Time `db:"created_at" gorm:"column:created_at"`
+		UpdatedAt time.Time `db:"updated_at" gorm:"column:updated_at"`
 	}
 )
 
@@ -59,6 +59,10 @@ func newProjectMembersModel(conn *gorm.DB, connS sqlx.SqlConn) *defaultProjectMe
 		conn:  connS,
 		table: "`project_members`",
 	}
+}
+
+func (m *defaultProjectMembersModel) TableName() string {
+	return m.table
 }
 
 // Delete 通过主键id删除数据，返回受影响行数

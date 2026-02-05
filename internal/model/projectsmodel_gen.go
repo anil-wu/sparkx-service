@@ -44,13 +44,13 @@ type (
 	}
 
 	Projects struct {
-		Id          uint64         `db:"id"`
-		Name        string         `db:"name"`
-		Description sql.NullString `db:"description"`
-		OwnerId     uint64         `db:"owner_id"`
-		Status      string         `db:"status"`
-		CreatedAt   time.Time      `db:"created_at"`
-		UpdatedAt   time.Time      `db:"updated_at"`
+		Id          uint64         `db:"id" gorm:"column:id;primaryKey"`
+		Name        string         `db:"name" gorm:"column:name"`
+		Description sql.NullString `db:"description" gorm:"column:description"`
+		OwnerId     uint64         `db:"owner_id" gorm:"column:owner_id"`
+		Status      string         `db:"status" gorm:"column:status"`
+		CreatedAt   time.Time      `db:"created_at" gorm:"column:created_at"`
+		UpdatedAt   time.Time      `db:"updated_at" gorm:"column:updated_at"`
 	}
 )
 
@@ -60,6 +60,10 @@ func newProjectsModel(conn *gorm.DB, connS sqlx.SqlConn) *defaultProjectsModel {
 		conn:  connS,
 		table: "`projects`",
 	}
+}
+
+func (m *defaultProjectsModel) TableName() string {
+	return m.table
 }
 
 // Delete 通过主键id删除数据，返回受影响行数

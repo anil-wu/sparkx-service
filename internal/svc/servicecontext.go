@@ -19,6 +19,7 @@ type ServiceContext struct {
 	Conn   sqlx.SqlConn
 
 	UsersModel          model.UsersModel
+	UserIdentitiesModel model.UserIdentitiesModel
 	ProjectsModel       model.ProjectsModel
 	ProjectMembersModel model.ProjectMembersModel
 	FilesModel          model.FilesModel
@@ -44,12 +45,14 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	// init models
 	var usersModel model.UsersModel
+	var userIdentitiesModel model.UserIdentitiesModel
 	var projectsModel model.ProjectsModel
 	var projectMembersModel model.ProjectMembersModel
 	var filesModel model.FilesModel
 	var fileVersionsModel model.FileVersionsModel
 	if db != nil && conn != nil {
 		usersModel = model.NewUsersModel(db, conn)
+		userIdentitiesModel = model.NewUserIdentitiesModel(db, conn)
 		projectsModel = model.NewProjectsModel(db, conn)
 		projectMembersModel = model.NewProjectMembersModel(db, conn)
 		filesModel = model.NewFilesModel(db, conn)
@@ -76,6 +79,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		DB:                  db,
 		Conn:                conn,
 		UsersModel:          usersModel,
+		UserIdentitiesModel: userIdentitiesModel,
 		ProjectsModel:       projectsModel,
 		ProjectMembersModel: projectMembersModel,
 		FilesModel:          filesModel,

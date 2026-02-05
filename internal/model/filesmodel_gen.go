@@ -44,11 +44,11 @@ type (
 	}
 
 	Files struct {
-		Id           uint64    `db:"id"`
-		ProjectId    uint64    `db:"project_id"`
-		Name         string    `db:"name"`
-		FileCategory string    `db:"file_category"`
-		CreatedAt    time.Time `db:"created_at"`
+		Id           uint64    `db:"id" gorm:"column:id;primaryKey"`
+		ProjectId    uint64    `db:"project_id" gorm:"column:project_id"`
+		Name         string    `db:"name" gorm:"column:name"`
+		FileCategory string    `db:"file_category" gorm:"column:file_category"`
+		CreatedAt    time.Time `db:"created_at" gorm:"column:created_at"`
 	}
 )
 
@@ -58,6 +58,10 @@ func newFilesModel(conn *gorm.DB, connS sqlx.SqlConn) *defaultFilesModel {
 		conn:  connS,
 		table: "`files`",
 	}
+}
+
+func (m *defaultFilesModel) TableName() string {
+	return m.table
 }
 
 // Delete 通过主键id删除数据，返回受影响行数

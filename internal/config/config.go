@@ -10,6 +10,13 @@ type Config struct {
 	MySQL struct {
 		DSN string
 	}
+	Auth struct {
+		AccessSecret string
+		AccessExpire int64
+	}
+	Google struct {
+		ClientID string
+	}
 	OSS struct {
 		Endpoint        string
 		AccessKeyId     string

@@ -44,16 +44,16 @@ type (
 	}
 
 	FileVersions struct {
-		Id            uint64    `db:"id"`
-		FileId        uint64    `db:"file_id"`
-		VersionNumber uint64    `db:"version_number"`
-		SizeBytes     uint64    `db:"size_bytes"`
-		Hash          string    `db:"hash"`
-		StoragePath   string    `db:"storage_path"`
-		MimeType      string    `db:"mime_type"`
-		CreatedAt     time.Time `db:"created_at"`
-		UpdatedAt     time.Time `db:"updated_at"`
-		CreatedBy     uint64    `db:"created_by"`
+		Id            uint64    `db:"id" gorm:"column:id;primaryKey"`
+		FileId        uint64    `db:"file_id" gorm:"column:file_id"`
+		VersionNumber uint64    `db:"version_number" gorm:"column:version_number"`
+		SizeBytes     uint64    `db:"size_bytes" gorm:"column:size_bytes"`
+		Hash          string    `db:"hash" gorm:"column:hash"`
+		StoragePath   string    `db:"storage_path" gorm:"column:storage_path"`
+		MimeType      string    `db:"mime_type" gorm:"column:mime_type"`
+		CreatedAt     time.Time `db:"created_at" gorm:"column:created_at"`
+		UpdatedAt     time.Time `db:"updated_at" gorm:"column:updated_at"`
+		CreatedBy     uint64    `db:"created_by" gorm:"column:created_by"`
 	}
 )
 
@@ -63,6 +63,10 @@ func newFileVersionsModel(conn *gorm.DB, connS sqlx.SqlConn) *defaultFileVersion
 		conn:  connS,
 		table: "`file_versions`",
 	}
+}
+
+func (m *defaultFileVersionsModel) TableName() string {
+	return m.table
 }
 
 // Delete 通过主键id删除数据，返回受影响行数

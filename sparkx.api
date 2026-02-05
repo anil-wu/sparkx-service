@@ -20,12 +20,15 @@ type (
 	}
 	// 用户
 	LoginReq {
-		email    string `json:"email"`
-		password string `json:"password"`
+		loginType string `json:"loginType"` // email | google
+		email     string `json:"email,optional"`
+		password  string `json:"password,optional"`
+		idToken   string `json:"idToken,optional"`
 	}
 	LoginResp {
-		userId  int64 `json:"userId"`
-		created bool  `json:"created"` // 如果是注册逻辑则为 true
+		userId  int64  `json:"userId"`
+		created bool   `json:"created"` // 如果是注册逻辑则为 true
+		token   string `json:"token"`
 	}
 	UpdateUserReq {
 		id       int64  `path:"id"`

@@ -1,8 +1,15 @@
 Name: sparkx-api
 Host: 0.0.0.0
 Port: 8890
+CertFile: etc/server.crt
+KeyFile: etc/server.key
 MySQL:
   DSN: "user:password@tcp(127.0.0.1:3306)/sparkx?charset=utf8mb4&parseTime=true&loc=Local"
+Auth:
+  AccessSecret: "uKq94b4X9v5y7n8r2z3p"
+  AccessExpire: 86400
+Google:
+  ClientID: "537084280912-5j6ig7r95rnisbtjlagkbc8f4lijub25.apps.googleusercontent.com"
 OSS:
   Endpoint: "https://oss-your-region.aliyuncs.com"
   AccessKeyId: ""

@@ -44,12 +44,13 @@ type (
 	}
 
 	Users struct {
-		Id           uint64    `db:"id"`
-		Username     string    `db:"username"`
-		Email        string    `db:"email"`
-		PasswordHash string    `db:"password_hash"`
-		CreatedAt    time.Time `db:"created_at"`
-		UpdatedAt    time.Time `db:"updated_at"`
+		Id           uint64    `db:"id" gorm:"column:id;primaryKey"`
+		Username     string    `db:"username" gorm:"column:username"`
+		Email        string    `db:"email" gorm:"column:email"`
+		PasswordHash string    `db:"password_hash" gorm:"column:password_hash"`
+		Avatar       string    `db:"avatar" gorm:"column:avatar"`
+		CreatedAt    time.Time `db:"created_at" gorm:"column:created_at"`
+		UpdatedAt    time.Time `db:"updated_at" gorm:"column:updated_at"`
 	}
 )
 
@@ -59,6 +60,10 @@ func newUsersModel(conn *gorm.DB, connS sqlx.SqlConn) *defaultUsersModel {
 		conn:  connS,
 		table: "`users`",
 	}
+}
+
+func (m *defaultUsersModel) TableName() string {
+	return m.table
 }
 
 // Delete 通过主键id删除数据，返回受影响行数
