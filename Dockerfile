@@ -18,17 +18,18 @@ RUN addgroup -S app && adduser -S app -G app
 
 WORKDIR /app
 
-# Build arguments for OSS configuration
 ARG OSS_ENDPOINT
 ARG OSS_ACCESS_KEY_ID
 ARG OSS_ACCESS_KEY_SECRET
 ARG OSS_BUCKET
 
+ENV OSS_ENDPOINT=${OSS_ENDPOINT} \
+    OSS_ACCESS_KEY_ID=${OSS_ACCESS_KEY_ID} \
+    OSS_ACCESS_KEY_SECRET=${OSS_ACCESS_KEY_SECRET} \
+    OSS_BUCKET=${OSS_BUCKET}
+
 COPY --from=builder /out/sparkx-service /app/sparkx-service
 COPY --from=builder /app/etc /app/etc
-
-# Replace environment variables in config file
-RUN sed -i "s|\\${OSS_ENDPOINT}|${OSS_ENDPOINT}|g; s|\\${OSS_ACCESS_KEY_ID}|${OSS_ACCESS_KEY_ID}|g; s|\\${OSS_ACCESS_KEY_SECRET}|${OSS_ACCESS_KEY_SECRET}|g; s|\\${OSS_BUCKET}|${OSS_BUCKET}|g" /app/etc/sparkx-api.yaml
 
 USER app
 
