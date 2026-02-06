@@ -48,6 +48,10 @@ type FileVersionListResp struct {
 	Page PageResp          `json:"page"`
 }
 
+type GetFileContentReq struct {
+	Id int64 `path:"id"`
+}
+
 type GetProjectReq struct {
 	Id int64 `path:"id"`
 }

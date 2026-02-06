@@ -163,6 +163,10 @@ type (
 		id            int64 `path:"id"`
 		versionNumber int64 `json:"versionNumber"`
 	}
+	// 文件内容获取（代理访问）
+	GetFileContentReq {
+		id int64 `path:"id"`
+	}
 )
 
 @server (
@@ -238,5 +242,8 @@ service sparkx-api {
 
 	@handler RollbackVersion
 	post /files/:id/rollback (RollbackVersionReq) returns (BaseResp)
+
+	@handler GetFileContent
+	get /files/:id/content (GetFileContentReq)
 }
 

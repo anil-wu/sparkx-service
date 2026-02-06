@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"crypto/sha256"
+	"crypto/tls"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -233,6 +234,105 @@ func TestFileOperations(t *testing.T) {
 	t.Log("========================================")
 	t.Log("All file operations tests PASSED!")
 	t.Log("========================================")
+}
+
+// TestGetFileContent 测试文件内容代理访问接口
+func TestGetFileContent(t *testing.T) {
+	if os.Getenv("SPARKX_INTEGRATION") == "" {
+		t.Skip("SPARKX_INTEGRATION is not set")
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	client := &tests.TestClient{T: t}
+
+	// 创建用户和项目
+	timestamp := time.Now().UnixNano()
+	email := fmt.Sprintf("test_content_%d@example.com", timestamp)
+	password := fmt.Sprintf("Pass%d!", rand.Intn(1000000))
+
+	loginReq := LoginReq{
+		LoginType: "email",
+		Email:     email,
+		Password:  password,
+	}
+	var loginResp LoginResp
+	client.Post("/auth/login", loginReq, &loginResp)
+	if loginResp.UserId == 0 {
+		t.Fatal("Login failed")
+	}
+	client.SetToken(loginResp.Token)
+
+	projectName := fmt.Sprintf("ContentTest_%d", rand.Intn(10000))
+	createProjReq := CreateProjectReq{
+		UserId:      loginResp.UserId,
+		Name:        projectName,
+		Description: "Test file content access",
+	}
+	var projectResp ProjectResp
+	client.Post("/projects", createProjReq, &projectResp)
+	if projectResp.Id == 0 {
+		t.Fatal("Create project failed")
+	}
+
+	t.Cleanup(func() {
+		if projectResp.Id > 0 {
+			tests.DeleteProjectBestEffort(t, loginResp.Token, projectResp.Id)
+		}
+	})
+
+	// 上传测试文件
+	textFiles := data.GetTextFiles()
+	testFile := textFiles[0]
+	fileId := uploadFileVersion(t, client, projectResp.Id, testFile.Name, testFile.Category, testFile.Format, testFile.Content)
+	t.Logf("Created file with ID: %d", fileId)
+
+	// 测试获取文件内容
+	t.Log("Testing: Get file content via proxy")
+
+	// 创建 HTTP 请求获取文件内容
+	httpClient := &http.Client{Timeout: 30 * time.Second, Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}}
+	req, err := http.NewRequest("GET", tests.GetBaseURL()+fmt.Sprintf("/files/%d/content", fileId), nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+loginResp.Token)
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		t.Fatalf("Failed to get file content: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("Get file content failed with status: %d", resp.StatusCode)
+	}
+
+	// 读取内容
+	content, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("Failed to read response body: %v", err)
+	}
+
+	// 验证 Content-Type
+	contentType := resp.Header.Get("Content-Type")
+	if contentType == "" {
+		t.Log("Warning: Content-Type header is empty")
+	} else {
+		t.Logf("Content-Type: %s", contentType)
+	}
+
+	// 验证内容长度
+	if len(content) == 0 {
+		t.Fatal("File content is empty")
+	}
+	t.Logf("File content received: %d bytes", len(content))
+
+	// 清理
+	client.DoWithStatusCheck("DELETE", fmt.Sprintf("/files/%d", fileId), nil, nil, false)
+
+	t.Log("Get file content test PASSED!")
 }
 
 // uploadFileVersion 辅助函数：上传文件版本

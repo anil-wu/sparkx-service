@@ -9,7 +9,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/anil-wu/spark-x/internal/model"
 	"github.com/anil-wu/spark-x/internal/svc"
 	"github.com/anil-wu/spark-x/internal/types"
@@ -70,11 +69,9 @@ func (l *DownloadFileLogic) DownloadFile(req *types.DownloadFileReq) (resp *type
 		return nil, err
 	}
 
-	// 获取 Content-Type
-	contentType := getContentTypeByFormat(file.FileFormat)
-
 	// 生成 OSS 临时访问 URL（GET 方法）
-	url, err := l.svcCtx.OSSBucket.SignURL(version.StorageKey, "GET", int64(l.svcCtx.Config.OSS.ExpireSeconds), oss.ContentType(contentType))
+	// 不指定 Content-Type，避免签名不匹配
+	url, err := l.svcCtx.OSSBucket.SignURL(version.StorageKey, "GET", int64(l.svcCtx.Config.OSS.ExpireSeconds))
 	if err != nil {
 		l.Errorf("[DownloadFile] Failed to sign URL: %v", err)
 		return nil, err
