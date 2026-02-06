@@ -11,8 +11,8 @@ Auth:
 Google:
   ClientID: "537084280912-5j6ig7r95rnisbtjlagkbc8f4lijub25.apps.googleusercontent.com"
 OSS:
-  Endpoint: "https://oss-your-region.aliyuncs.com"
-  AccessKeyId: ""
-  AccessKeySecret: ""
-  Bucket: "your-bucket-name"
+  Endpoint: "${OSS_ENDPOINT}"
+  AccessKeyId: "${OSS_ACCESS_KEY_ID}"
+  AccessKeySecret: "${OSS_ACCESS_KEY_SECRET}"
+  Bucket: "${OSS_BUCKET}"
   ExpireSeconds: 1800

@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SparkPlay 文件管理测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        /* 登录区域 */
+        .login-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 0 auto 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        input[type="email"],
+        input[type="password"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .btn-danger {
+            background: #dc3545;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        /* 用户信息 */
+        .user-info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* 项目选择 */
+        .project-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .project-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        /* 文件列表 */
+        .files-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .file-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        .file-item:hover {
+            background: #f8f9fa;
+        }
+        .file-info {
+            flex: 1;
+        }
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .file-meta {
+            font-size: 12px;
+            color: #666;
+        }
+        .file-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .file-actions button {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        /* 上传区域 */
+        .upload-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .upload-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .upload-form .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        /* 版本列表 */
+        .version-list {
+            margin-top: 10px;
+            padding-left: 20px;
+            border-left: 3px solid #007bff;
+        }
+        .version-item {
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+        
+        /* 消息提示 */
+        .message {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+        
+        /* 隐藏 */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* 预览模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+        }
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 80vh;
+        }
+        .preview-text {
+            white-space: pre-wrap;
+            font-family: monospace;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 70vh;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 SparkPlay 文件管理测试</h1>
+        
+        <div id="message" class="message"></div>
+        
+        <!-- 登录区域 -->
+        <div id="loginSection" class="login-section">
+            <h2>用户登录</h2>
+            <div class="form-group">
+                <label>邮箱</label>
+                <input type="email" id="email" placeholder="请输入邮箱">
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="password" placeholder="请输入密码">
+            </div>
+            <button onclick="login()">登录</button>
+            <hr style="margin: 20px 0;">
+            <h3>快速注册</h3>
+            <div class="form-group">
+                <label>邮箱</label>
+                <input type="email" id="regEmail" placeholder="请输入邮箱">
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="regPassword" placeholder="请输入密码">
+            </div>
+            <div class="form-group">
+                <label>昵称</label>
+                <input type="text" id="regNickname" placeholder="请输入昵称">
+            </div>
+            <button class="btn-success" onclick="register()">注册</button>
+        </div>
+        
+        <!-- 主界面（登录后显示） -->
+        <div id="mainSection" class="hidden">
+            <!-- 用户信息 -->
+            <div class="user-info">
+                <div>
+                    <strong>用户:</strong> <span id="userEmail"></span> 
+                    <small>(ID: <span id="userId"></span>)</small>
+                </div>
+                <button class="btn-secondary" onclick="logout()">退出登录</button>
+            </div>
+            
+            <!-- 项目选择 -->
+            <div class="project-section">
+                <h3>📁 项目管理</h3>
+                <div class="project-header">
+                    <select id="projectSelect" onchange="selectProject()">
+                        <option value="">选择项目</option>
+                    </select>
+                    <button onclick="loadProjects()">刷新项目列表</button>
+                    <button onclick="viewProjectInfo()" id="viewProjectBtn" disabled>查看项目信息</button>
+                </div>
+                <div class="project-header">
+                    <input type="text" id="newProjectName" placeholder="新项目名称">
+                    <input type="text" id="newProjectDesc" placeholder="项目描述">
+                    <button class="btn-success" onclick="createProject()">创建项目</button>
+                </div>
+                <!-- 项目信息显示区域 -->
+                <div id="projectInfo" class="hidden" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #007bff;">
+                    <h4 style="margin-bottom: 10px; color: #333;">项目信息</h4>
+                    <div id="projectInfoContent"></div>
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                        <h5 style="margin-bottom: 10px; color: #555;">更新项目信息</h5>
+                        <div class="project-header">
+                            <input type="text" id="updateProjectName" placeholder="新项目名称">
+                            <input type="text" id="updateProjectDesc" placeholder="新项目描述">
+                        </div>
+                        <div class="project-header" style="margin-top: 10px;">
+                            <input type="file" id="coverFileInput" accept="image/*" style="flex: 1;">
+                            <button class="btn-success" onclick="updateProjectWithCover()">保存修改</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 文件上传 -->
+            <div id="uploadSection" class="upload-section hidden">
+                <h3>📤 上传文件</h3>
+                <div class="upload-form">
+                    <div class="form-group">
+                        <label>选择文件</label>
+                        <input type="file" id="fileInput">
+                    </div>
+                    <div class="form-group">
+                        <label>文件类别</label>
+                        <select id="fileCategory">
+                            <option value="text">文本</option>
+                            <option value="image">图片</option>
+                            <option value="audio">音频</option>
+                            <option value="video">视频</option>
+                            <option value="script">脚本</option>
+                            <option value="document">文档</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    <button class="btn-success" onclick="uploadFile()">上传</button>
+                </div>
+            </div>
+            
+            <!-- 文件列表 -->
+            <div id="filesSection" class="files-section hidden">
+                <h3>📄 文件列表</h3>
+                <button onclick="loadFiles()" style="margin-bottom: 15px;">刷新文件列表</button>
+                <div id="fileList"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 预览模态框 -->
+    <div id="previewModal" class="modal" onclick="closePreview()">
+        <span class="modal-close">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div id="previewContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // API 基础配置
+        const API_BASE = 'https://47.112.97.49:6001/api/v1';
+        
+        // 全局状态
+        let token = localStorage.getItem('token');
+        let userId = localStorage.getItem('userId');
+        let userEmail = localStorage.getItem('userEmail');
+        let currentProjectId = null;
+        
+        // 页面加载时检查登录状态
+        document.addEventListener('DOMContentLoaded', () => {
+            if (token) {
+                showMainSection();
+            }
+        });
+        
+        // 显示消息
+        function showMessage(text, type = 'info') {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = 'message ' + type;
+            setTimeout(() => {
+                msg.className = 'message';
+            }, 5000);
+        }
+        
+        // 登录
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showMessage('请输入邮箱和密码', 'error');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        loginType: 'email',
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                const data = await res.json();
+                if (data.token) {
+                    token = data.token;
+                    userId = data.userId;
+                    userEmail = email;
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('userId', userId);
+                    localStorage.setItem('userEmail', userEmail);
+                    showMainSection();
+                    showMessage('登录成功！', 'success');
+                } else {
+                    showMessage(data.msg || '登录失败', 'error');
+                }
+            } catch (err) {
+                showMessage('登录错误: ' + err.message, 'error');
+            }
+        }
+        
+        // 注册
+        async function register() {
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const nickname = document.getElementById('regNickname').value;
+            
+            if (!email || !password) {
+                showMessage('请输入邮箱和密码', 'error');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        loginType: 'email',
+                        email: email,
+                        password: password,
+                        nickname: nickname,
+                        autoRegister: true
+                    })
+                });
+                
+                const data = await res.json();
+                if (data.token) {
+                    token = data.token;
+                    userId = data.userId;
+                    userEmail = email;
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('userId', userId);
+                    localStorage.setItem('userEmail', userEmail);
+                    showMainSection();
+                    showMessage('注册并登录成功！', 'success');
+                } else {
+                    showMessage(data.msg || '注册失败', 'error');
+                }
+            } catch (err) {
+                showMessage('注册错误: ' + err.message, 'error');
+            }
+        }
+        
+        // 退出登录
+        function logout() {
+            token = null;
+            userId = null;
+            userEmail = null;
+            currentProjectId = null;
+            localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userEmail');
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('mainSection').classList.add('hidden');
+            showMessage('已退出登录', 'info');
+        }
+        
+        // 显示主界面
+        function showMainSection() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('mainSection').classList.remove('hidden');
+            document.getElementById('userEmail').textContent = userEmail;
+            document.getElementById('userId').textContent = userId;
+            loadProjects();
+        }
+        
+        // 加载项目列表
+        async function loadProjects() {
+            try {
+                const res = await fetch(`${API_BASE}/projects`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                
+                const select = document.getElementById('projectSelect');
+                select.innerHTML = '<option value="">选择项目</option>';
+                
+                if (data.list) {
+                    data.list.forEach(p => {
+                        const option = document.createElement('option');
+                        option.value = p.id;
+                        option.textContent = `${p.name} (${p.role})`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (err) {
+                showMessage('加载项目失败: ' + err.message, 'error');
+            }
+        }
+        
+        // 创建项目
+        async function createProject() {
+            const name = document.getElementById('newProjectName').value;
+            const desc = document.getElementById('newProjectDesc').value;
+            
+            if (!name) {
+                showMessage('请输入项目名称', 'error');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/projects`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        userId: parseInt(userId),
+                        name: name,
+                        description: desc
+                    })
+                });
+                
+                const data = await res.json();
+                if (data.id) {
+                    showMessage('项目创建成功！', 'success');
+                    document.getElementById('newProjectName').value = '';
+                    document.getElementById('newProjectDesc').value = '';
+                    loadProjects();
+                } else {
+                    showMessage(data.msg || '创建失败', 'error');
+                }
+            } catch (err) {
+                showMessage('创建项目失败: ' + err.message, 'error');
+            }
+        }
+        
+        // 选择项目
+        function selectProject() {
+            const select = document.getElementById('projectSelect');
+            currentProjectId = select.value;
+            
+            // 重置项目信息显示
+            document.getElementById('projectInfo').classList.add('hidden');
+            document.getElementById('projectInfoContent').innerHTML = '';
+            
+            if (currentProjectId) {
+                document.getElementById('uploadSection').classList.remove('hidden');
+                document.getElementById('filesSection').classList.remove('hidden');
+                document.getElementById('viewProjectBtn').disabled = false;
+                loadFiles();
+            } else {
+                document.getElementById('uploadSection').classList.add('hidden');
+                document.getElementById('filesSection').classList.add('hidden');
+                document.getElementById('viewProjectBtn').disabled = true;
+            }
+        }
+        
+        // 查看项目信息
+        async function viewProjectInfo() {
+            if (!currentProjectId) {
+                showMessage('请先选择一个项目', 'error');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/projects/${currentProjectId}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                
+                if (data.id) {
+                    let coverHtml = '';
+                    // 如果 coverFileId 存在，获取下载链接
+                    if (data.coverFileId && data.coverFileId > 0) {
+                        try {
+                            const coverRes = await fetch(`${API_BASE}/files/${data.coverFileId}/download`, {
+                                headers: { 'Authorization': 'Bearer ' + token }
+                            });
+                            const coverData = await coverRes.json();
+                            if (coverData.downloadUrl) {
+                                coverHtml = `<div style="margin-bottom: 15px;">
+                                    <div style="color: #666; font-weight: 500; margin-bottom: 5px;">项目封面:</div>
+                                    <img src="${coverData.downloadUrl}" style="width: 628px; height: 416px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd;">
+                                </div>`;
+                            }
+                        } catch (e) {
+                            // 如果获取封面失败，显示封面文件ID
+                            coverHtml = `<div style="margin-bottom: 15px;">
+                                <div style="color: #666; font-weight: 500; margin-bottom: 5px;">项目封面 (文件ID):</div>
+                                <div>${data.coverFileId}</div>
+                            </div>`;
+                        }
+                    }
+                    
+                    const infoHtml = `
+                        ${coverHtml}
+                        <div style="display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; font-size: 14px;">
+                            <div style="color: #666; font-weight: 500;">项目ID:</div>
+                            <div>${data.id}</div>
+                            <div style="color: #666; font-weight: 500;">项目名称:</div>
+                            <div>${data.name}</div>
+                            <div style="color: #666; font-weight: 500;">项目描述:</div>
+                            <div>${data.description || '无'}</div>
+                            <div style="color: #666; font-weight: 500;">所有者ID:</div>
+                            <div>${data.ownerId}</div>
+                            <div style="color: #666; font-weight: 500;">状态:</div>
+                            <div>${data.status === 'active' ? '活跃' : '已归档'}</div>
+                            <div style="color: #666; font-weight: 500;">创建时间:</div>
+                            <div>${data.createdAt}</div>
+                            <div style="color: #666; font-weight: 500;">更新时间:</div>
+                            <div>${data.updatedAt}</div>
+                        </div>
+                    `;
+                    document.getElementById('projectInfoContent').innerHTML = infoHtml;
+                    document.getElementById('projectInfo').classList.remove('hidden');
+                    
+                    // 填充更新表单
+                    document.getElementById('updateProjectName').value = data.name || '';
+                    document.getElementById('updateProjectDesc').value = data.description || '';
+                } else {
+                    showMessage(data.msg || '获取项目信息失败', 'error');
+                }
+            } catch (err) {
+                showMessage('获取项目信息失败: ' + err.message, 'error');
+            }
+        }
+        
+        // 更新项目信息（带封面）
+        async function updateProjectWithCover() {
+            if (!currentProjectId) {
+                showMessage('请先选择一个项目', 'error');
+                return;
+            }
+            
+            const name = document.getElementById('updateProjectName').value;
+            const description = document.getElementById('updateProjectDesc').value;
+            const coverInput = document.getElementById('coverFileInput');
+            const coverFile = coverInput.files[0];
+            
+            // 获取当前项目信息（检查是否有封面）
+            let currentCoverFileId = null;
+            try {
+                const res = await fetch(`${API_BASE}/projects/${currentProjectId}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const projectData = await res.json();
+                if (projectData.coverFileId && projectData.coverFileId > 0) {
+                    currentCoverFileId = projectData.coverFileId;
+                }
+            } catch (err) {
+                showMessage('获取项目信息失败: ' + err.message, 'error');
+                return;
+            }
+            
+            let coverFileId = currentCoverFileId;
+            
+            // 如果选择了新封面文件
+            if (coverFile) {
+                try {
+                    showMessage('正在上传封面...', 'info');
+                    
+                    if (currentCoverFileId) {
+                        // 有现有封面，基于该文件 ID 上传新版本
+                        coverFileId = await uploadCoverToExistingFile(currentCoverFileId, coverFile);
+                    } else {
+                        // 没有封面，新增文件
+                        coverFileId = await uploadCoverAsNewFile(coverFile);
+                    }
+                    
+                    showMessage('封面上传成功', 'success');
+                } catch (err) {
+                    showMessage('封面上传失败: ' + err.message, 'error');
+                    return;
+                }
+            }
+            
+            // 构建请求体
+            const updateData = {};
+            if (name) updateData.name = name;
+            if (description) updateData.description = description;
+            if (coverFileId) updateData.coverFileId = coverFileId;
+            
+            if (Object.keys(updateData).length === 0) {
+                showMessage('请至少修改一项', 'error');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/projects/${currentProjectId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                const data = await res.json();
+                if (data.code === 0) {
+                    showMessage('项目信息更新成功！', 'success');
+                    // 清空封面输入
+                    coverInput.value = '';
+                    // 刷新项目信息
+                    viewProjectInfo();
+                    // 刷新项目列表
+                    loadProjects();
+                } else {
+                    showMessage(data.msg || '更新失败', 'error');
+                }
+            } catch (err) {
+                showMessage('更新项目失败: ' + err.message, 'error');
+            }
+        }
+        
+        // 上传封面到现有文件（新增版本）
+        async function uploadCoverToExistingFile(fileId, file) {
+            const content = await file.arrayBuffer();
+            
+            // 计算 SHA256
+            const hashBuffer = await crypto.subtle.digest('SHA-256', content);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            
+            const ext = file.name.split('.').pop().toLowerCase();
+            
+            // 预上传（使用相同的文件 ID）
+            const preRes = await fetch(`${API_BASE}/files/preupload`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    projectId: parseInt(currentProjectId),
+                    name: file.name,
+                    fileCategory: 'image',
+                    fileFormat: ext,
+                    sizeBytes: file.size,
+                    hash: hashHex
+                })
+            });
+            
+            const preData = await preRes.json();
+            if (!preData.fileId) {
+                throw new Error(preData.msg || '预上传失败');
+            }
+            
+            // 上传到 OSS
+            const uploadRes = await fetch(preData.uploadUrl, {
+                method: 'PUT',
+                body: file,
+                headers: {
+                    'Content-Type': preData.contentType || file.type || 'application/octet-stream'
+                }
+            });
+            
+            if (!uploadRes.ok) {
+                throw new Error('上传到 OSS 失败');
+            }
+            
+            return preData.fileId;
+        }
+        
+        // 上传封面作为新文件
+        async function uploadCoverAsNewFile(file) {
+            // 与 uploadCoverToExistingFile 逻辑相同，因为 preupload 会自动处理文件创建
+            return uploadCoverToExistingFile(null, file);
+        }
+        
+        // 上传文件
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const category = document.getElementById('fileCategory').value;
+            
+            if (!fileInput.files.length) {
+                showMessage('请选择文件', 'error');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const content = await file.arrayBuffer();
+            
+            // 计算 SHA256
+            const hashBuffer = await crypto.subtle.digest('SHA-256', content);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            
+            // 获取文件格式
+            const ext = file.name.split('.').pop().toLowerCase();
+            
+            try {
+                // 1. 预上传
+                const preRes = await fetch(`${API_BASE}/files/preupload`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        projectId: parseInt(currentProjectId),
+                        name: file.name,
+                        fileCategory: category,
+                        fileFormat: ext,
+                        sizeBytes: file.size,
+                        hash: hashHex
+                    })
+                });
+                
+                const preData = await preRes.json();
+                if (!preData.fileId) {
+                    showMessage(preData.msg || '预上传失败', 'error');
+                    return;
+                }
+                
+                // 2. 上传到 OSS
+                const uploadRes = await fetch(preData.uploadUrl, {
+                    method: 'PUT',
+                    body: file,
+                    headers: {
+                        'Content-Type': preData.contentType || file.type || 'application/octet-stream'
+                    }
+                });
+                
+                if (uploadRes.ok) {
+                    showMessage('文件上传成功！', 'success');
+                    fileInput.value = '';
+                    loadFiles();
+                } else {
+                    showMessage('上传到 OSS 失败', 'error');
+                }
+            } catch (err) {
+                showMessage('上传失败: ' + err.message, 'error');
+            }
+        }
+        
+        // 加载文件列表
+        async function loadFiles() {
+            if (!currentProjectId) return;
+            
+            try {
+                const res = await fetch(`${API_BASE}/projects/${currentProjectId}/files`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                
+                const listDiv = document.getElementById('fileList');
+                listDiv.innerHTML = '';
+                
+                if (!data.list || data.list.length === 0) {
+                    listDiv.innerHTML = '<p style="color: #999; text-align: center;">暂无文件</p>';
+                    return;
+                }
+                
+                data.list.forEach(file => {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.className = 'file-item';
+                    fileDiv.innerHTML = `
+                        <div class="file-info">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-meta">
+                                类别: ${file.fileCategory} | 
+                                格式: ${file.fileFormat} | 
+                                版本: ${file.versionNumber} | 
+                                大小: ${formatBytes(file.sizeBytes)} | 
+                                创建: ${file.createdAt}
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <button onclick="previewFile(${file.id}, '${file.fileFormat}')">预览</button>
+                            <button onclick="downloadFile(${file.id})">下载</button>
+                            <button onclick="showVersions(${file.id})">版本</button>
+                            <button class="btn-danger" onclick="deleteFile(${file.id})">删除</button>
+                        </div>
+                    `;
+                    listDiv.appendChild(fileDiv);
+                });
+            } catch (err) {
+                showMessage('加载文件失败: ' + err.message, 'error');
+            }
+        }
+        
+        // 格式化字节大小
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 预览文件
+        async function previewFile(fileId, format) {
+            try {
+                const res = await fetch(`${API_BASE}/files/${fileId}/content`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                
+                const blob = await res.blob();
+                const contentType = res.headers.get('content-type');
+                
+                const modal = document.getElementById('previewModal');
+                const content = document.getElementById('previewContent');
+                
+                if (contentType && contentType.startsWith('image/')) {
+                    const url = URL.createObjectURL(blob);
+                    content.innerHTML = `<img src="${url}" class="preview-image">`;
+                } else if (contentType && (contentType.startsWith('text/') || format === 'txt' || format === 'json' || format === 'js' || format === 'css')) {
+                    const text = await blob.text();
+                    content.innerHTML = `<pre class="preview-text">${escapeHtml(text)}</pre>`;
+                } else {
+                    content.innerHTML = '<p>该文件类型不支持预览，请下载查看</p>';
+                }
+                
+                modal.classList.add('active');
+            } catch (err) {
+                showMessage('预览失败: ' + err.message, 'error');
+            }
+        }
+        
+        // 关闭预览
+        function closePreview() {
+            document.getElementById('previewModal').classList.remove('active');
+        }
+        
+        // 转义 HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // 下载文件
+        async function downloadFile(fileId) {
+            try {
+                const res = await fetch(`${API_BASE}/files/${fileId}/download`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                
+                if (data.downloadUrl) {
+                    window.open(data.downloadUrl, '_blank');
+                } else {
+                    showMessage(data.msg || '获取下载链接失败', 'error');
+                }
+            } catch (err) {
+                showMessage('下载失败: ' + err.message, 'error');
+            }
+        }
+        
+        // 显示版本列表
+        async function showVersions(fileId) {
+            try {
+                const res = await fetch(`${API_BASE}/files/${fileId}/versions`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                
+                if (!data.list || data.list.length === 0) {
+                    showMessage('暂无版本信息', 'info');
+                    return;
+                }
+                
+                let html = '<h4>版本历史</h4>';
+                data.list.forEach(v => {
+                    html += `
+                        <div class="version-item">
+                            <span>版本 ${v.versionNumber} - ${formatBytes(v.sizeBytes)} - ${v.createdAt}</span>
+                            <button onclick="rollbackVersion(${fileId}, ${v.versionNumber})" 
+                                ${v.isCurrent ? 'disabled' : ''}>
+                                ${v.isCurrent ? '当前版本' : '回滚'}
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                // 显示在文件项下方
+                const fileItems = document.querySelectorAll('.file-item');
+                fileItems.forEach(item => {
+                    if (item.innerHTML.includes(`deleteFile(${fileId})`)) {
+                        let versionDiv = item.querySelector('.version-list');
+                        if (!versionDiv) {
+                            versionDiv = document.createElement('div');
+                            versionDiv.className = 'version-list';
+                            item.appendChild(versionDiv);
+                        }
+                        versionDiv.innerHTML = html;
+                    }
+                });
+            } catch (err) {
+                showMessage('加载版本失败: ' + err.message, 'error');
+            }
+        }
+        
+        // 回滚版本
+        async function rollbackVersion(fileId, versionNumber) {
+            if (!confirm(`确定要回滚到版本 ${versionNumber} 吗？`)) return;
+            
+            try {
+                const res = await fetch(`${API_BASE}/files/${fileId}/rollback`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ versionNumber: versionNumber })
+                });
+                
+                const data = await res.json();
+                if (data.code === 0) {
+                    showMessage('回滚成功！', 'success');
+                    loadFiles();
+                } else {
+                    showMessage(data.msg || '回滚失败', 'error');
+                }
+            } catch (err) {
+                showMessage('回滚失败: ' + err.message, 'error');
+            }
+        }
+        
+        // 删除文件
+        async function deleteFile(fileId) {
+            if (!confirm('确定要删除这个文件吗？')) return;
+            
+            try {
+                const res = await fetch(`${API_BASE}/files/${fileId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                
+                const data = await res.json();
+                if (data.code === 0) {
+                    showMessage('删除成功！', 'success');
+                    loadFiles();
+                } else {
+                    showMessage(data.msg || '删除失败', 'error');
+                }
+            } catch (err) {
+                showMessage('删除失败: ' + err.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
