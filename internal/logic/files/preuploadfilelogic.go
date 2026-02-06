@@ -20,26 +20,22 @@ import (
 )
 
 // generateStoragePath 生成 OSS 存储路径
-// 格式: 用户ID/项目ID/assets/文件名_文件hash(简短).后缀
-// 文件hash(简短) = hash前三位_hash后三位
+// 格式: 用户ID/项目ID/assets/hash前四位_hash后四位.后缀
 func generateStoragePath(projectId, userId int64, fileCategory, fileHash, fileName string) string {
-	// 取 hash 的前三位和后三位
+	// 取 hash 的前四位和后四位
 	var shortHash string
-	if len(fileHash) >= 6 {
-		shortHash = fileHash[:3] + "_" + fileHash[len(fileHash)-3:]
+	if len(fileHash) >= 8 {
+		shortHash = fileHash[:4] + "_" + fileHash[len(fileHash)-4:]
 	} else {
 		shortHash = fileHash
 	}
 
-	// 清理文件名，移除路径中的特殊字符
+	// 清理文件名，获取后缀
 	cleanName := filepath.Base(fileName)
-
-	// 分离文件名和后缀
 	ext := filepath.Ext(cleanName)
-	nameWithoutExt := strings.TrimSuffix(cleanName, ext)
 
-	// 构建路径: userId/projectId/assets/filename_hash.ext
-	newFileName := fmt.Sprintf("%s_%s%s", nameWithoutExt, shortHash, ext)
+	// 构建路径: userId/projectId/assets/hash.ext
+	newFileName := shortHash + ext
 	return fmt.Sprintf("%d/%d/assets/%s", userId, projectId, newFileName)
 }
 
