@@ -1,0 +1,41 @@
+/* Test CSS file for SparkPlay upload testing */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #333;
+    border-bottom: 2px solid #007acc;
+    padding-bottom: 10px;
+}
+
+.test-item {
+    padding: 15px;
+    margin: 10px 0;
+    background-color: #f0f8ff;
+    border-left: 4px solid #007acc;
+    border-radius: 4px;
+}
+
+.success {
+    background-color: #d4edda;
+    border-left-color: #28a745;
+}
+
+.error {
+    background-color: #f8d7da;
+    border-left-color: #dc3545;
+}

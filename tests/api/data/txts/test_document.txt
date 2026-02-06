@@ -1,0 +1,6 @@
+This is a test text file for SparkPlay file upload testing.
+It contains multiple lines of text.
+Line 3: Special characters: !@#$%^&*()_+-=[]{}|;':",./<>?
+Line 4: Chinese characters: 你好世界，这是一个测试文件。
+Line 5: Numbers: 1234567890
+Line 6: End of test content.

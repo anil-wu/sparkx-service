@@ -1,0 +1,15 @@
+{
+  "name": "SparkPlay Test Data",
+  "version": "1.0.0",
+  "description": "This is a test JSON file for file upload testing",
+  "items": [
+    {"id": 1, "name": "Item 1", "value": 100},
+    {"id": 2, "name": "Item 2", "value": 200},
+    {"id": 3, "name": "Item 3", "value": 300}
+  ],
+  "metadata": {
+    "created": "2026-02-06T11:50:00Z",
+    "author": "Test System",
+    "tags": ["test", "upload", "json"]
+  }
+}

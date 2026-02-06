@@ -8,13 +8,68 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"path/filepath"
+	"strings"
 
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/anil-wu/spark-x/internal/model"
 	"github.com/anil-wu/spark-x/internal/svc"
 	"github.com/anil-wu/spark-x/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
+
+// generateStoragePath 生成 OSS 存储路径
+// 格式: 用户ID/项目ID/assets/文件名_文件hash(简短).后缀
+// 文件hash(简短) = hash前三位_hash后三位
+func generateStoragePath(projectId, userId int64, fileCategory, fileHash, fileName string) string {
+	// 取 hash 的前三位和后三位
+	var shortHash string
+	if len(fileHash) >= 6 {
+		shortHash = fileHash[:3] + "_" + fileHash[len(fileHash)-3:]
+	} else {
+		shortHash = fileHash
+	}
+
+	// 清理文件名，移除路径中的特殊字符
+	cleanName := filepath.Base(fileName)
+
+	// 分离文件名和后缀
+	ext := filepath.Ext(cleanName)
+	nameWithoutExt := strings.TrimSuffix(cleanName, ext)
+
+	// 构建路径: userId/projectId/assets/filename_hash.ext
+	newFileName := fmt.Sprintf("%s_%s%s", nameWithoutExt, shortHash, ext)
+	return fmt.Sprintf("%d/%d/assets/%s", userId, projectId, newFileName)
+}
+
+// getContentTypeByFormat 根据文件格式返回对应的 Content-Type
+func getContentTypeByFormat(format string) string {
+	switch strings.ToLower(format) {
+	case "txt":
+		return "text/plain"
+	case "png":
+		return "image/png"
+	case "jpg", "jpeg":
+		return "image/jpeg"
+	case "gif":
+		return "image/gif"
+	case "mp4":
+		return "video/mp4"
+	case "mp3":
+		return "audio/mpeg"
+	case "pdf":
+		return "application/pdf"
+	case "json":
+		return "application/json"
+	case "xml":
+		return "application/xml"
+	case "zip":
+		return "application/zip"
+	default:
+		return "application/octet-stream"
+	}
+}
 
 type PreUploadFileLogic struct {
 	logx.Logger
@@ -76,8 +131,10 @@ func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types
 	}
 	nextVer := maxVerNumber + 1
 
-	// storage path
-	objectPath := fmt.Sprintf("projects/%d/%s/%d", req.ProjectId, req.Name, nextVer)
+	// 生成 OSS 存储路径: 项目ID/用户ID/文件类型/文件名_文件hash(简短).后缀
+	objectPath := generateStoragePath(req.ProjectId, userId, req.FileCategory, req.Hash, req.Name)
+	l.Infof("[PreUpload] ProjectId=%d, UserId=%d, File=%s, GeneratedPath=%s", req.ProjectId, userId, req.Name, objectPath)
+
 	// create version row (without actual upload)
 	newVer := &model.FileVersions{
 		FileId:        file.Id,
@@ -89,24 +146,38 @@ func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types
 	}
 	_, err = l.svcCtx.FileVersionsModel.Insert(l.ctx, newVer)
 	if err != nil {
+		l.Errorf("[PreUpload] Failed to insert version: %v", err)
 		return nil, err
 	}
+	l.Infof("[PreUpload] Version inserted: VersionId=%d, StorageKey=%s", newVer.Id, objectPath)
+
 	// update file current_version_id
 	file.CurrentVersionId = newVer.Id
 	_, err = l.svcCtx.FilesModel.Update(l.ctx, int64(file.Id), file)
 	if err != nil {
+		l.Errorf("[PreUpload] Failed to update file: %v", err)
 		return nil, err
 	}
-	// pre-signed url
-	url, err := l.svcCtx.OSSBucket.SignURL(objectPath, "PUT", int64(l.svcCtx.Config.OSS.ExpireSeconds))
+	// 确定 Content-Type
+	contentType := req.ContentType
+	if contentType == "" {
+		// 根据文件格式推断 Content-Type
+		contentType = getContentTypeByFormat(req.FileFormat)
+	}
+
+	// pre-signed url with Content-Type
+	url, err := l.svcCtx.OSSBucket.SignURL(objectPath, "PUT", int64(l.svcCtx.Config.OSS.ExpireSeconds), oss.ContentType(contentType))
 	if err != nil {
+		l.Errorf("[PreUpload] Failed to sign URL: %v", err)
 		return nil, err
 	}
+	l.Infof("[PreUpload] Signed URL generated successfully, expires in %d seconds", l.svcCtx.Config.OSS.ExpireSeconds)
 	resp = &types.PreUploadResp{
 		UploadUrl:     url,
 		FileId:        int64(file.Id),
 		VersionId:     int64(newVer.Id),
 		VersionNumber: int64(newVer.VersionNumber),
+		ContentType:   contentType,
 	}
 
 	return resp, nil

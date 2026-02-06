@@ -1,33 +1,14 @@
 package api
 
 import (
-	"bytes"
-	"crypto/tls"
-	"encoding/json"
 	"fmt"
-	"io"
 	"math/rand"
-	"net/http"
 	"os"
-	"strings"
 	"testing"
 	"time"
+
+	"github.com/anil-wu/spark-x/tests"
 )
-
-const (
-	defaultBaseURL = "https://localhost:8890/api/v1"
-)
-
-type Response struct {
-	Code int32           `json:"code"`
-	Msg  string          `json:"msg"`
-	Data json.RawMessage `json:"data"` // Delay parsing
-}
-
-type BaseResp struct {
-	Code int32  `json:"code"`
-	Msg  string `json:"msg"`
-}
 
 // Data structs matching API
 type LoginReq struct {
@@ -54,7 +35,7 @@ type ProjectResp struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	OwnerId     int64  `json:"ownerId"`
-	Status      string `json:"status"`
+	Status      string `json:"status"` // active | archived
 	CreatedAt   string `json:"createdAt"`
 	UpdatedAt   string `json:"updatedAt"`
 }
@@ -110,9 +91,10 @@ type PreUploadReq struct {
 	ProjectId    int64  `json:"projectId"`
 	Name         string `json:"name"`
 	FileCategory string `json:"fileCategory"`
+	FileFormat   string `json:"fileFormat"`
 	SizeBytes    int64  `json:"sizeBytes"`
 	Hash         string `json:"hash"`
-	MimeType     string `json:"mimeType"`
+	ContentType  string `json:"contentType"`
 }
 
 type PreUploadResp struct {
@@ -120,20 +102,22 @@ type PreUploadResp struct {
 	FileId        int64  `json:"fileId"`
 	VersionId     int64  `json:"versionId"`
 	VersionNumber int64  `json:"versionNumber"`
+	ContentType   string `json:"contentType"`
 }
 
 type ProjectFileItem struct {
-	Id            int64  `json:"id"`
-	ProjectId     int64  `json:"projectId"`
-	Name          string `json:"name"`
-	FileCategory  string `json:"fileCategory"`
-	VersionId     int64  `json:"versionId"`
-	VersionNumber int64  `json:"versionNumber"`
-	SizeBytes     int64  `json:"sizeBytes"`
-	Hash          string `json:"hash"`
-	MimeType      string `json:"mimeType"`
-	CreatedAt     string `json:"createdAt"`
-	StoragePath   string `json:"storagePath"`
+	Id               int64  `json:"id"`
+	ProjectId        int64  `json:"projectId"`
+	Name             string `json:"name"`
+	FileCategory     string `json:"fileCategory"`
+	FileFormat       string `json:"fileFormat"`
+	CurrentVersionId int64  `json:"currentVersionId"`
+	VersionId        int64  `json:"versionId"`
+	VersionNumber    int64  `json:"versionNumber"`
+	SizeBytes        int64  `json:"sizeBytes"`
+	Hash             string `json:"hash"`
+	CreatedAt        string `json:"createdAt"`
+	StorageKey       string `json:"storageKey"`
 }
 
 type ProjectFileListResp struct {
@@ -147,8 +131,7 @@ type FileVersionItem struct {
 	VersionNumber int64  `json:"versionNumber"`
 	SizeBytes     int64  `json:"sizeBytes"`
 	Hash          string `json:"hash"`
-	StoragePath   string `json:"storagePath"`
-	MimeType      string `json:"mimeType"`
+	StorageKey    string `json:"storageKey"`
 	CreatedAt     string `json:"createdAt"`
 	UpdatedAt     string `json:"updatedAt"`
 	CreatedBy     int64  `json:"createdBy"`
@@ -159,120 +142,10 @@ type FileVersionListResp struct {
 	Page PageResp          `json:"page"`
 }
 
-// Helper client
-type Client struct {
-	t     *testing.T
-	token string
-}
-
-func getenvDefault(key, def string) string {
-	v := os.Getenv(key)
-	if v == "" {
-		return def
-	}
-	return v
-}
-
-func getBaseURL() string {
-	v := os.Getenv("SPARKX_BASE_URL")
-	if v == "" {
-		return defaultBaseURL
-	}
-	return strings.TrimRight(v, "/")
-}
-
-func (c *Client) SetToken(token string) {
-	c.token = token
-}
-
-func (c *Client) Post(path string, body interface{}, target interface{}) {
-	c.do("POST", path, body, target)
-}
-
-func (c *Client) Put(path string, body interface{}, target interface{}) {
-	c.do("PUT", path, body, target)
-}
-
-func (c *Client) Get(path string, target interface{}) {
-	c.do("GET", path, nil, target)
-}
-
-func (c *Client) Delete(path string) {
-	c.do("DELETE", path, nil, nil)
-}
-
-func (c *Client) do(method, path string, body interface{}, target interface{}) {
-	var bodyReader io.Reader
-	if body != nil {
-		jsonBytes, err := json.Marshal(body)
-		if err != nil {
-			c.t.Fatalf("Failed to marshal body: %v", err)
-		}
-		bodyReader = bytes.NewReader(jsonBytes)
-	}
-
-	req, err := http.NewRequest(method, getBaseURL()+path, bodyReader)
-	if err != nil {
-		c.t.Fatalf("Failed to create request: %v", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	// Add JWT token if available
-	if c.token != "" {
-		req.Header.Set("Authorization", "Bearer "+c.token)
-	}
-
-	// Skip TLS verification for self-signed certificates
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Timeout: 10 * time.Second, Transport: tr}
-	resp, err := client.Do(req)
-	if err != nil {
-		c.t.Fatalf("Request failed: %v", err)
-	}
-	defer resp.Body.Close()
-
-	respBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		c.t.Fatalf("Failed to read response body: %v", err)
-	}
-
-	if resp.StatusCode >= 400 {
-		c.t.Fatalf("API Error %d: %s", resp.StatusCode, string(respBytes))
-	}
-
-	if target != nil {
-		if err := json.Unmarshal(respBytes, target); err != nil {
-			c.t.Fatalf("Failed to unmarshal response: %v. Body: %s", err, string(respBytes))
-		}
-	}
-}
-
-func deleteProjectBestEffort(t *testing.T, token string, id int64) {
-	req, err := http.NewRequest("DELETE", getBaseURL()+fmt.Sprintf("/projects/%d", id), nil)
-	if err != nil {
-		t.Logf("Cleanup failed to create request: %v", err)
-		return
-	}
-	if token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
-	}
-	// Skip TLS verification for self-signed certificates
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Timeout: 10 * time.Second, Transport: tr}
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Logf("Cleanup request failed: %v", err)
-		return
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		b, _ := io.ReadAll(resp.Body)
-		t.Logf("Cleanup API Error %d: %s", resp.StatusCode, string(b))
-	}
+// BaseResp 基础响应
+type BaseResp struct {
+	Code int32  `json:"code"`
+	Msg  string `json:"msg"`
 }
 
 func TestWorkflow(t *testing.T) {
@@ -281,15 +154,15 @@ func TestWorkflow(t *testing.T) {
 	}
 
 	rand.Seed(time.Now().UnixNano())
-	client := &Client{t: t}
+	client := &tests.TestClient{T: t}
 
 	// ==========================================
 	// 1. Auth & Users
 	// ==========================================
 
 	// Create User A
-	emailA := getenvDefault("SPARKX_IT_EMAIL_A", "sparkx_it_user_a@example.com")
-	password := getenvDefault("SPARKX_IT_PASSWORD", "password123")
+	emailA := tests.GetenvDefault("SPARKX_IT_EMAIL_A", "sparkx_it_user_a@example.com")
+	password := tests.GetenvDefault("SPARKX_IT_PASSWORD", "password123")
 	t.Logf("Step 1.1: Register User A (%s)", emailA)
 	loginReqA := LoginReq{
 		LoginType: "email",
@@ -305,7 +178,7 @@ func TestWorkflow(t *testing.T) {
 	t.Logf("User A logged in, token received")
 
 	// Create User B (for invitation)
-	emailB := getenvDefault("SPARKX_IT_EMAIL_B", "sparkx_it_user_b@example.com")
+	emailB := tests.GetenvDefault("SPARKX_IT_EMAIL_B", "sparkx_it_user_b@example.com")
 	t.Logf("Step 1.2: Register User B (%s)", emailB)
 	loginReqB := LoginReq{
 		LoginType: "email",
@@ -358,7 +231,7 @@ func TestWorkflow(t *testing.T) {
 	t.Logf("Project created with ID: %d", projectResp.Id)
 	t.Cleanup(func() {
 		if projectResp.Id > 0 {
-			deleteProjectBestEffort(t, loginRespA.Token, projectResp.Id)
+			tests.DeleteProjectBestEffort(t, loginRespA.Token, projectResp.Id)
 		}
 	})
 
@@ -421,9 +294,9 @@ func TestWorkflow(t *testing.T) {
 		ProjectId:    projectResp.Id,
 		Name:         "test_doc.txt",
 		FileCategory: "text",
+		FileFormat:   "txt",
 		SizeBytes:    2048,
 		Hash:         "testhash123456",
-		MimeType:     "text/plain",
 	}
 	var preUploadResp PreUploadResp
 	client.Post("/files/preupload", preUploadReq, &preUploadResp)
@@ -458,7 +331,7 @@ func TestWorkflow(t *testing.T) {
 	// ==========================================
 	t.Log("Step 4: Cleanup - Delete Project")
 	var deleteProjectResp BaseResp
-	client.do("DELETE", fmt.Sprintf("/projects/%d", projectResp.Id), nil, &deleteProjectResp)
+	client.Do("DELETE", fmt.Sprintf("/projects/%d", projectResp.Id), nil, &deleteProjectResp)
 	if deleteProjectResp.Code != 0 {
 		t.Fatalf("DeleteProject failed: code=%d msg=%s", deleteProjectResp.Code, deleteProjectResp.Msg)
 	}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appSettings>
+    <add key="AppName" value="SparkPlay Test" />
+    <add key="Version" value="1.0.0" />
+    <add key="Environment" value="Testing" />
+  </appSettings>
+  <connectionStrings>
+    <add name="TestDB" connectionString="Server=test;Database=testdb;" />
+  </connectionStrings>
+  <features>
+    <feature name="FileUpload" enabled="true" />
+    <feature name="OSSStorage" enabled="true" />
+    <feature name="VersionControl" enabled="true" />
+  </features>
+</configuration>

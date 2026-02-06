@@ -93,6 +93,7 @@ type PreUploadReq struct {
 	FileFormat   string `json:"fileFormat"`   // 文件格式，如 png, jpg, mp4, mp3, txt 等
 	SizeBytes    int64  `json:"sizeBytes"`
 	Hash         string `json:"hash"`
+	ContentType  string `json:"contentType"`  // 上传文件的 Content-Type，如 text/plain, image/png 等
 }
 
 type PreUploadResp struct {
@@ -100,6 +101,7 @@ type PreUploadResp struct {
 	FileId        int64  `json:"fileId"`
 	VersionId     int64  `json:"versionId"`
 	VersionNumber int64  `json:"versionNumber"`
+	ContentType   string `json:"contentType"` // 上传时必须使用的 Content-Type
 }
 
 type ProjectFileItem struct {
