@@ -28,10 +28,10 @@ COPY --from=builder /out/sparkx-service /app/sparkx-service
 COPY --from=builder /app/etc /app/etc
 
 # Replace environment variables in config file
-RUN sed -i "s|\\${OSS_ENDPOINT}|${OSS_ENDPOINT}|g" /app/etc/sparkx-api.yaml && \
-    sed -i "s|\\${OSS_ACCESS_KEY_ID}|${OSS_ACCESS_KEY_ID}|g" /app/etc/sparkx-api.yaml && \
-    sed -i "s|\\${OSS_ACCESS_KEY_SECRET}|${OSS_ACCESS_KEY_SECRET}|g" /app/etc/sparkx-api.yaml && \
-    sed -i "s|\\${OSS_BUCKET}|${OSS_BUCKET}|g" /app/etc/sparkx-api.yaml
+RUN sed -i "s|\\${OSS_ENDPOINT}|${OSS_ENDPOINT}|g; \
+    s|\\${OSS_ACCESS_KEY_ID}|${OSS_ACCESS_KEY_ID}|g; \
+    s|\\${OSS_ACCESS_KEY_SECRET}|${OSS_ACCESS_KEY_SECRET}|g; \
+    s|\\${OSS_BUCKET}|${OSS_BUCKET}|g" /app/etc/sparkx-api.yaml
 
 USER app
 
