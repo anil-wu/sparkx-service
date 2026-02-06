@@ -150,6 +150,7 @@ type ProjectResp struct {
 	Id          int64  `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	CoverFileId int64  `json:"coverFileId"`
 	OwnerId     int64  `json:"ownerId"`
 	Status      string `json:"status"` // active | archived
 	CreatedAt   string `json:"createdAt"`
@@ -163,9 +164,10 @@ type RollbackVersionReq struct {
 
 type UpdateProjectReq struct {
 	Id          int64  `path:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Status      string `json:"status"` // active | archived
+	Name        string `json:"name,optional"`
+	Description string `json:"description,optional"`
+	CoverFileId int64  `json:"coverFileId,optional"`
+	Status      string `json:"status,optional"` // active | archived
 }
 
 type UpdateUserReq struct {

@@ -47,6 +47,7 @@ type (
 		Id          uint64         `db:"id" gorm:"column:id;primaryKey"`
 		Name        string         `db:"name" gorm:"column:name"`
 		Description sql.NullString `db:"description" gorm:"column:description"`
+		CoverFileId uint64         `db:"cover_file_id" gorm:"column:cover_file_id"`
 		OwnerId     uint64         `db:"owner_id" gorm:"column:owner_id"`
 		Status      string         `db:"status" gorm:"column:status"`
 		CreatedAt   time.Time      `db:"created_at" gorm:"column:created_at"`

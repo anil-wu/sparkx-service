@@ -53,6 +53,7 @@ func (l *UpdateProjectLogic) UpdateProject(req *types.UpdateProjectReq) (resp *t
 	data := &model.Projects{
 		Name:        req.Name,
 		Description: sql.NullString{String: req.Description, Valid: req.Description != ""},
+		CoverFileId: uint64(req.CoverFileId),
 		Status:      req.Status,
 	}
 	_, err = l.svcCtx.ProjectsModel.Update(l.ctx, req.Id, data)

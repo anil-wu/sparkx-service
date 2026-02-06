@@ -54,10 +54,12 @@ func (l *GetProjectLogic) GetProject(req *types.GetProjectReq) (resp *types.Proj
 	if err != nil {
 		return nil, err
 	}
+
 	resp = &types.ProjectResp{
 		Id:          int64(p.Id),
 		Name:        p.Name,
 		Description: p.Description.String,
+		CoverFileId: int64(p.CoverFileId),
 		OwnerId:     int64(p.OwnerId),
 		Status:      p.Status,
 		CreatedAt:   p.CreatedAt.Format("2006-01-02 15:04:05"),

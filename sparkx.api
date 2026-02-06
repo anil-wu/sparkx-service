@@ -59,6 +59,7 @@ type (
 		id          int64  `json:"id"`
 		name        string `json:"name"`
 		description string `json:"description"`
+		coverFileId int64  `json:"coverFileId"`
 		ownerId     int64  `json:"ownerId"`
 		status      string `json:"status"` // active | archived
 		createdAt   string `json:"createdAt"`
@@ -66,9 +67,10 @@ type (
 	}
 	UpdateProjectReq {
 		id          int64  `path:"id"`
-		name        string `json:"name"`
-		description string `json:"description"`
-		status      string `json:"status"` // active | archived
+		name        string `json:"name,optional"`
+		description string `json:"description,optional"`
+		coverFileId int64  `json:"coverFileId,optional"`
+		status      string `json:"status,optional"` // active | archived
 	}
 	ProjectListResp {
 		list []ProjectResp `json:"list"`

@@ -46,6 +46,7 @@ type ProjectsTable struct {
 	Id          uint64         `gorm:"column:id;primaryKey;autoIncrement"`
 	Name        string         `gorm:"column:name;type:varchar(128);not null"`
 	Description sql.NullString `gorm:"column:description;type:text"`
+	CoverFileId uint64         `gorm:"column:cover_file_id;type:bigint;default:0"`
 	OwnerId     uint64         `gorm:"column:owner_id;not null;index:idx_projects_owner_id"`
 	Status      string         `gorm:"column:status;type:enum('active','archived');not null;default:'active'"`
 	CreatedAt   time.Time      `gorm:"column:created_at;autoCreateTime"`

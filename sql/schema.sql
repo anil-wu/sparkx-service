@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS `projects` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(128) NOT NULL,
   `description` TEXT,
+  `cover_file_id` BIGINT NOT NULL DEFAULT 0,
   `owner_id` BIGINT UNSIGNED NOT NULL,
   `status` ENUM('active','archived') NOT NULL DEFAULT 'active',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
