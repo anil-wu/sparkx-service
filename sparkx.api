@@ -90,10 +90,10 @@ type (
 	PreUploadReq {
 		projectId    int64  `json:"projectId"`
 		name         string `json:"name"`
-		fileCategory string `json:"fileCategory"` // text | image | video | audio | binary
+		fileCategory string `json:"fileCategory"` // text | image | video | audio | binary | archive
+		fileFormat   string `json:"fileFormat"` // 文件格式，如 png, jpg, mp4, mp3, txt 等
 		sizeBytes    int64  `json:"sizeBytes"`
 		hash         string `json:"hash"`
-		mimeType     string `json:"mimeType"`
 	}
 	PreUploadResp {
 		uploadUrl     string `json:"uploadUrl"`
@@ -102,17 +102,18 @@ type (
 		versionNumber int64  `json:"versionNumber"`
 	}
 	ProjectFileItem {
-		id            int64  `json:"id"`
-		projectId     int64  `json:"projectId"`
-		name          string `json:"name"`
-		fileCategory  string `json:"fileCategory"`
-		versionId     int64  `json:"versionId"`
-		versionNumber int64  `json:"versionNumber"`
-		sizeBytes     int64  `json:"sizeBytes"`
-		hash          string `json:"hash"`
-		mimeType      string `json:"mimeType"`
-		createdAt     string `json:"createdAt"`
-		storagePath   string `json:"storagePath"`
+		id               int64  `json:"id"`
+		projectId        int64  `json:"projectId"`
+		name             string `json:"name"`
+		fileCategory     string `json:"fileCategory"`
+		fileFormat       string `json:"fileFormat"`
+		currentVersionId int64  `json:"currentVersionId"`
+		versionId        int64  `json:"versionId"`
+		versionNumber    int64  `json:"versionNumber"`
+		sizeBytes        int64  `json:"sizeBytes"`
+		hash             string `json:"hash"`
+		createdAt        string `json:"createdAt"`
+		storageKey       string `json:"storageKey"`
 	}
 	ProjectFileListResp {
 		list []ProjectFileItem `json:"list"`
@@ -129,8 +130,7 @@ type (
 		versionNumber int64  `json:"versionNumber"`
 		sizeBytes     int64  `json:"sizeBytes"`
 		hash          string `json:"hash"`
-		storagePath   string `json:"storagePath"`
-		mimeType      string `json:"mimeType"`
+		storageKey    string `json:"storageKey"`
 		createdAt     string `json:"createdAt"`
 		updatedAt     string `json:"updatedAt"`
 		createdBy     int64  `json:"createdBy"`

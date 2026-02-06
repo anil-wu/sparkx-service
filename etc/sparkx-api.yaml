@@ -4,7 +4,7 @@ Port: 8890
 CertFile: etc/server.crt
 KeyFile: etc/server.key
 MySQL:
-  DSN: "user:password@tcp(127.0.0.1:3306)/sparkx?charset=utf8mb4&parseTime=true&loc=Local"
+  DSN: "sparkplay:sparkplay@tcp(47.112.97.49:6003)/sparkplay?charset=utf8mb4&parseTime=true&loc=Local"
 Auth:
   AccessSecret: "uKq94b4X9v5y7n8r2z3p"
   AccessExpire: 86400

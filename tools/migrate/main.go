@@ -23,7 +23,7 @@ type UsersTable struct {
 	Username     string    `gorm:"column:username;type:varchar(64);not null;default:''"`
 	Email        string    `gorm:"column:email;type:varchar(128);not null;uniqueIndex:uk_users_email"`
 	PasswordHash string    `gorm:"column:password_hash;type:char(32);not null"`
-	Avatar       string    `gorm:"column:avatar;type:varchar(255);not null;default:''"`
+	Avatar       string    `gorm:"column:avatar;type:varchar(255);default:''"`
 	CreatedAt    time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt    time.Time `gorm:"column:updated_at;autoUpdateTime"`
 }
@@ -66,11 +66,13 @@ type ProjectMembersTable struct {
 func (ProjectMembersTable) TableName() string { return "project_members" }
 
 type FilesTable struct {
-	Id           uint64    `gorm:"column:id;primaryKey;autoIncrement"`
-	ProjectId    uint64    `gorm:"column:project_id;not null;uniqueIndex:uk_project_name,priority:1"`
-	Name         string    `gorm:"column:name;type:varchar(255);not null;uniqueIndex:uk_project_name,priority:2"`
-	FileCategory string    `gorm:"column:file_category;type:enum('text','image','video','audio','binary');not null"`
-	CreatedAt    time.Time `gorm:"column:created_at;autoCreateTime"`
+	Id               uint64    `gorm:"column:id;primaryKey;autoIncrement"`
+	ProjectId        uint64    `gorm:"column:project_id;not null;uniqueIndex:uk_project_name,priority:1"`
+	Name             string    `gorm:"column:name;type:varchar(255);not null;uniqueIndex:uk_project_name,priority:2"`
+	FileCategory     string    `gorm:"column:file_category;type:enum('text','image','video','audio','binary','archive');not null"`
+	FileFormat       string    `gorm:"column:file_format;type:varchar(50);not null;default:''"`
+	CurrentVersionId uint64    `gorm:"column:current_version_id;index:idx_files_current_version_id"`
+	CreatedAt        time.Time `gorm:"column:created_at;autoCreateTime"`
 }
 
 func (FilesTable) TableName() string { return "files" }
@@ -81,8 +83,7 @@ type FileVersionsTable struct {
 	VersionNumber uint64    `gorm:"column:version_number;not null;uniqueIndex:uk_file_version,priority:2"`
 	SizeBytes     uint64    `gorm:"column:size_bytes;not null"`
 	Hash          string    `gorm:"column:hash;type:varchar(128);not null"`
-	StoragePath   string    `gorm:"column:storage_path;type:varchar(512);not null"`
-	MimeType      string    `gorm:"column:mime_type;type:varchar(128);not null"`
+	StorageKey    string    `gorm:"column:storage_key;type:varchar(512);not null"`
 	CreatedAt     time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt     time.Time `gorm:"column:updated_at;autoUpdateTime"`
 	CreatedBy     uint64    `gorm:"column:created_by;not null"`

@@ -49,8 +49,7 @@ type (
 		VersionNumber uint64    `db:"version_number" gorm:"column:version_number"`
 		SizeBytes     uint64    `db:"size_bytes" gorm:"column:size_bytes"`
 		Hash          string    `db:"hash" gorm:"column:hash"`
-		StoragePath   string    `db:"storage_path" gorm:"column:storage_path"`
-		MimeType      string    `db:"mime_type" gorm:"column:mime_type"`
+		StorageKey    string    `db:"storage_key" gorm:"column:storage_key"`
 		CreatedAt     time.Time `db:"created_at" gorm:"column:created_at"`
 		UpdatedAt     time.Time `db:"updated_at" gorm:"column:updated_at"`
 		CreatedBy     uint64    `db:"created_by" gorm:"column:created_by"`

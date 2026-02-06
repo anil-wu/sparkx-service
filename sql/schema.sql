@@ -56,10 +56,13 @@ CREATE TABLE IF NOT EXISTS `files` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `project_id` BIGINT UNSIGNED NOT NULL,
   `name` VARCHAR(255) NOT NULL,
-  `file_category` ENUM('text','image','video','audio','binary') NOT NULL,
+  `file_category` ENUM('text','image','video','audio','binary','archive') NOT NULL,
+  `file_format` VARCHAR(50) NOT NULL COMMENT '文件格式，如 png, jpg, mp4, mp3, txt 等',
+  `current_version_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '当前版本ID，关联 file_versions.id',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_project_name` (`project_id`,`name`)
+  UNIQUE KEY `uk_project_name` (`project_id`,`name`),
+  KEY `idx_files_current_version_id` (`current_version_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- file_versions
@@ -69,8 +72,7 @@ CREATE TABLE IF NOT EXISTS `file_versions` (
   `version_number` BIGINT UNSIGNED NOT NULL,
   `size_bytes` BIGINT UNSIGNED NOT NULL,
   `hash` VARCHAR(128) NOT NULL,
-  `storage_path` VARCHAR(512) NOT NULL,
-  `mime_type` VARCHAR(128) NOT NULL,
+  `storage_key` VARCHAR(512) NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created_by` BIGINT UNSIGNED NOT NULL,

@@ -44,11 +44,13 @@ type (
 	}
 
 	Files struct {
-		Id           uint64    `db:"id" gorm:"column:id;primaryKey"`
-		ProjectId    uint64    `db:"project_id" gorm:"column:project_id"`
-		Name         string    `db:"name" gorm:"column:name"`
-		FileCategory string    `db:"file_category" gorm:"column:file_category"`
-		CreatedAt    time.Time `db:"created_at" gorm:"column:created_at"`
+		Id               uint64    `db:"id" gorm:"column:id;primaryKey"`
+		ProjectId        uint64    `db:"project_id" gorm:"column:project_id"`
+		Name             string    `db:"name" gorm:"column:name"`
+		FileCategory     string    `db:"file_category" gorm:"column:file_category"`
+		FileFormat       string    `db:"file_format" gorm:"column:file_format"`
+		CurrentVersionId uint64    `db:"current_version_id" gorm:"column:current_version_id"`
+		CreatedAt        time.Time `db:"created_at" gorm:"column:created_at"`
 	}
 )
 

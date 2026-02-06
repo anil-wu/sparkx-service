@@ -73,17 +73,18 @@ func (l *ListProjectFilesLogic) ListProjectFiles(req *types.ListProjectFilesReq)
 			return nil, err
 		}
 		items = append(items, types.ProjectFileItem{
-			Id:            int64(f.Id),
-			ProjectId:     int64(f.ProjectId),
-			Name:          f.Name,
-			FileCategory:  f.FileCategory,
-			VersionId:     int64(latest.Id),
-			VersionNumber: int64(latest.VersionNumber),
-			SizeBytes:     int64(latest.SizeBytes),
-			Hash:          latest.Hash,
-			MimeType:      latest.MimeType,
-			CreatedAt:     f.CreatedAt.Format("2006-01-02 15:04:05"),
-			StoragePath:   latest.StoragePath,
+			Id:               int64(f.Id),
+			ProjectId:        int64(f.ProjectId),
+			Name:             f.Name,
+			FileCategory:     f.FileCategory,
+			FileFormat:       f.FileFormat,
+			CurrentVersionId: int64(f.CurrentVersionId),
+			VersionId:        int64(latest.Id),
+			VersionNumber:    int64(latest.VersionNumber),
+			SizeBytes:        int64(latest.SizeBytes),
+			Hash:             latest.Hash,
+			CreatedAt:        f.CreatedAt.Format("2006-01-02 15:04:05"),
+			StorageKey:       latest.StorageKey,
 		})
 	}
 	var total int64

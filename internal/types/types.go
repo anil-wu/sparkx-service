@@ -24,8 +24,7 @@ type FileVersionItem struct {
 	VersionNumber int64  `json:"versionNumber"`
 	SizeBytes     int64  `json:"sizeBytes"`
 	Hash          string `json:"hash"`
-	StoragePath   string `json:"storagePath"`
-	MimeType      string `json:"mimeType"`
+	StorageKey    string `json:"storageKey"`
 	CreatedAt     string `json:"createdAt"`
 	UpdatedAt     string `json:"updatedAt"`
 	CreatedBy     int64  `json:"createdBy"`
@@ -90,10 +89,10 @@ type PageResp struct {
 type PreUploadReq struct {
 	ProjectId    int64  `json:"projectId"`
 	Name         string `json:"name"`
-	FileCategory string `json:"fileCategory"` // text | image | video | audio | binary
+	FileCategory string `json:"fileCategory"` // text | image | video | audio | binary | archive
+	FileFormat   string `json:"fileFormat"`   // 文件格式，如 png, jpg, mp4, mp3, txt 等
 	SizeBytes    int64  `json:"sizeBytes"`
 	Hash         string `json:"hash"`
-	MimeType     string `json:"mimeType"`
 }
 
 type PreUploadResp struct {
@@ -104,17 +103,18 @@ type PreUploadResp struct {
 }
 
 type ProjectFileItem struct {
-	Id            int64  `json:"id"`
-	ProjectId     int64  `json:"projectId"`
-	Name          string `json:"name"`
-	FileCategory  string `json:"fileCategory"`
-	VersionId     int64  `json:"versionId"`
-	VersionNumber int64  `json:"versionNumber"`
-	SizeBytes     int64  `json:"sizeBytes"`
-	Hash          string `json:"hash"`
-	MimeType      string `json:"mimeType"`
-	CreatedAt     string `json:"createdAt"`
-	StoragePath   string `json:"storagePath"`
+	Id               int64  `json:"id"`
+	ProjectId        int64  `json:"projectId"`
+	Name             string `json:"name"`
+	FileCategory     string `json:"fileCategory"`
+	FileFormat       string `json:"fileFormat"`
+	CurrentVersionId int64  `json:"currentVersionId"`
+	VersionId        int64  `json:"versionId"`
+	VersionNumber    int64  `json:"versionNumber"`
+	SizeBytes        int64  `json:"sizeBytes"`
+	Hash             string `json:"hash"`
+	CreatedAt        string `json:"createdAt"`
+	StorageKey       string `json:"storageKey"`
 }
 
 type ProjectFileListResp struct {

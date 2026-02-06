@@ -37,7 +37,7 @@ func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types
 	}
 	userId, _ := userIdNumber.Int64()
 
-	if req == nil || req.ProjectId <= 0 || req.Name == "" || req.FileCategory == "" {
+	if req == nil || req.ProjectId <= 0 || req.Name == "" || req.FileCategory == "" || req.FileFormat == "" {
 		return nil, model.InputParamInvalid
 	}
 
@@ -60,6 +60,7 @@ func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types
 			ProjectId:    uint64(req.ProjectId),
 			Name:         req.Name,
 			FileCategory: req.FileCategory,
+			FileFormat:   req.FileFormat,
 		}
 		_, err = l.svcCtx.FilesModel.Insert(l.ctx, newFile)
 		if err != nil {
@@ -83,11 +84,16 @@ func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types
 		VersionNumber: uint64(nextVer),
 		SizeBytes:     uint64(req.SizeBytes),
 		Hash:          req.Hash,
-		StoragePath:   objectPath,
-		MimeType:      req.MimeType,
+		StorageKey:    objectPath,
 		CreatedBy:     uint64(userId),
 	}
 	_, err = l.svcCtx.FileVersionsModel.Insert(l.ctx, newVer)
+	if err != nil {
+		return nil, err
+	}
+	// update file current_version_id
+	file.CurrentVersionId = newVer.Id
+	_, err = l.svcCtx.FilesModel.Update(l.ctx, int64(file.Id), file)
 	if err != nil {
 		return nil, err
 	}
