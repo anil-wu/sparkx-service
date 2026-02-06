@@ -1,0 +1,1210 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "sparkx api",
+    "description": "Spark-X 项目 API 服务",
+    "version": "v1"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "Login",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/LoginResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 用户",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LoginReq"
+            }
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/files/preupload": {
+      "post": {
+        "operationId": "PreUploadFile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/PreUploadResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 文件与版本",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PreUploadReq"
+            }
+          }
+        ],
+        "tags": [
+          "files"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/files/{id}": {
+      "delete": {
+        "operationId": "DeleteFile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/BaseResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "description": " 文件删除",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeleteFileReq"
+            }
+          }
+        ],
+        "tags": [
+          "files"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/files/{id}/download": {
+      "get": {
+        "operationId": "DownloadFile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/DownloadFileResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "files"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/files/{id}/rollback": {
+      "post": {
+        "operationId": "RollbackVersion",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/BaseResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "description": " 版本回滚",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RollbackVersionReq"
+            }
+          }
+        ],
+        "tags": [
+          "files"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/files/{id}/versions": {
+      "get": {
+        "operationId": "ListFileVersions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/FileVersionListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "20"
+          }
+        ],
+        "tags": [
+          "files"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/projects": {
+      "get": {
+        "operationId": "ListProjects",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ProjectListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "20"
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "CreateProject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ProjectResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 项目",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateProjectReq"
+            }
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/projects/{id}": {
+      "get": {
+        "operationId": "GetProject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ProjectResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "DeleteProject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/BaseResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeleteProjectReq"
+            }
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      },
+      "put": {
+        "operationId": "UpdateProject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/BaseResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateProjectReq"
+            }
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/projects/{id}/invite": {
+      "post": {
+        "operationId": "InviteMember",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/BaseResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/InviteMemberReq"
+            }
+          }
+        ],
+        "tags": [
+          "projects"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/projects/{projectId}/files": {
+      "get": {
+        "operationId": "ListProjectFiles",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ProjectFileListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "20"
+          }
+        ],
+        "tags": [
+          "files"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "operationId": "ListUsers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UserListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "20"
+          }
+        ],
+        "tags": [
+          "users"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users/email/{email}": {
+      "get": {
+        "operationId": "GetUserByEmail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UserInfoResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{id}": {
+      "put": {
+        "operationId": "UpdateUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/BaseResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateUserReq"
+            }
+          }
+        ],
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "BaseResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "msg": {
+          "type": "string"
+        }
+      },
+      "title": "BaseResp",
+      "required": [
+        "code",
+        "msg"
+      ]
+    },
+    "CreateProjectReq": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "title": "CreateProjectReq",
+      "required": [
+        "userId",
+        "name",
+        "description"
+      ]
+    },
+    "DeleteFileReq": {
+      "type": "object",
+      "title": "DeleteFileReq"
+    },
+    "DeleteProjectReq": {
+      "type": "object",
+      "title": "DeleteProjectReq"
+    },
+    "DownloadFileReq": {
+      "type": "object",
+      "title": "DownloadFileReq"
+    },
+    "DownloadFileResp": {
+      "type": "object",
+      "properties": {
+        "downloadUrl": {
+          "type": "string"
+        },
+        "expiresAt": {
+          "type": "string"
+        }
+      },
+      "title": "DownloadFileResp",
+      "required": [
+        "downloadUrl",
+        "expiresAt"
+      ]
+    },
+    "FileVersionItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "fileId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "versionNumber": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "storageKey": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        },
+        "createdBy": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "FileVersionItem",
+      "required": [
+        "id",
+        "fileId",
+        "versionNumber",
+        "sizeBytes",
+        "hash",
+        "storageKey",
+        "createdAt",
+        "updatedAt",
+        "createdBy"
+      ]
+    },
+    "FileVersionListResp": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FileVersionItem"
+          }
+        },
+        "page": {
+          "$ref": "#/definitions/PageResp"
+        }
+      },
+      "title": "FileVersionListResp",
+      "required": [
+        "list",
+        "page"
+      ]
+    },
+    "GetProjectReq": {
+      "type": "object",
+      "title": "GetProjectReq"
+    },
+    "GetUserByEmailReq": {
+      "type": "object",
+      "title": "GetUserByEmailReq"
+    },
+    "InviteMemberReq": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 发起者"
+        },
+        "invitedUserId": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 被邀请者"
+        },
+        "role": {
+          "type": "string",
+          "description": " owner | admin | developer | viewer"
+        }
+      },
+      "title": "InviteMemberReq",
+      "required": [
+        "userId",
+        "invitedUserId",
+        "role"
+      ]
+    },
+    "ListFileVersionsReq": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1"
+        },
+        "pageSize": {
+          "type": "integer",
+          "format": "int64",
+          "default": "20"
+        }
+      },
+      "title": "ListFileVersionsReq",
+      "required": [
+        "page",
+        "pageSize"
+      ]
+    },
+    "ListProjectFilesReq": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1"
+        },
+        "pageSize": {
+          "type": "integer",
+          "format": "int64",
+          "default": "20"
+        }
+      },
+      "title": "ListProjectFilesReq",
+      "required": [
+        "page",
+        "pageSize"
+      ]
+    },
+    "LoginReq": {
+      "type": "object",
+      "properties": {
+        "loginType": {
+          "type": "string",
+          "description": " email | google"
+        },
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "idToken": {
+          "type": "string"
+        }
+      },
+      "title": "LoginReq",
+      "required": [
+        "loginType"
+      ]
+    },
+    "LoginResp": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "created": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": " 如果是注册逻辑则为 true"
+        },
+        "token": {
+          "type": "string"
+        }
+      },
+      "title": "LoginResp",
+      "required": [
+        "userId",
+        "created",
+        "token"
+      ]
+    },
+    "PageReq": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1"
+        },
+        "pageSize": {
+          "type": "integer",
+          "format": "int64",
+          "default": "20"
+        }
+      },
+      "title": "PageReq",
+      "required": [
+        "page",
+        "pageSize"
+      ]
+    },
+    "PageResp": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "pageSize": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "PageResp",
+      "required": [
+        "page",
+        "pageSize",
+        "total"
+      ]
+    },
+    "PreUploadReq": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "fileCategory": {
+          "type": "string",
+          "description": " text | image | video | audio | binary | archive"
+        },
+        "fileFormat": {
+          "type": "string",
+          "description": " 文件格式，如 png, jpg, mp4, mp3, txt 等"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "contentType": {
+          "type": "string",
+          "description": " 上传文件的 Content-Type，如 text/plain, image/png 等"
+        }
+      },
+      "title": "PreUploadReq",
+      "required": [
+        "projectId",
+        "name",
+        "fileCategory",
+        "fileFormat",
+        "sizeBytes",
+        "hash"
+      ]
+    },
+    "PreUploadResp": {
+      "type": "object",
+      "properties": {
+        "uploadUrl": {
+          "type": "string"
+        },
+        "fileId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "versionId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "versionNumber": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "contentType": {
+          "type": "string",
+          "description": " 上传时必须使用的 Content-Type"
+        }
+      },
+      "title": "PreUploadResp",
+      "required": [
+        "uploadUrl",
+        "fileId",
+        "versionId",
+        "versionNumber",
+        "contentType"
+      ]
+    },
+    "ProjectFileItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "projectId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "fileCategory": {
+          "type": "string"
+        },
+        "fileFormat": {
+          "type": "string"
+        },
+        "currentVersionId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "versionId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "versionNumber": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "storageKey": {
+          "type": "string"
+        }
+      },
+      "title": "ProjectFileItem",
+      "required": [
+        "id",
+        "projectId",
+        "name",
+        "fileCategory",
+        "fileFormat",
+        "currentVersionId",
+        "versionId",
+        "versionNumber",
+        "sizeBytes",
+        "hash",
+        "createdAt",
+        "storageKey"
+      ]
+    },
+    "ProjectFileListResp": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProjectFileItem"
+          }
+        },
+        "page": {
+          "$ref": "#/definitions/PageResp"
+        }
+      },
+      "title": "ProjectFileListResp",
+      "required": [
+        "list",
+        "page"
+      ]
+    },
+    "ProjectListResp": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProjectResp"
+          }
+        },
+        "page": {
+          "$ref": "#/definitions/PageResp"
+        }
+      },
+      "title": "ProjectListResp",
+      "required": [
+        "list",
+        "page"
+      ]
+    },
+    "ProjectResp": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "ownerId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "type": "string",
+          "description": " active | archived"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      },
+      "title": "ProjectResp",
+      "required": [
+        "id",
+        "name",
+        "description",
+        "ownerId",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "RollbackVersionReq": {
+      "type": "object",
+      "properties": {
+        "versionNumber": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "RollbackVersionReq",
+      "required": [
+        "versionNumber"
+      ]
+    },
+    "UpdateProjectReq": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "description": " active | archived"
+        }
+      },
+      "title": "UpdateProjectReq",
+      "required": [
+        "name",
+        "description",
+        "status"
+      ]
+    },
+    "UpdateUserReq": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        }
+      },
+      "title": "UpdateUserReq",
+      "required": [
+        "username"
+      ]
+    },
+    "UserInfoResp": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "username": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "passwordHash": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      },
+      "title": "UserInfoResp",
+      "required": [
+        "id",
+        "username",
+        "email",
+        "passwordHash",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserListResp": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserInfoResp"
+          }
+        },
+        "page": {
+          "$ref": "#/definitions/PageResp"
+        }
+      },
+      "title": "UserListResp",
+      "required": [
+        "list",
+        "page"
+      ]
+    }
+  },
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "description": "Enter JWT Bearer token **_only_**",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

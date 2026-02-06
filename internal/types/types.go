@@ -14,8 +14,21 @@ type CreateProjectReq struct {
 	Description string `json:"description"`
 }
 
+type DeleteFileReq struct {
+	Id int64 `path:"id"`
+}
+
 type DeleteProjectReq struct {
 	Id int64 `path:"id"`
+}
+
+type DownloadFileReq struct {
+	Id int64 `path:"id"`
+}
+
+type DownloadFileResp struct {
+	DownloadUrl string `json:"downloadUrl"`
+	ExpiresAt   string `json:"expiresAt"`
 }
 
 type FileVersionItem struct {
@@ -93,7 +106,7 @@ type PreUploadReq struct {
 	FileFormat   string `json:"fileFormat"`   // 文件格式，如 png, jpg, mp4, mp3, txt 等
 	SizeBytes    int64  `json:"sizeBytes"`
 	Hash         string `json:"hash"`
-	ContentType  string `json:"contentType"`  // 上传文件的 Content-Type，如 text/plain, image/png 等
+	ContentType  string `json:"contentType,optional"` // 上传文件的 Content-Type，如 text/plain, image/png 等
 }
 
 type PreUploadResp struct {
@@ -137,6 +150,11 @@ type ProjectResp struct {
 	Status      string `json:"status"` // active | archived
 	CreatedAt   string `json:"createdAt"`
 	UpdatedAt   string `json:"updatedAt"`
+}
+
+type RollbackVersionReq struct {
+	Id            int64 `path:"id"`
+	VersionNumber int64 `json:"versionNumber"`
 }
 
 type UpdateProjectReq struct {

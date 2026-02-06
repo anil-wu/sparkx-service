@@ -30,6 +30,21 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				Method:  http.MethodDelete,
+				Path:    "/files/:id",
+				Handler: files.DeleteFileHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/files/:id/download",
+				Handler: files.DownloadFileHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/files/:id/rollback",
+				Handler: files.RollbackVersionHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodGet,
 				Path:    "/files/:id/versions",
 				Handler: files.ListFileVersionsHandler(serverCtx),

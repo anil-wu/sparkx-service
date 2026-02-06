@@ -67,10 +67,16 @@ func (l *ListProjectFilesLogic) ListProjectFiles(req *types.ListProjectFilesReq)
 	}
 	items := make([]types.ProjectFileItem, 0, len(files))
 	for _, f := range files {
-		var latest model.FileVersions
-		err = l.svcCtx.DB.WithContext(l.ctx).Model(&model.FileVersions{}).Where("file_id = ?", f.Id).Order("version_number desc").Limit(1).Find(&latest).Error
+		// 获取当前版本（由 current_version_id 指定）
+		var currentVersion model.FileVersions
+		err = l.svcCtx.DB.WithContext(l.ctx).Model(&model.FileVersions{}).Where("id = ?", f.CurrentVersionId).First(&currentVersion).Error
 		if err != nil {
-			return nil, err
+			// 如果当前版本找不到，回退到最新版本
+			l.Logger.Infof("Current version %d not found for file %d, fallback to latest", f.CurrentVersionId, f.Id)
+			err = l.svcCtx.DB.WithContext(l.ctx).Model(&model.FileVersions{}).Where("file_id = ?", f.Id).Order("version_number desc").Limit(1).First(&currentVersion).Error
+			if err != nil {
+				return nil, err
+			}
 		}
 		items = append(items, types.ProjectFileItem{
 			Id:               int64(f.Id),
@@ -79,12 +85,12 @@ func (l *ListProjectFilesLogic) ListProjectFiles(req *types.ListProjectFilesReq)
 			FileCategory:     f.FileCategory,
 			FileFormat:       f.FileFormat,
 			CurrentVersionId: int64(f.CurrentVersionId),
-			VersionId:        int64(latest.Id),
-			VersionNumber:    int64(latest.VersionNumber),
-			SizeBytes:        int64(latest.SizeBytes),
-			Hash:             latest.Hash,
+			VersionId:        int64(currentVersion.Id),
+			VersionNumber:    int64(currentVersion.VersionNumber),
+			SizeBytes:        int64(currentVersion.SizeBytes),
+			Hash:             currentVersion.Hash,
 			CreatedAt:        f.CreatedAt.Format("2006-01-02 15:04:05"),
-			StorageKey:       latest.StorageKey,
+			StorageKey:       currentVersion.StorageKey,
 		})
 	}
 	var total int64

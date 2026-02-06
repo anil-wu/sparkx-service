@@ -66,13 +66,14 @@ type ProjectMembersTable struct {
 func (ProjectMembersTable) TableName() string { return "project_members" }
 
 type FilesTable struct {
-	Id               uint64    `gorm:"column:id;primaryKey;autoIncrement"`
-	ProjectId        uint64    `gorm:"column:project_id;not null;uniqueIndex:uk_project_name,priority:1"`
-	Name             string    `gorm:"column:name;type:varchar(255);not null;uniqueIndex:uk_project_name,priority:2"`
-	FileCategory     string    `gorm:"column:file_category;type:enum('text','image','video','audio','binary','archive');not null"`
-	FileFormat       string    `gorm:"column:file_format;type:varchar(50);not null;default:''"`
-	CurrentVersionId uint64    `gorm:"column:current_version_id;index:idx_files_current_version_id"`
-	CreatedAt        time.Time `gorm:"column:created_at;autoCreateTime"`
+	Id               uint64         `gorm:"column:id;primaryKey;autoIncrement"`
+	ProjectId        uint64         `gorm:"column:project_id;not null;uniqueIndex:uk_project_name,priority:1"`
+	Name             string         `gorm:"column:name;type:varchar(255);not null;uniqueIndex:uk_project_name,priority:2"`
+	FileCategory     string         `gorm:"column:file_category;type:enum('text','image','video','audio','binary','archive');not null"`
+	FileFormat       string         `gorm:"column:file_format;type:varchar(50);not null;default:''"`
+	CurrentVersionId uint64         `gorm:"column:current_version_id;index:idx_files_current_version_id"`
+	CreatedAt        time.Time      `gorm:"column:created_at;autoCreateTime"`
+	DeletedAt        gorm.DeletedAt `gorm:"column:deleted_at;index;softDelete"`
 }
 
 func (FilesTable) TableName() string { return "files" }

@@ -142,6 +142,17 @@ type FileVersionListResp struct {
 	Page PageResp          `json:"page"`
 }
 
+// 文件下载
+type DownloadFileResp struct {
+	DownloadUrl string `json:"downloadUrl"`
+	ExpiresAt   string `json:"expiresAt"`
+}
+
+// 版本回滚
+type RollbackVersionReq struct {
+	VersionNumber int64 `json:"versionNumber"`
+}
+
 // BaseResp 基础响应
 type BaseResp struct {
 	Code int32  `json:"code"`

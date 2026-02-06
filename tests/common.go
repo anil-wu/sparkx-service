@@ -80,6 +80,11 @@ func (c *TestClient) Delete(path string) {
 
 // Do 发送 HTTP 请求
 func (c *TestClient) Do(method, path string, body interface{}, target interface{}) {
+	c.DoWithStatusCheck(method, path, body, target, true)
+}
+
+// DoWithStatusCheck 发送 HTTP 请求，可选择是否检查状态码
+func (c *TestClient) DoWithStatusCheck(method, path string, body interface{}, target interface{}, checkStatus bool) {
 	var bodyReader io.Reader
 	if body != nil {
 		jsonBytes, err := json.Marshal(body)
@@ -114,7 +119,7 @@ func (c *TestClient) Do(method, path string, body interface{}, target interface{
 		c.T.Fatalf("Failed to read response body: %v", err)
 	}
 
-	if resp.StatusCode >= 400 {
+	if checkStatus && resp.StatusCode >= 400 {
 		c.T.Fatalf("API Error %d: %s", resp.StatusCode, string(respBytes))
 	}
 

@@ -94,12 +94,14 @@ type (
 		fileFormat   string `json:"fileFormat"` // 文件格式，如 png, jpg, mp4, mp3, txt 等
 		sizeBytes    int64  `json:"sizeBytes"`
 		hash         string `json:"hash"`
+		contentType  string `json:"contentType,optional"` // 上传文件的 Content-Type，如 text/plain, image/png 等
 	}
 	PreUploadResp {
 		uploadUrl     string `json:"uploadUrl"`
 		fileId        int64  `json:"fileId"`
 		versionId     int64  `json:"versionId"`
 		versionNumber int64  `json:"versionNumber"`
+		contentType   string `json:"contentType"` // 上传时必须使用的 Content-Type
 	}
 	ProjectFileItem {
 		id               int64  `json:"id"`
@@ -143,6 +145,23 @@ type (
 		id       int64 `path:"id"`
 		page     int64 `form:"page,default=1"`
 		pageSize int64 `form:"pageSize,default=20"`
+	}
+	// 文件下载
+	DownloadFileReq {
+		id int64 `path:"id"`
+	}
+	DownloadFileResp {
+		downloadUrl string `json:"downloadUrl"`
+		expiresAt   string `json:"expiresAt"`
+	}
+	// 文件删除
+	DeleteFileReq {
+		id int64 `path:"id"`
+	}
+	// 版本回滚
+	RollbackVersionReq {
+		id            int64 `path:"id"`
+		versionNumber int64 `json:"versionNumber"`
 	}
 )
 
@@ -210,5 +229,14 @@ service sparkx-api {
 
 	@handler ListFileVersions
 	get /files/:id/versions (ListFileVersionsReq) returns (FileVersionListResp)
+
+	@handler DownloadFile
+	get /files/:id/download (DownloadFileReq) returns (DownloadFileResp)
+
+	@handler DeleteFile
+	delete /files/:id (DeleteFileReq) returns (BaseResp)
+
+	@handler RollbackVersion
+	post /files/:id/rollback (RollbackVersionReq) returns (BaseResp)
 }
 
