@@ -31,8 +31,14 @@ func NewListFileVersionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 func (l *ListFileVersionsLogic) ListFileVersions(req *types.ListFileVersionsReq) (resp *types.FileVersionListResp, err error) {
 	userIdNumber, ok := l.ctx.Value("userId").(json.Number)
+	isAdmin := false
 	if !ok {
-		return nil, errors.New("unauthorized")
+		adminIdNumber, ok2 := l.ctx.Value("adminId").(json.Number)
+		if !ok2 {
+			return nil, errors.New("unauthorized")
+		}
+		userIdNumber = adminIdNumber
+		isAdmin = true
 	}
 	userId, _ := userIdNumber.Int64()
 
@@ -48,17 +54,18 @@ func (l *ListFileVersionsLogic) ListFileVersions(req *types.ListFileVersionsReq)
 
 	// Get project_id from project_files
 	var projectFile model.ProjectFiles
-	if err := l.svcCtx.DB.WithContext(l.ctx).Where("file_id = ?", file.Id).First(&projectFile).Error; err != nil {
+	if err := l.svcCtx.DB.WithContext(l.ctx).Where("file_id = ?", file.Id).First(&projectFile).Error; err != nil && !isAdmin {
 		return nil, err
 	}
 
-	// Check project membership
-	var count int64
-	if err := l.svcCtx.DB.WithContext(l.ctx).Model(&model.ProjectMembers{}).Where("project_id = ? AND user_id = ?", projectFile.ProjectId, userId).Count(&count).Error; err != nil {
-		return nil, err
-	}
-	if count == 0 {
-		return nil, errors.New("project not found or permission denied")
+	if !isAdmin {
+		var count int64
+		if err := l.svcCtx.DB.WithContext(l.ctx).Model(&model.ProjectMembers{}).Where("project_id = ? AND user_id = ?", projectFile.ProjectId, userId).Count(&count).Error; err != nil {
+			return nil, err
+		}
+		if count == 0 {
+			return nil, errors.New("project not found or permission denied")
+		}
 	}
 
 	page := int(req.Page)

@@ -92,6 +92,21 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
+				Path:    "/files/preupload",
+				Handler: files.PreUploadFileHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/files/:id/versions",
+				Handler: files.ListFileVersionsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/files/:id/download",
+				Handler: files.DownloadFileHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
 				Path:    "/users",
 				Handler: admin.AdminCreateUserHandler(serverCtx),
 			},

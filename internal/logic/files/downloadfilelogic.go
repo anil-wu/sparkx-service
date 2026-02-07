@@ -32,8 +32,14 @@ func NewDownloadFileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Down
 
 func (l *DownloadFileLogic) DownloadFile(req *types.DownloadFileReq) (resp *types.DownloadFileResp, err error) {
 	userIdNumber, ok := l.ctx.Value("userId").(json.Number)
+	isAdmin := false
 	if !ok {
-		return nil, errors.New("unauthorized")
+		adminIdNumber, ok2 := l.ctx.Value("adminId").(json.Number)
+		if !ok2 {
+			return nil, errors.New("unauthorized")
+		}
+		userIdNumber = adminIdNumber
+		isAdmin = true
 	}
 	userId, _ := userIdNumber.Int64()
 
@@ -52,27 +58,43 @@ func (l *DownloadFileLogic) DownloadFile(req *types.DownloadFileReq) (resp *type
 
 	// Get project_id from project_files
 	var projectFile model.ProjectFiles
-	if err := l.svcCtx.DB.WithContext(l.ctx).Where("file_id = ?", file.Id).First(&projectFile).Error; err != nil {
+	if err := l.svcCtx.DB.WithContext(l.ctx).Where("file_id = ?", file.Id).First(&projectFile).Error; err != nil && !isAdmin {
 		return nil, err
 	}
 
-	// 检查项目成员权限
-	var count int64
-	if err := l.svcCtx.DB.WithContext(l.ctx).Model(&model.ProjectMembers{}).
-		Where("project_id = ? AND user_id = ?", projectFile.ProjectId, userId).Count(&count).Error; err != nil {
-		return nil, err
-	}
-	if count == 0 {
-		return nil, errors.New("project not found or permission denied")
+	if !isAdmin {
+		var count int64
+		if err := l.svcCtx.DB.WithContext(l.ctx).Model(&model.ProjectMembers{}).
+			Where("project_id = ? AND user_id = ?", projectFile.ProjectId, userId).Count(&count).Error; err != nil {
+			return nil, err
+		}
+		if count == 0 {
+			return nil, errors.New("project not found or permission denied")
+		}
 	}
 
 	// 获取当前版本信息
-	version, err := l.svcCtx.FileVersionsModel.FindOne(l.ctx, file.CurrentVersionId)
+	versionId := file.CurrentVersionId
+	if req.VersionId > 0 {
+		versionId = uint64(req.VersionId)
+	}
+	if req.VersionNumber > 0 {
+		var v model.FileVersions
+		if err := l.svcCtx.DB.WithContext(l.ctx).Where("file_id = ? AND version_number = ?", file.Id, req.VersionNumber).First(&v).Error; err != nil {
+			return nil, err
+		}
+		versionId = v.Id
+	}
+
+	version, err := l.svcCtx.FileVersionsModel.FindOne(l.ctx, versionId)
 	if err != nil {
 		if errors.Is(err, model.ErrNotFound) {
 			return nil, errors.New("file version not found")
 		}
 		return nil, err
+	}
+	if version.FileId != file.Id {
+		return nil, errors.New("file version not found")
 	}
 
 	// 生成 OSS 临时访问 URL（GET 方法）

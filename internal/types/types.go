@@ -103,7 +103,9 @@ type DeleteSoftwareTemplateReq struct {
 }
 
 type DownloadFileReq struct {
-	Id int64 `path:"id"`
+	Id           int64 `path:"id"`
+	VersionId    int64 `form:"versionId,optional"`
+	VersionNumber int64 `form:"versionNumber,optional"`
 }
 
 type DownloadFileResp struct {

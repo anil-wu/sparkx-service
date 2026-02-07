@@ -83,22 +83,32 @@ func NewPreUploadFileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Pre
 
 func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types.PreUploadResp, err error) {
 	userIdNumber, ok := l.ctx.Value("userId").(json.Number)
+	isAdmin := false
 	if !ok {
-		return nil, errors.New("unauthorized")
+		adminIdNumber, ok2 := l.ctx.Value("adminId").(json.Number)
+		if !ok2 {
+			return nil, errors.New("unauthorized")
+		}
+		userIdNumber = adminIdNumber
+		isAdmin = true
 	}
 	userId, _ := userIdNumber.Int64()
 
-	if req == nil || req.ProjectId <= 0 || req.Name == "" || req.FileCategory == "" || req.FileFormat == "" {
+	if req == nil || req.Name == "" || req.FileCategory == "" || req.FileFormat == "" {
+		return nil, model.InputParamInvalid
+	}
+	if req.ProjectId < 0 || (!isAdmin && req.ProjectId <= 0) {
 		return nil, model.InputParamInvalid
 	}
 
-	// Check project membership
-	var count int64
-	if err := l.svcCtx.DB.WithContext(l.ctx).Model(&model.ProjectMembers{}).Where("project_id = ? AND user_id = ?", req.ProjectId, userId).Count(&count).Error; err != nil {
-		return nil, err
-	}
-	if count == 0 {
-		return nil, errors.New("project not found or permission denied")
+	if !isAdmin {
+		var count int64
+		if err := l.svcCtx.DB.WithContext(l.ctx).Model(&model.ProjectMembers{}).Where("project_id = ? AND user_id = ?", req.ProjectId, userId).Count(&count).Error; err != nil {
+			return nil, err
+		}
+		if count == 0 {
+			return nil, errors.New("project not found or permission denied")
+		}
 	}
 
 	// ensure file exists or create
