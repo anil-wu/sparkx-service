@@ -104,3 +104,16 @@ CREATE TABLE IF NOT EXISTS `admins` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_admins_username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- software_templates
+CREATE TABLE IF NOT EXISTS `software_templates` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(128) NOT NULL,
+  `description` TEXT,
+  `archive_file_id` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  `created_by` BIGINT UNSIGNED NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_software_templates_created_by` (`created_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

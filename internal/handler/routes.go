@@ -67,6 +67,31 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
+				Path:    "/software-templates",
+				Handler: admin.CreateSoftwareTemplateHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/software-templates",
+				Handler: admin.ListSoftwareTemplatesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/software-templates/:id",
+				Handler: admin.UpdateSoftwareTemplateHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/software-templates/:id",
+				Handler: admin.DeleteSoftwareTemplateHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/software-templates/:id",
+				Handler: admin.GetSoftwareTemplateHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
 				Path:    "/users",
 				Handler: admin.AdminCreateUserHandler(serverCtx),
 			},

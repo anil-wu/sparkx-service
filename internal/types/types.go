@@ -80,6 +80,12 @@ type CreateProjectReq struct {
 	Description string `json:"description"`
 }
 
+type CreateSoftwareTemplateReq struct {
+	Name          string `json:"name"`
+	Description   string `json:"description,optional"`
+	ArchiveFileId int64  `json:"archiveFileId,optional"`
+}
+
 type DeleteAdminReq struct {
 	Id int64 `path:"id"`
 }
@@ -89,6 +95,10 @@ type DeleteFileReq struct {
 }
 
 type DeleteProjectReq struct {
+	Id int64 `path:"id"`
+}
+
+type DeleteSoftwareTemplateReq struct {
 	Id int64 `path:"id"`
 }
 
@@ -123,6 +133,10 @@ type GetFileContentReq struct {
 }
 
 type GetProjectReq struct {
+	Id int64 `path:"id"`
+}
+
+type GetSoftwareTemplateReq struct {
 	Id int64 `path:"id"`
 }
 
@@ -237,6 +251,21 @@ type RollbackVersionReq struct {
 	VersionNumber int64 `json:"versionNumber"`
 }
 
+type SoftwareTemplateListResp struct {
+	List []SoftwareTemplateResp `json:"list"`
+	Page PageResp               `json:"page"`
+}
+
+type SoftwareTemplateResp struct {
+	Id            int64  `json:"id"`
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	ArchiveFileId int64  `json:"archiveFileId"`
+	CreatedBy     int64  `json:"createdBy"`
+	CreatedAt     string `json:"createdAt"`
+	UpdatedAt     string `json:"updatedAt"`
+}
+
 type UpdateAdminReq struct {
 	Id       int64  `path:"id"`
 	Password string `json:"password,optional"`
@@ -250,6 +279,13 @@ type UpdateProjectReq struct {
 	Description string `json:"description,optional"`
 	CoverFileId int64  `json:"coverFileId,optional"`
 	Status      string `json:"status,optional"` // active | archived
+}
+
+type UpdateSoftwareTemplateReq struct {
+	Id            int64  `path:"id"`
+	Name          string `json:"name,optional"`
+	Description   string `json:"description,optional"`
+	ArchiveFileId int64  `json:"archiveFileId,optional"`
 }
 
 type UpdateUserReq struct {

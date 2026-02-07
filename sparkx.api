@@ -238,6 +238,37 @@ type (
 		description string `json:"description,optional"`
 		status      string `json:"status,optional"` // active | archived
 	}
+	// 软件模板
+	CreateSoftwareTemplateReq {
+		name          string `json:"name"`
+		description   string `json:"description,optional"`
+		archiveFileId int64  `json:"archiveFileId,optional"`
+	}
+	UpdateSoftwareTemplateReq {
+		id            int64  `path:"id"`
+		name          string `json:"name,optional"`
+		description   string `json:"description,optional"`
+		archiveFileId int64  `json:"archiveFileId,optional"`
+	}
+	GetSoftwareTemplateReq {
+		id int64 `path:"id"`
+	}
+	DeleteSoftwareTemplateReq {
+		id int64 `path:"id"`
+	}
+	SoftwareTemplateResp {
+		id            int64  `json:"id"`
+		name          string `json:"name"`
+		description   string `json:"description"`
+		archiveFileId int64  `json:"archiveFileId"`
+		createdBy     int64  `json:"createdBy"`
+		createdAt     string `json:"createdAt"`
+		updatedAt     string `json:"updatedAt"`
+	}
+	SoftwareTemplateListResp {
+		list []SoftwareTemplateResp `json:"list"`
+		page PageResp               `json:"page"`
+	}
 )
 
 @server (
@@ -371,5 +402,20 @@ service sparkx-api {
 
 	@handler AdminListProjects
 	get /projects (PageReq) returns (ProjectListResp)
+
+	@handler CreateSoftwareTemplate
+	post /software-templates (CreateSoftwareTemplateReq) returns (SoftwareTemplateResp)
+
+	@handler UpdateSoftwareTemplate
+	put /software-templates/:id (UpdateSoftwareTemplateReq) returns (BaseResp)
+
+	@handler DeleteSoftwareTemplate
+	delete /software-templates/:id (DeleteSoftwareTemplateReq) returns (BaseResp)
+
+	@handler GetSoftwareTemplate
+	get /software-templates/:id (GetSoftwareTemplateReq) returns (SoftwareTemplateResp)
+
+	@handler ListSoftwareTemplates
+	get /software-templates (PageReq) returns (SoftwareTemplateListResp)
 }
 

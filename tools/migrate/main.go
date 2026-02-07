@@ -114,6 +114,18 @@ type AdminsTable struct {
 
 func (AdminsTable) TableName() string { return "admins" }
 
+type SoftwareTemplatesTable struct {
+	Id            uint64         `gorm:"column:id;primaryKey;autoIncrement"`
+	Name          string         `gorm:"column:name;type:varchar(128);not null"`
+	Description   sql.NullString `gorm:"column:description;type:text"`
+	ArchiveFileId uint64         `gorm:"column:archive_file_id;type:bigint;default:0"`
+	CreatedBy     uint64         `gorm:"column:created_by;not null;index:idx_software_templates_created_by"`
+	CreatedAt     time.Time      `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt     time.Time      `gorm:"column:updated_at;autoUpdateTime"`
+}
+
+func (SoftwareTemplatesTable) TableName() string { return "software_templates" }
+
 func main() {
 	flag.Parse()
 
@@ -144,6 +156,7 @@ func main() {
 		&ProjectFilesTable{},
 		&FileVersionsTable{},
 		&AdminsTable{},
+		&SoftwareTemplatesTable{},
 	)
 
 	if err != nil {

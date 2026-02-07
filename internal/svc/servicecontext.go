@@ -18,14 +18,15 @@ type ServiceContext struct {
 	DB     *gorm.DB
 	Conn   sqlx.SqlConn
 
-	UsersModel          model.UsersModel
-	UserIdentitiesModel model.UserIdentitiesModel
-	ProjectsModel       model.ProjectsModel
-	ProjectMembersModel model.ProjectMembersModel
-	ProjectFilesModel   model.ProjectFilesModel
-	FilesModel          model.FilesModel
-	FileVersionsModel   model.FileVersionsModel
-	AdminsModel         model.AdminsModel
+	UsersModel             model.UsersModel
+	UserIdentitiesModel    model.UserIdentitiesModel
+	ProjectsModel          model.ProjectsModel
+	ProjectMembersModel    model.ProjectMembersModel
+	ProjectFilesModel      model.ProjectFilesModel
+	FilesModel             model.FilesModel
+	FileVersionsModel      model.FileVersionsModel
+	AdminsModel            model.AdminsModel
+	SoftwareTemplatesModel model.SoftwareTemplatesModel
 
 	OSSClient *oss.Client
 	OSSBucket *oss.Bucket
@@ -54,6 +55,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	var filesModel model.FilesModel
 	var fileVersionsModel model.FileVersionsModel
 	var adminsModel model.AdminsModel
+	var softwareTemplatesModel model.SoftwareTemplatesModel
 	if db != nil && conn != nil {
 		usersModel = model.NewUsersModel(db, conn)
 		userIdentitiesModel = model.NewUserIdentitiesModel(db, conn)
@@ -63,6 +65,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		filesModel = model.NewFilesModel(db, conn)
 		fileVersionsModel = model.NewFileVersionsModel(db, conn)
 		adminsModel = model.NewAdminsModel(db, conn)
+		softwareTemplatesModel = model.NewSoftwareTemplatesModel(db, conn)
 	}
 
 	// init oss
@@ -81,18 +84,19 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 
 	return &ServiceContext{
-		Config:              c,
-		DB:                  db,
-		Conn:                conn,
-		UsersModel:          usersModel,
-		UserIdentitiesModel: userIdentitiesModel,
-		ProjectsModel:       projectsModel,
-		ProjectMembersModel: projectMembersModel,
-		ProjectFilesModel:   projectFilesModel,
-		FilesModel:          filesModel,
-		FileVersionsModel:   fileVersionsModel,
-		AdminsModel:         adminsModel,
-		OSSClient:           ossClient,
-		OSSBucket:           bucket,
+		Config:                 c,
+		DB:                     db,
+		Conn:                   conn,
+		UsersModel:             usersModel,
+		UserIdentitiesModel:    userIdentitiesModel,
+		ProjectsModel:          projectsModel,
+		ProjectMembersModel:    projectMembersModel,
+		ProjectFilesModel:      projectFilesModel,
+		FilesModel:             filesModel,
+		FileVersionsModel:      fileVersionsModel,
+		AdminsModel:            adminsModel,
+		SoftwareTemplatesModel: softwareTemplatesModel,
+		OSSClient:              ossClient,
+		OSSBucket:              bucket,
 	}
 }
