@@ -3,6 +3,7 @@ package admin_auth
 import (
 	"context"
 	"crypto/md5"
+	"database/sql"
 	"encoding/hex"
 	"time"
 
@@ -57,7 +58,7 @@ func (l *AdminLoginLogic) AdminLogin(req *types.AdminLoginReq) (resp *types.Admi
 	}
 
 	// update last login time
-	admin.LastLoginAt = time.Now()
+	admin.LastLoginAt = sql.NullTime{Time: time.Now(), Valid: true}
 	_, _ = l.svcCtx.AdminsModel.Update(l.ctx, int64(admin.Id), admin)
 
 	// generate token

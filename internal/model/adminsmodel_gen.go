@@ -6,6 +6,7 @@ package model
 
 import (
 	"context"
+	"database/sql"
 	"strings"
 	"time"
 
@@ -41,14 +42,14 @@ type (
 	}
 
 	Admins struct {
-		Id           uint64    `db:"id" gorm:"column:id;primaryKey"`
-		Username     string    `db:"username" gorm:"column:username"`
-		PasswordHash string    `db:"password_hash" gorm:"column:password_hash"`
-		Role         string    `db:"role" gorm:"column:role"`
-		Status       string    `db:"status" gorm:"column:status"`
-		LastLoginAt  time.Time `db:"last_login_at" gorm:"column:last_login_at"`
-		CreatedAt    time.Time `db:"created_at" gorm:"column:created_at"`
-		UpdatedAt    time.Time `db:"updated_at" gorm:"column:updated_at"`
+		Id           uint64       `db:"id" gorm:"column:id;primaryKey"`
+		Username     string       `db:"username" gorm:"column:username"`
+		PasswordHash string       `db:"password_hash" gorm:"column:password_hash"`
+		Role         string       `db:"role" gorm:"column:role"`
+		Status       string       `db:"status" gorm:"column:status"`
+		LastLoginAt  sql.NullTime `db:"last_login_at" gorm:"column:last_login_at"`
+		CreatedAt    time.Time    `db:"created_at" gorm:"column:created_at"`
+		UpdatedAt    time.Time    `db:"updated_at" gorm:"column:updated_at"`
 	}
 )
 
