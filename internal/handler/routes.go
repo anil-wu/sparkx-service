@@ -6,6 +6,8 @@ package handler
 import (
 	"net/http"
 
+	admin "github.com/anil-wu/spark-x/internal/handler/admin"
+	admin_auth "github.com/anil-wu/spark-x/internal/handler/admin_auth"
 	auth "github.com/anil-wu/spark-x/internal/handler/auth"
 	files "github.com/anil-wu/spark-x/internal/handler/files"
 	projects "github.com/anil-wu/spark-x/internal/handler/projects"
@@ -16,6 +18,89 @@ import (
 )
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/admins",
+				Handler: admin.CreateAdminHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/admins",
+				Handler: admin.ListAdminsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/admins/:id",
+				Handler: admin.UpdateAdminHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/admins/:id",
+				Handler: admin.DeleteAdminHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/profile",
+				Handler: admin.AdminProfileHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/projects",
+				Handler: admin.AdminCreateProjectHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/projects",
+				Handler: admin.AdminListProjectsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/projects/:id",
+				Handler: admin.AdminDeleteProjectHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/projects/:id",
+				Handler: admin.AdminUpdateProjectHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/users",
+				Handler: admin.AdminCreateUserHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/users",
+				Handler: admin.AdminListUsersHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/users/:id",
+				Handler: admin.AdminDeleteUserHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/users/:id",
+				Handler: admin.AdminUpdateUserHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.AdminAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/admin"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/login",
+				Handler: admin_auth.AdminLoginHandler(serverCtx),
+			},
+		},
+		rest.WithPrefix("/api/v1/admin"),
+	)
+
 	server.AddRoutes(
 		[]rest.Route{
 			{

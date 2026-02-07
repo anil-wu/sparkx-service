@@ -93,6 +93,19 @@ type FileVersionsTable struct {
 
 func (FileVersionsTable) TableName() string { return "file_versions" }
 
+type AdminsTable struct {
+	Id           uint64       `gorm:"column:id;primaryKey;autoIncrement"`
+	Username     string       `gorm:"column:username;type:varchar(64);not null;uniqueIndex:uk_admins_username"`
+	PasswordHash string       `gorm:"column:password_hash;type:char(32);not null"`
+	Role         string       `gorm:"column:role;type:enum('super_admin','admin');not null;default:'admin'"`
+	Status       string       `gorm:"column:status;type:enum('active','disabled');not null;default:'active'"`
+	LastLoginAt  sql.NullTime `gorm:"column:last_login_at"`
+	CreatedAt    time.Time    `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt    time.Time    `gorm:"column:updated_at;autoUpdateTime"`
+}
+
+func (AdminsTable) TableName() string { return "admins" }
+
 func main() {
 	flag.Parse()
 
@@ -121,6 +134,7 @@ func main() {
 		&ProjectMembersTable{},
 		&FilesTable{},
 		&FileVersionsTable{},
+		&AdminsTable{},
 	)
 
 	if err != nil {

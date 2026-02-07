@@ -169,6 +169,75 @@ type (
 	GetFileContentReq {
 		id int64 `path:"id"`
 	}
+	// 管理员
+	AdminLoginReq {
+		username string `json:"username"`
+		password string `json:"password"`
+	}
+	AdminLoginResp {
+		adminId int64  `json:"adminId"`
+		role    string `json:"role"`
+		token   string `json:"token"`
+	}
+	AdminInfoResp {
+		id          int64  `json:"id"`
+		username    string `json:"username"`
+		role        string `json:"role"`
+		status      string `json:"status"`
+		lastLoginAt string `json:"lastLoginAt"`
+		createdAt   string `json:"createdAt"`
+		updatedAt   string `json:"updatedAt"`
+	}
+	CreateAdminReq {
+		username string `json:"username"`
+		password string `json:"password"`
+		role     string `json:"role,default=admin"` // super_admin | admin
+	}
+	UpdateAdminReq {
+		id       int64  `path:"id"`
+		password string `json:"password,optional"`
+		role     string `json:"role,optional"` // super_admin | admin
+		status   string `json:"status,optional"` // active | disabled
+	}
+	DeleteAdminReq {
+		id int64 `path:"id"`
+	}
+	ListAdminsReq {
+		page     int64 `form:"page,default=1"`
+		pageSize int64 `form:"pageSize,default=20"`
+	}
+	AdminListResp {
+		list []AdminInfoResp `json:"list"`
+		page PageResp        `json:"page"`
+	}
+	AdminCreateUserReq {
+		username string `json:"username"`
+		email    string `json:"email"`
+		password string `json:"password"`
+	}
+	AdminDeleteUserReq {
+		id int64 `path:"id"`
+	}
+	AdminUpdateUserReq {
+		id       int64  `path:"id"`
+		username string `json:"username,optional"`
+		email    string `json:"email,optional"`
+		password string `json:"password,optional"`
+	}
+	AdminCreateProjectReq {
+		name        string `json:"name"`
+		description string `json:"description,optional"`
+		ownerId     int64  `json:"ownerId"`
+	}
+	AdminDeleteProjectReq {
+		id int64 `path:"id"`
+	}
+	AdminUpdateProjectReq {
+		id          int64  `path:"id"`
+		name        string `json:"name,optional"`
+		description string `json:"description,optional"`
+		status      string `json:"status,optional"` // active | archived
+	}
 )
 
 @server (
@@ -247,5 +316,60 @@ service sparkx-api {
 
 	@handler GetFileContent
 	get /files/:id/content (GetFileContentReq)
+}
+
+@server (
+	group:  admin_auth
+	prefix: /api/v1/admin
+)
+service sparkx-api {
+	@handler AdminLogin
+	post /login (AdminLoginReq) returns (AdminLoginResp)
+}
+
+@server (
+	group:  admin
+	prefix: /api/v1/admin
+	jwt:    AdminAuth
+)
+service sparkx-api {
+	@handler AdminProfile
+	get /profile returns (AdminInfoResp)
+
+	@handler CreateAdmin
+	post /admins (CreateAdminReq) returns (AdminInfoResp)
+
+	@handler UpdateAdmin
+	put /admins/:id (UpdateAdminReq) returns (BaseResp)
+
+	@handler DeleteAdmin
+	delete /admins/:id (DeleteAdminReq) returns (BaseResp)
+
+	@handler ListAdmins
+	get /admins (ListAdminsReq) returns (AdminListResp)
+
+	@handler AdminCreateUser
+	post /users (AdminCreateUserReq) returns (UserInfoResp)
+
+	@handler AdminDeleteUser
+	delete /users/:id (AdminDeleteUserReq) returns (BaseResp)
+
+	@handler AdminUpdateUser
+	put /users/:id (AdminUpdateUserReq) returns (BaseResp)
+
+	@handler AdminListUsers
+	get /users (PageReq) returns (UserListResp)
+
+	@handler AdminCreateProject
+	post /projects (AdminCreateProjectReq) returns (ProjectResp)
+
+	@handler AdminDeleteProject
+	delete /projects/:id (AdminDeleteProjectReq) returns (BaseResp)
+
+	@handler AdminUpdateProject
+	put /projects/:id (AdminUpdateProjectReq) returns (BaseResp)
+
+	@handler AdminListProjects
+	get /projects (PageReq) returns (ProjectListResp)
 }
 

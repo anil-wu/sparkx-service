@@ -24,6 +24,7 @@ type ServiceContext struct {
 	ProjectMembersModel model.ProjectMembersModel
 	FilesModel          model.FilesModel
 	FileVersionsModel   model.FileVersionsModel
+	AdminsModel         model.AdminsModel
 
 	OSSClient *oss.Client
 	OSSBucket *oss.Bucket
@@ -50,6 +51,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	var projectMembersModel model.ProjectMembersModel
 	var filesModel model.FilesModel
 	var fileVersionsModel model.FileVersionsModel
+	var adminsModel model.AdminsModel
 	if db != nil && conn != nil {
 		usersModel = model.NewUsersModel(db, conn)
 		userIdentitiesModel = model.NewUserIdentitiesModel(db, conn)
@@ -57,6 +59,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		projectMembersModel = model.NewProjectMembersModel(db, conn)
 		filesModel = model.NewFilesModel(db, conn)
 		fileVersionsModel = model.NewFileVersionsModel(db, conn)
+		adminsModel = model.NewAdminsModel(db, conn)
 	}
 
 	// init oss
@@ -84,6 +87,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ProjectMembersModel: projectMembersModel,
 		FilesModel:          filesModel,
 		FileVersionsModel:   fileVersionsModel,
+		AdminsModel:         adminsModel,
 		OSSClient:           ossClient,
 		OSSBucket:           bucket,
 	}

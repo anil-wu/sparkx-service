@@ -3,15 +3,85 @@
 
 package types
 
+type AdminCreateProjectReq struct {
+	Name        string `json:"name"`
+	Description string `json:"description,optional"`
+	OwnerId     int64  `json:"ownerId"`
+}
+
+type AdminCreateUserReq struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type AdminDeleteProjectReq struct {
+	Id int64 `path:"id"`
+}
+
+type AdminDeleteUserReq struct {
+	Id int64 `path:"id"`
+}
+
+type AdminInfoResp struct {
+	Id          int64  `json:"id"`
+	Username    string `json:"username"`
+	Role        string `json:"role"`
+	Status      string `json:"status"`
+	LastLoginAt string `json:"lastLoginAt"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+
+type AdminListResp struct {
+	List []AdminInfoResp `json:"list"`
+	Page PageResp        `json:"page"`
+}
+
+type AdminLoginReq struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type AdminLoginResp struct {
+	AdminId int64  `json:"adminId"`
+	Role    string `json:"role"`
+	Token   string `json:"token"`
+}
+
+type AdminUpdateProjectReq struct {
+	Id          int64  `path:"id"`
+	Name        string `json:"name,optional"`
+	Description string `json:"description,optional"`
+	Status      string `json:"status,optional"` // active | archived
+}
+
+type AdminUpdateUserReq struct {
+	Id       int64  `path:"id"`
+	Username string `json:"username,optional"`
+	Email    string `json:"email,optional"`
+	Password string `json:"password,optional"`
+}
+
 type BaseResp struct {
 	Code int32  `json:"code"`
 	Msg  string `json:"msg"`
+}
+
+type CreateAdminReq struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Role     string `json:"role,default=admin"` // super_admin | admin
 }
 
 type CreateProjectReq struct {
 	UserId      int64  `json:"userId"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+}
+
+type DeleteAdminReq struct {
+	Id int64 `path:"id"`
 }
 
 type DeleteFileReq struct {
@@ -65,6 +135,11 @@ type InviteMemberReq struct {
 	InvitedUserId int64  `json:"invitedUserId"` // 被邀请者
 	ProjectId     int64  `path:"id"`
 	Role          string `json:"role"` // owner | admin | developer | viewer
+}
+
+type ListAdminsReq struct {
+	Page     int64 `form:"page,default=1"`
+	PageSize int64 `form:"pageSize,default=20"`
 }
 
 type ListFileVersionsReq struct {
@@ -160,6 +235,13 @@ type ProjectResp struct {
 type RollbackVersionReq struct {
 	Id            int64 `path:"id"`
 	VersionNumber int64 `json:"versionNumber"`
+}
+
+type UpdateAdminReq struct {
+	Id       int64  `path:"id"`
+	Password string `json:"password,optional"`
+	Role     string `json:"role,optional"`   // super_admin | admin
+	Status   string `json:"status,optional"` // active | disabled
 }
 
 type UpdateProjectReq struct {

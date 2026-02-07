@@ -8,6 +8,9 @@ MySQL:
 Auth:
   AccessSecret: "uKq94b4X9v5y7n8r2z3p"
   AccessExpire: 86400
+AdminAuth:
+  AccessSecret: "aDm1nS3cr3tK3y2024!@#"
+  AccessExpire: 86400
 Google:
   ClientID: "537084280912-5j6ig7r95rnisbtjlagkbc8f4lijub25.apps.googleusercontent.com"
 OSS:

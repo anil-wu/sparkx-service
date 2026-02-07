@@ -81,3 +81,17 @@ CREATE TABLE IF NOT EXISTS `file_versions` (
   UNIQUE KEY `uk_file_version` (`file_id`,`version_number`),
   KEY `idx_file_versions_file_id` (`file_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- admins
+CREATE TABLE IF NOT EXISTS `admins` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(64) NOT NULL UNIQUE,
+  `password_hash` CHAR(32) NOT NULL,
+  `role` ENUM('super_admin','admin') NOT NULL DEFAULT 'admin',
+  `status` ENUM('active','disabled') NOT NULL DEFAULT 'active',
+  `last_login_at` TIMESTAMP NULL DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_admins_username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
