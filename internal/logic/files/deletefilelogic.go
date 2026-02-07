@@ -49,10 +49,16 @@ func (l *DeleteFileLogic) DeleteFile(req *types.DeleteFileReq) (resp *types.Base
 		return nil, err
 	}
 
+	// Get project_id from project_files
+	var projectFile model.ProjectFiles
+	if err := l.svcCtx.DB.WithContext(l.ctx).Where("file_id = ?", file.Id).First(&projectFile).Error; err != nil {
+		return nil, err
+	}
+
 	// 检查项目成员权限（需要 admin 或 owner 角色）
 	var member model.ProjectMembers
 	if err := l.svcCtx.DB.WithContext(l.ctx).
-		Where("project_id = ? AND user_id = ?", file.ProjectId, userId).
+		Where("project_id = ? AND user_id = ?", projectFile.ProjectId, userId).
 		First(&member).Error; err != nil {
 		if errors.Is(err, model.ErrNotFound) {
 			return nil, errors.New("project not found or permission denied")

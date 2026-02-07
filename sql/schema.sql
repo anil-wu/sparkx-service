@@ -55,15 +55,24 @@ CREATE TABLE IF NOT EXISTS `project_members` (
 -- files
 CREATE TABLE IF NOT EXISTS `files` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `project_id` BIGINT UNSIGNED NOT NULL,
   `name` VARCHAR(255) NOT NULL,
   `file_category` ENUM('text','image','video','audio','binary','archive') NOT NULL,
   `file_format` VARCHAR(50) NOT NULL COMMENT '文件格式，如 png, jpg, mp4, mp3, txt 等',
   `current_version_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '当前版本ID，关联 file_versions.id',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_project_name` (`project_id`,`name`),
   KEY `idx_files_current_version_id` (`current_version_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- project_files
+CREATE TABLE IF NOT EXISTS `project_files` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `project_id` BIGINT UNSIGNED NOT NULL,
+  `file_id` BIGINT UNSIGNED NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_project_file` (`project_id`,`file_id`),
+  KEY `idx_project_files_file_id` (`file_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- file_versions

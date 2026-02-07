@@ -68,8 +68,7 @@ func (ProjectMembersTable) TableName() string { return "project_members" }
 
 type FilesTable struct {
 	Id               uint64         `gorm:"column:id;primaryKey;autoIncrement"`
-	ProjectId        uint64         `gorm:"column:project_id;not null;uniqueIndex:uk_project_name,priority:1"`
-	Name             string         `gorm:"column:name;type:varchar(255);not null;uniqueIndex:uk_project_name,priority:2"`
+	Name             string         `gorm:"column:name;type:varchar(255);not null"`
 	FileCategory     string         `gorm:"column:file_category;type:enum('text','image','video','audio','binary','archive');not null"`
 	FileFormat       string         `gorm:"column:file_format;type:varchar(50);not null;default:''"`
 	CurrentVersionId uint64         `gorm:"column:current_version_id;index:idx_files_current_version_id"`
@@ -78,6 +77,15 @@ type FilesTable struct {
 }
 
 func (FilesTable) TableName() string { return "files" }
+
+type ProjectFilesTable struct {
+	Id        uint64    `gorm:"column:id;primaryKey;autoIncrement"`
+	ProjectId uint64    `gorm:"column:project_id;not null;uniqueIndex:uk_project_file,priority:1"`
+	FileId    uint64    `gorm:"column:file_id;not null;uniqueIndex:uk_project_file,priority:2;index:idx_project_files_file_id"`
+	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
+}
+
+func (ProjectFilesTable) TableName() string { return "project_files" }
 
 type FileVersionsTable struct {
 	Id            uint64    `gorm:"column:id;primaryKey;autoIncrement"`
@@ -133,6 +141,7 @@ func main() {
 		&ProjectsTable{},
 		&ProjectMembersTable{},
 		&FilesTable{},
+		&ProjectFilesTable{},
 		&FileVersionsTable{},
 		&AdminsTable{},
 	)

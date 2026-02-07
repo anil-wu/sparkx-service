@@ -50,10 +50,16 @@ func (l *DownloadFileLogic) DownloadFile(req *types.DownloadFileReq) (resp *type
 		return nil, err
 	}
 
+	// Get project_id from project_files
+	var projectFile model.ProjectFiles
+	if err := l.svcCtx.DB.WithContext(l.ctx).Where("file_id = ?", file.Id).First(&projectFile).Error; err != nil {
+		return nil, err
+	}
+
 	// 检查项目成员权限
 	var count int64
 	if err := l.svcCtx.DB.WithContext(l.ctx).Model(&model.ProjectMembers{}).
-		Where("project_id = ? AND user_id = ?", file.ProjectId, userId).Count(&count).Error; err != nil {
+		Where("project_id = ? AND user_id = ?", projectFile.ProjectId, userId).Count(&count).Error; err != nil {
 		return nil, err
 	}
 	if count == 0 {

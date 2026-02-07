@@ -19,54 +19,52 @@ import (
 )
 
 var (
-	filesFieldNames          = builder.RawFieldNames(&Files{})
-	filesRows                = strings.Join(filesFieldNames, ",")
-	filesRowsExpectAutoSet   = strings.Join(stringx.Remove(filesFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	filesRowsWithPlaceHolder = strings.Join(stringx.Remove(filesFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	projectFilesFieldNames          = builder.RawFieldNames(&ProjectFiles{})
+	projectFilesRows                = strings.Join(projectFilesFieldNames, ",")
+	projectFilesRowsExpectAutoSet   = strings.Join(stringx.Remove(projectFilesFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
+	projectFilesRowsWithPlaceHolder = strings.Join(stringx.Remove(projectFilesFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
 )
 
 type (
-	filesModel interface {
+	projectFilesModel interface {
 		// 返回的是受影响行数，如需获取自增id，请通过data参数获取
-		Insert(ctx context.Context, data *Files) (int64, error)
-		FindOne(ctx context.Context, id uint64) (*Files, error)
+		Insert(ctx context.Context, data *ProjectFiles) (int64, error)
+		FindOne(ctx context.Context, id uint64) (*ProjectFiles, error)
+		FindOneByProjectIdFileId(ctx context.Context, projectId uint64, fileId uint64) (*ProjectFiles, error)
 		// 通过主键id更新指定字段，零值不可更新，返回受影响行数
-		Update(ctx context.Context, id int64, data *Files) (int64, error)
+		Update(ctx context.Context, id int64, data *ProjectFiles) (int64, error)
 		// 通过主键id删除数据，返回受影响行数
 		Delete(ctx context.Context, id uint64) (int64, error)
 	}
 
-	defaultFilesModel struct {
+	defaultProjectFilesModel struct {
 		DB    *gorm.DB
 		conn  sqlx.SqlConn
 		table string
 	}
 
-	Files struct {
-		Id               uint64         `db:"id" gorm:"column:id;primaryKey"`
-		Name             string         `db:"name" gorm:"column:name"`
-		FileCategory     string         `db:"file_category" gorm:"column:file_category"`
-		FileFormat       string         `db:"file_format" gorm:"column:file_format"`
-		CurrentVersionId uint64         `db:"current_version_id" gorm:"column:current_version_id"`
-		CreatedAt        time.Time      `db:"created_at" gorm:"column:created_at"`
-		DeletedAt        gorm.DeletedAt `db:"deleted_at" gorm:"column:deleted_at;index"`
+	ProjectFiles struct {
+		Id        uint64    `db:"id" gorm:"column:id;primaryKey"`
+		ProjectId uint64    `db:"project_id" gorm:"column:project_id"`
+		FileId    uint64    `db:"file_id" gorm:"column:file_id"`
+		CreatedAt time.Time `db:"created_at" gorm:"column:created_at"`
 	}
 )
 
-func newFilesModel(conn *gorm.DB, connS sqlx.SqlConn) *defaultFilesModel {
-	return &defaultFilesModel{
+func newProjectFilesModel(conn *gorm.DB, connS sqlx.SqlConn) *defaultProjectFilesModel {
+	return &defaultProjectFilesModel{
 		DB:    conn,
 		conn:  connS,
-		table: "`files`",
+		table: "`project_files`",
 	}
 }
 
-func (m *defaultFilesModel) TableName() string {
+func (m *defaultProjectFilesModel) TableName() string {
 	return m.table
 }
 
 // Delete 通过主键id删除数据，返回受影响行数
-func (m *defaultFilesModel) Delete(ctx context.Context, id uint64) (int64, error) {
+func (m *defaultProjectFilesModel) Delete(ctx context.Context, id uint64) (int64, error) {
 	logx.WithContext(ctx).Infof("delete data:%+v", id)
 
 	if id <= 0 {
@@ -74,7 +72,7 @@ func (m *defaultFilesModel) Delete(ctx context.Context, id uint64) (int64, error
 		return 0, InputParamInvalid
 	}
 
-	result := m.DB.Debug().WithContext(ctx).Where("`id` = ?", id).Delete(&Files{})
+	result := m.DB.Debug().WithContext(ctx).Where("`id` = ?", id).Delete(&ProjectFiles{})
 	if result.Error != nil {
 		logx.WithContext(ctx).Errorf("delete error:%+v", result.Error)
 		return 0, WriteDataFailed
@@ -84,7 +82,7 @@ func (m *defaultFilesModel) Delete(ctx context.Context, id uint64) (int64, error
 }
 
 // FindOne 通过主键id查找数据
-func (m *defaultFilesModel) FindOne(ctx context.Context, id uint64) (*Files, error) {
+func (m *defaultProjectFilesModel) FindOne(ctx context.Context, id uint64) (*ProjectFiles, error) {
 	logx.WithContext(ctx).Infof("findOne data:%+v", id)
 
 	if id <= 0 {
@@ -92,7 +90,7 @@ func (m *defaultFilesModel) FindOne(ctx context.Context, id uint64) (*Files, err
 		return nil, InputParamInvalid
 	}
 
-	var result Files
+	var result ProjectFiles
 	err := m.DB.Debug().WithContext(ctx).Where("`id` = ?", id).First(&result).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -105,8 +103,25 @@ func (m *defaultFilesModel) FindOne(ctx context.Context, id uint64) (*Files, err
 
 }
 
+// FindOneByProjectIdFileId 通过指定字段查找数据
+func (m *defaultProjectFilesModel) FindOneByProjectIdFileId(ctx context.Context, projectId uint64, fileId uint64) (*ProjectFiles, error) {
+	logx.WithContext(ctx).Infof("findOneByProjectIdFileId data:%+v", projectId, fileId)
+
+	var result ProjectFiles
+	err := m.DB.Debug().WithContext(ctx).Where("`project_id` = ? and `file_id` = ?", projectId, fileId).First(&result).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+		logx.WithContext(ctx).Errorf("findOneByProjectIdFileId error:%+v", err)
+		return nil, err
+	}
+	return &result, nil
+
+}
+
 // Insert 返回的是受影响行数，如需获取自增id，请通过data参数获取
-func (m *defaultFilesModel) Insert(ctx context.Context, data *Files) (int64, error) {
+func (m *defaultProjectFilesModel) Insert(ctx context.Context, data *ProjectFiles) (int64, error) {
 	logx.WithContext(ctx).Infof("insert data:%+v", data)
 	if data == nil {
 		logx.WithContext(ctx).Errorf("insert error:%+v", "param invalid")
@@ -122,7 +137,7 @@ func (m *defaultFilesModel) Insert(ctx context.Context, data *Files) (int64, err
 }
 
 // Update 通过主键id更新指定字段，零值不可更新，返回受影响行数
-func (m *defaultFilesModel) Update(ctx context.Context, id int64, data *Files) (int64, error) {
+func (m *defaultProjectFilesModel) Update(ctx context.Context, id int64, data *ProjectFiles) (int64, error) {
 	logx.WithContext(ctx).Infof("update data:%+v", data)
 
 	if id <= 0 {
@@ -139,6 +154,6 @@ func (m *defaultFilesModel) Update(ctx context.Context, id int64, data *Files) (
 	return result.RowsAffected, nil
 }
 
-func (m *defaultFilesModel) tableName() string {
+func (m *defaultProjectFilesModel) tableName() string {
 	return m.table
 }

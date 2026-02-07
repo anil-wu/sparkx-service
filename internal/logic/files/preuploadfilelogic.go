@@ -103,17 +103,28 @@ func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types
 
 	// ensure file exists or create
 	var file *model.Files
-	// try find by unique (project_id,name)
-	err = l.svcCtx.DB.WithContext(l.ctx).Where("project_id = ? AND name = ?", req.ProjectId, req.Name).First(&file).Error
+	// try find by name through project_files join
+	err = l.svcCtx.DB.WithContext(l.ctx).Model(&model.Files{}).
+		Joins("JOIN project_files ON project_files.file_id = files.id").
+		Where("project_files.project_id = ? AND files.name = ?", req.ProjectId, req.Name).
+		First(&file).Error
 	if err != nil {
 		// create new file
 		newFile := &model.Files{
-			ProjectId:    uint64(req.ProjectId),
 			Name:         req.Name,
 			FileCategory: req.FileCategory,
 			FileFormat:   req.FileFormat,
 		}
 		_, err = l.svcCtx.FilesModel.Insert(l.ctx, newFile)
+		if err != nil {
+			return nil, err
+		}
+		// create project_file relationship
+		projectFile := &model.ProjectFiles{
+			ProjectId: uint64(req.ProjectId),
+			FileId:    newFile.Id,
+		}
+		_, err = l.svcCtx.ProjectFilesModel.Insert(l.ctx, projectFile)
 		if err != nil {
 			return nil, err
 		}
@@ -154,6 +165,12 @@ func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types
 		l.Errorf("[PreUpload] Failed to update file: %v", err)
 		return nil, err
 	}
+	// 检查 OSS 是否已配置
+	if l.svcCtx.OSSBucket == nil {
+		l.Errorf("[PreUpload] OSS not configured")
+		return nil, errors.New("OSS not configured")
+	}
+
 	// 确定 Content-Type
 	contentType := req.ContentType
 	if contentType == "" {

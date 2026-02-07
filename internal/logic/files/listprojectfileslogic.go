@@ -62,7 +62,10 @@ func (l *ListProjectFilesLogic) ListProjectFiles(req *types.ListProjectFilesReq)
 	}
 	offset := (page - 1) * size
 	var files []model.Files
-	if err = l.svcCtx.DB.WithContext(l.ctx).Model(&model.Files{}).Where("project_id = ?", req.ProjectId).Offset(offset).Limit(size).Order("id desc").Find(&files).Error; err != nil {
+	if err = l.svcCtx.DB.WithContext(l.ctx).Model(&model.Files{}).
+		Joins("JOIN project_files ON project_files.file_id = files.id").
+		Where("project_files.project_id = ?", req.ProjectId).
+		Offset(offset).Limit(size).Order("files.id desc").Find(&files).Error; err != nil {
 		return nil, err
 	}
 	items := make([]types.ProjectFileItem, 0, len(files))
@@ -80,7 +83,7 @@ func (l *ListProjectFilesLogic) ListProjectFiles(req *types.ListProjectFilesReq)
 		}
 		items = append(items, types.ProjectFileItem{
 			Id:               int64(f.Id),
-			ProjectId:        int64(f.ProjectId),
+			ProjectId:        req.ProjectId,
 			Name:             f.Name,
 			FileCategory:     f.FileCategory,
 			FileFormat:       f.FileFormat,
@@ -94,7 +97,10 @@ func (l *ListProjectFilesLogic) ListProjectFiles(req *types.ListProjectFilesReq)
 		})
 	}
 	var total int64
-	if err = l.svcCtx.DB.WithContext(l.ctx).Model(&model.Files{}).Where("project_id = ?", req.ProjectId).Count(&total).Error; err != nil {
+	if err = l.svcCtx.DB.WithContext(l.ctx).Model(&model.Files{}).
+		Joins("JOIN project_files ON project_files.file_id = files.id").
+		Where("project_files.project_id = ?", req.ProjectId).
+		Count(&total).Error; err != nil {
 		return nil, err
 	}
 	resp = &types.ProjectFileListResp{

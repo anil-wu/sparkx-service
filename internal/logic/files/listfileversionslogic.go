@@ -46,9 +46,15 @@ func (l *ListFileVersionsLogic) ListFileVersions(req *types.ListFileVersionsReq)
 		return nil, err
 	}
 
+	// Get project_id from project_files
+	var projectFile model.ProjectFiles
+	if err := l.svcCtx.DB.WithContext(l.ctx).Where("file_id = ?", file.Id).First(&projectFile).Error; err != nil {
+		return nil, err
+	}
+
 	// Check project membership
 	var count int64
-	if err := l.svcCtx.DB.WithContext(l.ctx).Model(&model.ProjectMembers{}).Where("project_id = ? AND user_id = ?", file.ProjectId, userId).Count(&count).Error; err != nil {
+	if err := l.svcCtx.DB.WithContext(l.ctx).Model(&model.ProjectMembers{}).Where("project_id = ? AND user_id = ?", projectFile.ProjectId, userId).Count(&count).Error; err != nil {
 		return nil, err
 	}
 	if count == 0 {

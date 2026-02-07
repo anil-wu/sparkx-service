@@ -22,6 +22,7 @@ type ServiceContext struct {
 	UserIdentitiesModel model.UserIdentitiesModel
 	ProjectsModel       model.ProjectsModel
 	ProjectMembersModel model.ProjectMembersModel
+	ProjectFilesModel   model.ProjectFilesModel
 	FilesModel          model.FilesModel
 	FileVersionsModel   model.FileVersionsModel
 	AdminsModel         model.AdminsModel
@@ -49,6 +50,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	var userIdentitiesModel model.UserIdentitiesModel
 	var projectsModel model.ProjectsModel
 	var projectMembersModel model.ProjectMembersModel
+	var projectFilesModel model.ProjectFilesModel
 	var filesModel model.FilesModel
 	var fileVersionsModel model.FileVersionsModel
 	var adminsModel model.AdminsModel
@@ -57,6 +59,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		userIdentitiesModel = model.NewUserIdentitiesModel(db, conn)
 		projectsModel = model.NewProjectsModel(db, conn)
 		projectMembersModel = model.NewProjectMembersModel(db, conn)
+		projectFilesModel = model.NewProjectFilesModel(db, conn)
 		filesModel = model.NewFilesModel(db, conn)
 		fileVersionsModel = model.NewFileVersionsModel(db, conn)
 		adminsModel = model.NewAdminsModel(db, conn)
@@ -85,6 +88,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserIdentitiesModel: userIdentitiesModel,
 		ProjectsModel:       projectsModel,
 		ProjectMembersModel: projectMembersModel,
+		ProjectFilesModel:   projectFilesModel,
 		FilesModel:          filesModel,
 		FileVersionsModel:   fileVersionsModel,
 		AdminsModel:         adminsModel,
