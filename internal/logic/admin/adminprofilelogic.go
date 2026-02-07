@@ -33,8 +33,8 @@ func (l *AdminProfileLogic) AdminProfile() (resp *types.AdminInfoResp, err error
 	}
 
 	lastLoginAt := ""
-	if !admin.LastLoginAt.IsZero() {
-		lastLoginAt = admin.LastLoginAt.Format(time.RFC3339)
+	if admin.LastLoginAt.Valid {
+		lastLoginAt = admin.LastLoginAt.Time.Format(time.RFC3339)
 	}
 
 	return &types.AdminInfoResp{

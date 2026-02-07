@@ -46,8 +46,8 @@ func (l *ListAdminsLogic) ListAdmins(req *types.ListAdminsReq) (resp *types.Admi
 	list := make([]types.AdminInfoResp, 0, len(admins))
 	for _, admin := range admins {
 		lastLoginAt := ""
-		if !admin.LastLoginAt.IsZero() {
-			lastLoginAt = admin.LastLoginAt.Format(time.RFC3339)
+		if admin.LastLoginAt.Valid {
+			lastLoginAt = admin.LastLoginAt.Time.Format(time.RFC3339)
 		}
 		list = append(list, types.AdminInfoResp{
 			Id:          int64(admin.Id),
