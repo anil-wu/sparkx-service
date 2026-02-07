@@ -7,3 +7,7 @@ sparkx.exe~
 # OS specific
 *.DS_Store
 Thumbs.db
+
+# Local dev configs (may contain secrets)
+etc/*-dev.yaml
+etc/*-dev.yml
