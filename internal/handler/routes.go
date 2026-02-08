@@ -92,6 +92,61 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
+				Path:    "/llm/providers",
+				Handler: admin.CreateLlmProviderHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/llm/providers",
+				Handler: admin.ListLlmProvidersHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/llm/providers/:id",
+				Handler: admin.GetLlmProviderHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/llm/providers/:id",
+				Handler: admin.UpdateLlmProviderHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/llm/providers/:id",
+				Handler: admin.DeleteLlmProviderHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/llm/models",
+				Handler: admin.CreateLlmModelHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/llm/models",
+				Handler: admin.ListLlmModelsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/llm/models/:id",
+				Handler: admin.GetLlmModelHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/llm/models/:id",
+				Handler: admin.UpdateLlmModelHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/llm/models/:id",
+				Handler: admin.DeleteLlmModelHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/llm/usage-logs",
+				Handler: admin.ListLlmUsageLogsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
 				Path:    "/files/preupload",
 				Handler: files.PreUploadFileHandler(serverCtx),
 			},

@@ -269,6 +269,115 @@ type (
 		list []SoftwareTemplateResp `json:"list"`
 		page PageResp               `json:"page"`
 	}
+	// LLM Providers
+	CreateLlmProviderReq {
+		name        string `json:"name"`
+		baseUrl     string `json:"baseUrl"`
+		apiKey      string `json:"apiKey,optional"`
+		description string `json:"description,optional"`
+	}
+	UpdateLlmProviderReq {
+		id          int64  `path:"id"`
+		name        string `json:"name,optional"`
+		baseUrl     string `json:"baseUrl,optional"`
+		apiKey      string `json:"apiKey,optional"`
+		clearApiKey bool   `json:"clearApiKey,optional"`
+		description string `json:"description,optional"`
+	}
+	GetLlmProviderReq {
+		id int64 `path:"id"`
+	}
+	DeleteLlmProviderReq {
+		id int64 `path:"id"`
+	}
+	LlmProviderResp {
+		id          int64  `json:"id"`
+		name        string `json:"name"`
+		baseUrl     string `json:"baseUrl"`
+		hasApiKey   bool   `json:"hasApiKey"`
+		description string `json:"description"`
+		createdAt   string `json:"createdAt"`
+		updatedAt   string `json:"updatedAt"`
+	}
+	LlmProviderListResp {
+		list []LlmProviderResp `json:"list"`
+		page PageResp          `json:"page"`
+	}
+	// LLM Models
+	CreateLlmModelReq {
+		providerId      int64   `json:"providerId"`
+		modelName       string  `json:"modelName"`
+		modelType       string  `json:"modelType"` // llm | vlm | embedding
+		maxInputTokens  int64   `json:"maxInputTokens"`
+		maxOutputTokens int64   `json:"maxOutputTokens"`
+		supportStream   bool    `json:"supportStream"`
+		supportJson     bool    `json:"supportJson"`
+		priceInputPer1k float64 `json:"priceInputPer1k"`
+		priceOutputPer1k float64 `json:"priceOutputPer1k"`
+	}
+	UpdateLlmModelReq {
+		id              int64    `path:"id"`
+		providerId      *int64   `json:"providerId,optional"`
+		modelName       string   `json:"modelName,optional"`
+		modelType       string   `json:"modelType,optional"` // llm | vlm | embedding
+		maxInputTokens  *int64   `json:"maxInputTokens,optional"`
+		maxOutputTokens *int64   `json:"maxOutputTokens,optional"`
+		supportStream   *bool    `json:"supportStream,optional"`
+		supportJson     *bool    `json:"supportJson,optional"`
+		priceInputPer1k *float64 `json:"priceInputPer1k,optional"`
+		priceOutputPer1k *float64 `json:"priceOutputPer1k,optional"`
+	}
+	GetLlmModelReq {
+		id int64 `path:"id"`
+	}
+	DeleteLlmModelReq {
+		id int64 `path:"id"`
+	}
+	ListLlmModelsReq {
+		providerId int64  `form:"providerId,optional"`
+		modelType  string `form:"modelType,optional"` // llm | vlm | embedding
+		page       int64  `form:"page,default=1"`
+		pageSize   int64  `form:"pageSize,default=20"`
+	}
+	LlmModelResp {
+		id               int64   `json:"id"`
+		providerId       int64   `json:"providerId"`
+		modelName        string  `json:"modelName"`
+		modelType        string  `json:"modelType"`
+		maxInputTokens   int64   `json:"maxInputTokens"`
+		maxOutputTokens  int64   `json:"maxOutputTokens"`
+		supportStream    bool    `json:"supportStream"`
+		supportJson      bool    `json:"supportJson"`
+		priceInputPer1k  float64 `json:"priceInputPer1k"`
+		priceOutputPer1k float64 `json:"priceOutputPer1k"`
+		createdAt        string  `json:"createdAt"`
+		updatedAt        string  `json:"updatedAt"`
+	}
+	LlmModelListResp {
+		list []LlmModelResp `json:"list"`
+		page PageResp       `json:"page"`
+	}
+	// LLM Usage Logs
+	ListLlmUsageLogsReq {
+		projectId  int64 `form:"projectId,optional"`
+		llmModelId int64 `form:"llmModelId,optional"`
+		page       int64 `form:"page,default=1"`
+		pageSize   int64 `form:"pageSize,default=20"`
+	}
+	LlmUsageLogResp {
+		id           int64   `json:"id"`
+		llmModelId   int64   `json:"llmModelId"`
+		projectId    int64   `json:"projectId"`
+		inputTokens  int64   `json:"inputTokens"`
+		outputTokens int64   `json:"outputTokens"`
+		cacheHit     bool    `json:"cacheHit"`
+		costUsd      float64 `json:"costUsd"`
+		createdAt    string  `json:"createdAt"`
+	}
+	LlmUsageLogListResp {
+		list []LlmUsageLogResp `json:"list"`
+		page PageResp          `json:"page"`
+	}
 )
 
 @server (
@@ -417,5 +526,37 @@ service sparkx-api {
 
 	@handler ListSoftwareTemplates
 	get /software-templates (PageReq) returns (SoftwareTemplateListResp)
-}
 
+	@handler CreateLlmProvider
+	post /llm/providers (CreateLlmProviderReq) returns (LlmProviderResp)
+
+	@handler ListLlmProviders
+	get /llm/providers (PageReq) returns (LlmProviderListResp)
+
+	@handler GetLlmProvider
+	get /llm/providers/:id (GetLlmProviderReq) returns (LlmProviderResp)
+
+	@handler UpdateLlmProvider
+	put /llm/providers/:id (UpdateLlmProviderReq) returns (BaseResp)
+
+	@handler DeleteLlmProvider
+	delete /llm/providers/:id (DeleteLlmProviderReq) returns (BaseResp)
+
+	@handler CreateLlmModel
+	post /llm/models (CreateLlmModelReq) returns (LlmModelResp)
+
+	@handler ListLlmModels
+	get /llm/models (ListLlmModelsReq) returns (LlmModelListResp)
+
+	@handler GetLlmModel
+	get /llm/models/:id (GetLlmModelReq) returns (LlmModelResp)
+
+	@handler UpdateLlmModel
+	put /llm/models/:id (UpdateLlmModelReq) returns (BaseResp)
+
+	@handler DeleteLlmModel
+	delete /llm/models/:id (DeleteLlmModelReq) returns (BaseResp)
+
+	@handler ListLlmUsageLogs
+	get /llm/usage-logs (ListLlmUsageLogsReq) returns (LlmUsageLogListResp)
+}

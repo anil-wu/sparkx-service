@@ -103,8 +103,8 @@ type DeleteSoftwareTemplateReq struct {
 }
 
 type DownloadFileReq struct {
-	Id           int64 `path:"id"`
-	VersionId    int64 `form:"versionId,optional"`
+	Id            int64 `path:"id"`
+	VersionId     int64 `form:"versionId,optional"`
 	VersionNumber int64 `form:"versionNumber,optional"`
 }
 
@@ -307,4 +307,126 @@ type UserInfoResp struct {
 type UserListResp struct {
 	List []UserInfoResp `json:"list"`
 	Page PageResp       `json:"page"`
+}
+
+type CreateLlmProviderReq struct {
+	Name        string `json:"name"`
+	BaseUrl     string `json:"baseUrl"`
+	ApiKey      string `json:"apiKey,optional"`
+	Description string `json:"description,optional"`
+}
+
+type UpdateLlmProviderReq struct {
+	Id          int64  `path:"id"`
+	Name        string `json:"name,optional"`
+	BaseUrl     string `json:"baseUrl,optional"`
+	ApiKey      string `json:"apiKey,optional"`
+	ClearApiKey bool   `json:"clearApiKey,optional"`
+	Description string `json:"description,optional"`
+}
+
+type DeleteLlmProviderReq struct {
+	Id int64 `path:"id"`
+}
+
+type GetLlmProviderReq struct {
+	Id int64 `path:"id"`
+}
+
+type LlmProviderResp struct {
+	Id          int64  `json:"id"`
+	Name        string `json:"name"`
+	BaseUrl     string `json:"baseUrl"`
+	HasApiKey   bool   `json:"hasApiKey"`
+	Description string `json:"description"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+
+type LlmProviderListResp struct {
+	List []LlmProviderResp `json:"list"`
+	Page PageResp          `json:"page"`
+}
+
+type CreateLlmModelReq struct {
+	ProviderId       int64   `json:"providerId"`
+	ModelName        string  `json:"modelName"`
+	ModelType        string  `json:"modelType"` // llm | vlm | embedding
+	MaxInputTokens   int64   `json:"maxInputTokens"`
+	MaxOutputTokens  int64   `json:"maxOutputTokens"`
+	SupportStream    bool    `json:"supportStream"`
+	SupportJson      bool    `json:"supportJson"`
+	PriceInputPer1k  float64 `json:"priceInputPer1k"`
+	PriceOutputPer1k float64 `json:"priceOutputPer1k"`
+}
+
+type UpdateLlmModelReq struct {
+	Id               int64    `path:"id"`
+	ProviderId       *int64   `json:"providerId,optional"`
+	ModelName        string   `json:"modelName,optional"`
+	ModelType        string   `json:"modelType,optional"` // llm | vlm | embedding
+	MaxInputTokens   *int64   `json:"maxInputTokens,optional"`
+	MaxOutputTokens  *int64   `json:"maxOutputTokens,optional"`
+	SupportStream    *bool    `json:"supportStream,optional"`
+	SupportJson      *bool    `json:"supportJson,optional"`
+	PriceInputPer1k  *float64 `json:"priceInputPer1k,optional"`
+	PriceOutputPer1k *float64 `json:"priceOutputPer1k,optional"`
+}
+
+type DeleteLlmModelReq struct {
+	Id int64 `path:"id"`
+}
+
+type GetLlmModelReq struct {
+	Id int64 `path:"id"`
+}
+
+type ListLlmModelsReq struct {
+	ProviderId int64  `form:"providerId,optional"`
+	ModelType  string `form:"modelType,optional"` // llm | vlm | embedding
+	Page       int64  `form:"page,default=1"`
+	PageSize   int64  `form:"pageSize,default=20"`
+}
+
+type LlmModelResp struct {
+	Id               int64   `json:"id"`
+	ProviderId       int64   `json:"providerId"`
+	ModelName        string  `json:"modelName"`
+	ModelType        string  `json:"modelType"`
+	MaxInputTokens   int64   `json:"maxInputTokens"`
+	MaxOutputTokens  int64   `json:"maxOutputTokens"`
+	SupportStream    bool    `json:"supportStream"`
+	SupportJson      bool    `json:"supportJson"`
+	PriceInputPer1k  float64 `json:"priceInputPer1k"`
+	PriceOutputPer1k float64 `json:"priceOutputPer1k"`
+	CreatedAt        string  `json:"createdAt"`
+	UpdatedAt        string  `json:"updatedAt"`
+}
+
+type LlmModelListResp struct {
+	List []LlmModelResp `json:"list"`
+	Page PageResp       `json:"page"`
+}
+
+type ListLlmUsageLogsReq struct {
+	ProjectId  int64 `form:"projectId,optional"`
+	LlmModelId int64 `form:"llmModelId,optional"`
+	Page       int64 `form:"page,default=1"`
+	PageSize   int64 `form:"pageSize,default=20"`
+}
+
+type LlmUsageLogResp struct {
+	Id           int64   `json:"id"`
+	LlmModelId   int64   `json:"llmModelId"`
+	ProjectId    int64   `json:"projectId"`
+	InputTokens  int64   `json:"inputTokens"`
+	OutputTokens int64   `json:"outputTokens"`
+	CacheHit     bool    `json:"cacheHit"`
+	CostUsd      float64 `json:"costUsd"`
+	CreatedAt    string  `json:"createdAt"`
+}
+
+type LlmUsageLogListResp struct {
+	List []LlmUsageLogResp `json:"list"`
+	Page PageResp          `json:"page"`
 }

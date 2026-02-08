@@ -126,6 +126,93 @@ type SoftwareTemplatesTable struct {
 
 func (SoftwareTemplatesTable) TableName() string { return "software_templates" }
 
+type LlmProvidersTable struct {
+	Id          uint64         `gorm:"column:id;primaryKey;autoIncrement"`
+	Name        string         `gorm:"column:name;type:varchar(128);not null;uniqueIndex:uk_llm_providers_name"`
+	BaseUrl     string         `gorm:"column:base_url;type:varchar(512);not null;default:''"`
+	ApiKey      sql.NullString `gorm:"column:api_key;type:text"`
+	Description sql.NullString `gorm:"column:description;type:text"`
+	CreatedAt   time.Time      `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt   time.Time      `gorm:"column:updated_at;autoUpdateTime"`
+}
+
+func (LlmProvidersTable) TableName() string { return "llm_providers" }
+
+type LlmModelsTable struct {
+	Id               uint64    `gorm:"column:id;primaryKey;autoIncrement"`
+	ProviderId       uint64    `gorm:"column:provider_id;not null;uniqueIndex:uk_llm_models_provider_model,priority:1;index:idx_llm_models_provider_id"`
+	ModelName        string    `gorm:"column:model_name;type:varchar(255);not null;uniqueIndex:uk_llm_models_provider_model,priority:2"`
+	ModelType        string    `gorm:"column:model_type;type:enum('llm','vlm','embedding');not null;default:'llm';uniqueIndex:uk_llm_models_provider_model,priority:3"`
+	MaxInputTokens   int       `gorm:"column:max_input_tokens;not null;default:0"`
+	MaxOutputTokens  int       `gorm:"column:max_output_tokens;not null;default:0"`
+	SupportStream    bool      `gorm:"column:support_stream;not null;default:false"`
+	SupportJson      bool      `gorm:"column:support_json;not null;default:false"`
+	PriceInputPer1k  float64   `gorm:"column:price_input_per_1k;type:decimal(10,6);not null;default:0"`
+	PriceOutputPer1k float64   `gorm:"column:price_output_per_1k;type:decimal(10,6);not null;default:0"`
+	CreatedAt        time.Time `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt        time.Time `gorm:"column:updated_at;autoUpdateTime"`
+}
+
+func (LlmModelsTable) TableName() string { return "llm_models" }
+
+type LlmUsageLogsTable struct {
+	Id           uint64    `gorm:"column:id;primaryKey;autoIncrement"`
+	LlmModelId   uint64    `gorm:"column:llm_model_id;not null;index:idx_llm_usage_logs_model_id"`
+	ProjectId    uint64    `gorm:"column:project_id;not null;index:idx_llm_usage_logs_project_id"`
+	InputTokens  int       `gorm:"column:input_tokens;not null;default:0"`
+	OutputTokens int       `gorm:"column:output_tokens;not null;default:0"`
+	CacheHit     bool      `gorm:"column:cache_hit;not null;default:false"`
+	CostUsd      float64   `gorm:"column:cost_usd;type:decimal(10,6);not null;default:0"`
+	CreatedAt    time.Time `gorm:"column:created_at;autoCreateTime;index:idx_llm_usage_logs_created_at"`
+}
+
+func (LlmUsageLogsTable) TableName() string { return "llm_usage_logs" }
+
+func migrateWithRetry(targetDSN string) error {
+	var lastErr error
+	for attempt := 1; attempt <= 5; attempt++ {
+		db, err := gorm.Open(mysql.Open(targetDSN), &gorm.Config{})
+		if err != nil {
+			lastErr = err
+			time.Sleep(time.Duration(attempt) * time.Second)
+			continue
+		}
+
+		sqlDB, err := db.DB()
+		if err == nil {
+			sqlDB.SetMaxOpenConns(10)
+			sqlDB.SetMaxIdleConns(10)
+			sqlDB.SetConnMaxLifetime(10 * time.Minute)
+			sqlDB.SetConnMaxIdleTime(5 * time.Minute)
+		}
+
+		err = db.AutoMigrate(
+			&UsersTable{},
+			&UserIdentitiesTable{},
+			&ProjectsTable{},
+			&ProjectMembersTable{},
+			&FilesTable{},
+			&ProjectFilesTable{},
+			&FileVersionsTable{},
+			&AdminsTable{},
+			&SoftwareTemplatesTable{},
+			&LlmProvidersTable{},
+			&LlmModelsTable{},
+			&LlmUsageLogsTable{},
+		)
+		if err == nil {
+			return nil
+		}
+		lastErr = err
+
+		if sqlDB != nil {
+			_ = sqlDB.Close()
+		}
+		time.Sleep(time.Duration(attempt) * time.Second)
+	}
+	return lastErr
+}
+
 func main() {
 	flag.Parse()
 
@@ -141,24 +228,7 @@ func main() {
 	}
 
 	fmt.Println("Starting migration...")
-
-	db, err := gorm.Open(mysql.Open(targetDSN), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("failed to connect database: %v", err)
-	}
-
-	err = db.AutoMigrate(
-		&UsersTable{},
-		&UserIdentitiesTable{},
-		&ProjectsTable{},
-		&ProjectMembersTable{},
-		&FilesTable{},
-		&ProjectFilesTable{},
-		&FileVersionsTable{},
-		&AdminsTable{},
-		&SoftwareTemplatesTable{},
-	)
-
+	err := migrateWithRetry(targetDSN)
 	if err != nil {
 		log.Fatalf("Migration failed: %v", err)
 	}

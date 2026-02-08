@@ -4,6 +4,8 @@
 package svc
 
 import (
+	"time"
+
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/anil-wu/spark-x/internal/config"
 	"github.com/anil-wu/spark-x/internal/model"
@@ -39,6 +41,13 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		db, err = gorm.Open(mysql.Open(c.MySQL.DSN), &gorm.Config{})
 		if err != nil {
 			panic(err)
+		}
+		sqlDB, err := db.DB()
+		if err == nil {
+			sqlDB.SetMaxOpenConns(10)
+			sqlDB.SetMaxIdleConns(10)
+			sqlDB.SetConnMaxLifetime(30 * time.Minute)
+			sqlDB.SetConnMaxIdleTime(10 * time.Minute)
 		}
 	}
 	var conn sqlx.SqlConn
