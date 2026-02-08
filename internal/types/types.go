@@ -430,3 +430,82 @@ type LlmUsageLogListResp struct {
 	List []LlmUsageLogResp `json:"list"`
 	Page PageResp          `json:"page"`
 }
+
+type CreateAgentReq struct {
+	Name        string `json:"name"`
+	Description string `json:"description,optional"`
+	AgentType   string `json:"agentType"` // code | asset | design | test | build | ops
+}
+
+type UpdateAgentReq struct {
+	Id          int64  `path:"id"`
+	Name        string `json:"name,optional"`
+	Description string `json:"description,optional"`
+	AgentType   string `json:"agentType,optional"` // code | asset | design | test | build | ops
+}
+
+type GetAgentReq struct {
+	Id int64 `path:"id"`
+}
+
+type DeleteAgentReq struct {
+	Id int64 `path:"id"`
+}
+
+type ListAgentsReq struct {
+	AgentType string `form:"agentType,optional"` // code | asset | design | test | build | ops
+	Page      int64  `form:"page,default=1"`
+	PageSize  int64  `form:"pageSize,default=20"`
+}
+
+type AgentResp struct {
+	Id          int64  `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	AgentType   string `json:"agentType"`
+	CreatedAt   string `json:"createdAt"`
+}
+
+type AgentListResp struct {
+	List []AgentResp `json:"list"`
+	Page PageResp    `json:"page"`
+}
+
+type ListAgentBindingsReq struct {
+	AgentId int64 `path:"id"`
+}
+
+type CreateAgentBindingReq struct {
+	AgentId    int64 `path:"id"`
+	LlmModelId int64 `json:"llmModelId"`
+	Priority   int64 `json:"priority,optional"`
+	IsActive   *bool `json:"isActive,optional"`
+}
+
+type UpdateAgentBindingReq struct {
+	Id         int64  `path:"id"`
+	LlmModelId int64  `json:"llmModelId,optional"`
+	Priority   *int64 `json:"priority,optional"`
+	IsActive   *bool  `json:"isActive,optional"`
+}
+
+type DeleteAgentBindingReq struct {
+	Id int64 `path:"id"`
+}
+
+type AgentBindingResp struct {
+	Id           int64  `json:"id"`
+	AgentId      int64  `json:"agentId"`
+	LlmModelId   int64  `json:"llmModelId"`
+	Priority     int64  `json:"priority"`
+	IsActive     bool   `json:"isActive"`
+	CreatedAt    string `json:"createdAt"`
+	ProviderId   int64  `json:"providerId"`
+	ProviderName string `json:"providerName"`
+	ModelName    string `json:"modelName"`
+	ModelType    string `json:"modelType"`
+}
+
+type AgentBindingListResp struct {
+	List []AgentBindingResp `json:"list"`
+}

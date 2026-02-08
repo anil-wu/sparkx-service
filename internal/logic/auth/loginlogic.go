@@ -69,7 +69,7 @@ func (l *LoginLogic) loginByEmail(req *types.LoginReq) (*types.LoginResp, error)
 		if err != nil {
 			return nil, err
 		}
-		
+
 		// generate token
 		token, err := l.generateToken(int64(newUser.Id))
 		if err != nil {
@@ -134,7 +134,7 @@ func (l *LoginLogic) loginByGoogle(req *types.LoginReq) (*types.LoginResp, error
 	// Check if identity exists
 	provider := "google"
 	providerUid := payload.Subject // "sub" claim
-	
+
 	identity, err := l.svcCtx.UserIdentitiesModel.FindOneByProviderProviderUid(l.ctx, provider, providerUid)
 	if err != nil && err != model.ErrNotFound {
 		return nil, err

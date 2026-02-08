@@ -168,6 +168,77 @@ type LlmUsageLogsTable struct {
 
 func (LlmUsageLogsTable) TableName() string { return "llm_usage_logs" }
 
+type AgentsTable struct {
+	Id          uint64         `gorm:"column:id;primaryKey;autoIncrement"`
+	Name        string         `gorm:"column:name;type:varchar(128);not null;uniqueIndex:uk_agents_name_type,priority:1"`
+	Description sql.NullString `gorm:"column:description;type:text"`
+	AgentType   string         `gorm:"column:agent_type;type:enum('code','asset','design','test','build','ops');not null;default:'code';uniqueIndex:uk_agents_name_type,priority:2"`
+	CreatedAt   time.Time      `gorm:"column:created_at;autoCreateTime"`
+}
+
+func (AgentsTable) TableName() string { return "agents" }
+
+type AgentLlmBindingsTable struct {
+	Id         uint64    `gorm:"column:id;primaryKey;autoIncrement"`
+	AgentId    uint64    `gorm:"column:agent_id;not null;uniqueIndex:uk_agent_llm_bindings_agent_id"`
+	LlmModelId uint64    `gorm:"column:llm_model_id;not null;index:idx_agent_llm_bindings_model_id"`
+	Priority   int       `gorm:"column:priority;not null;default:0"`
+	IsActive   bool      `gorm:"column:is_active;not null;default:true"`
+	CreatedAt  time.Time `gorm:"column:created_at;autoCreateTime"`
+}
+
+func (AgentLlmBindingsTable) TableName() string { return "agent_llm_bindings" }
+
+func enforceSingleBindingPerAgent(db *gorm.DB) error {
+	type dupRow struct {
+		AgentId uint64 `gorm:"column:agent_id"`
+		Cnt     int64  `gorm:"column:cnt"`
+	}
+
+	var dups []dupRow
+	if err := db.
+		Table("agent_llm_bindings").
+		Select("agent_id, COUNT(*) AS cnt").
+		Group("agent_id").
+		Having("COUNT(*) > 1").
+		Scan(&dups).Error; err != nil {
+		return err
+	}
+
+	for _, d := range dups {
+		var rows []AgentLlmBindingsTable
+		if err := db.
+			Where("agent_id = ?", d.AgentId).
+			Order("is_active DESC, priority DESC, id DESC").
+			Find(&rows).Error; err != nil {
+			return err
+		}
+		if len(rows) <= 1 {
+			continue
+		}
+
+		idsToDelete := make([]uint64, 0, len(rows)-1)
+		for _, r := range rows[1:] {
+			idsToDelete = append(idsToDelete, r.Id)
+		}
+		if len(idsToDelete) > 0 {
+			if err := db.Where("id IN ?", idsToDelete).Delete(&AgentLlmBindingsTable{}).Error; err != nil {
+				return err
+			}
+		}
+	}
+
+	_ = db.Migrator().DropIndex(&AgentLlmBindingsTable{}, "uk_agent_llm_bindings_agent_model")
+	_ = db.Migrator().DropIndex(&AgentLlmBindingsTable{}, "idx_agent_llm_bindings_agent_id")
+
+	if !db.Migrator().HasIndex(&AgentLlmBindingsTable{}, "uk_agent_llm_bindings_agent_id") {
+		if err := db.Migrator().CreateIndex(&AgentLlmBindingsTable{}, "uk_agent_llm_bindings_agent_id"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func migrateWithRetry(targetDSN string) error {
 	var lastErr error
 	for attempt := 1; attempt <= 5; attempt++ {
@@ -199,11 +270,18 @@ func migrateWithRetry(targetDSN string) error {
 			&LlmProvidersTable{},
 			&LlmModelsTable{},
 			&LlmUsageLogsTable{},
+			&AgentsTable{},
+			&AgentLlmBindingsTable{},
 		)
 		if err == nil {
-			return nil
+			if err := enforceSingleBindingPerAgent(db); err == nil {
+				return nil
+			} else {
+				lastErr = err
+			}
+		} else {
+			lastErr = err
 		}
-		lastErr = err
 
 		if sqlDB != nil {
 			_ = sqlDB.Close()

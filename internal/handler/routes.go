@@ -147,6 +147,51 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
+				Path:    "/agents",
+				Handler: admin.CreateAgentHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/agents",
+				Handler: admin.ListAgentsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/agents/:id",
+				Handler: admin.GetAgentHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/agents/:id",
+				Handler: admin.UpdateAgentHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/agents/:id",
+				Handler: admin.DeleteAgentHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/agents/:id/bindings",
+				Handler: admin.ListAgentBindingsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/agents/:id/bindings",
+				Handler: admin.CreateAgentBindingHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/agent-bindings/:id",
+				Handler: admin.UpdateAgentBindingHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/agent-bindings/:id",
+				Handler: admin.DeleteAgentBindingHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
 				Path:    "/files/preupload",
 				Handler: files.PreUploadFileHandler(serverCtx),
 			},

@@ -32,7 +32,7 @@ func GetFileContentHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		// 设置响应头
 		w.Header().Set("Content-Type", contentType)
 		w.Header().Set("Cache-Control", "private, max-age=3600")
-		
+
 		// 流式传输文件内容
 		w.WriteHeader(http.StatusOK)
 		io.Copy(w, reader)

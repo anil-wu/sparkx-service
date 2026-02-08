@@ -378,6 +378,74 @@ type (
 		list []LlmUsageLogResp `json:"list"`
 		page PageResp          `json:"page"`
 	}
+	// Agents
+	CreateAgentReq {
+		name        string `json:"name"`
+		description string `json:"description,optional"`
+		agentType   string `json:"agentType"` // code | asset | design | test | build | ops
+	}
+	UpdateAgentReq {
+		id          int64  `path:"id"`
+		name        string `json:"name,optional"`
+		description string `json:"description,optional"`
+		agentType   string `json:"agentType,optional"` // code | asset | design | test | build | ops
+	}
+	GetAgentReq {
+		id int64 `path:"id"`
+	}
+	DeleteAgentReq {
+		id int64 `path:"id"`
+	}
+	ListAgentsReq {
+		agentType string `form:"agentType,optional"` // code | asset | design | test | build | ops
+		page      int64  `form:"page,default=1"`
+		pageSize  int64  `form:"pageSize,default=20"`
+	}
+	AgentResp {
+		id          int64  `json:"id"`
+		name        string `json:"name"`
+		description string `json:"description"`
+		agentType   string `json:"agentType"`
+		createdAt   string `json:"createdAt"`
+	}
+	AgentListResp {
+		list []AgentResp `json:"list"`
+		page PageResp    `json:"page"`
+	}
+	// Agent bindings
+	ListAgentBindingsReq {
+		agentId int64 `path:"id"`
+	}
+	CreateAgentBindingReq {
+		agentId     int64 `path:"id"`
+		llmModelId  int64 `json:"llmModelId"`
+		priority    int64 `json:"priority,optional"`
+		isActive    *bool `json:"isActive,optional"`
+	}
+	UpdateAgentBindingReq {
+		id         int64  `path:"id"`
+		llmModelId int64  `json:"llmModelId,optional"`
+		priority   *int64 `json:"priority,optional"`
+		isActive   *bool  `json:"isActive,optional"`
+	}
+	DeleteAgentBindingReq {
+		id int64 `path:"id"`
+	}
+	AgentBindingResp {
+		id            int64  `json:"id"`
+		agentId       int64  `json:"agentId"`
+		llmModelId     int64  `json:"llmModelId"`
+		priority       int64  `json:"priority"`
+		isActive       bool   `json:"isActive"`
+		createdAt      string `json:"createdAt"`
+		providerId     int64  `json:"providerId"`
+		providerName   string `json:"providerName"`
+		modelName      string `json:"modelName"`
+		modelType      string `json:"modelType"`
+	}
+	AgentBindingListResp {
+		list []AgentBindingResp `json:"list"`
+	}
 )
 
 @server (
@@ -559,4 +627,31 @@ service sparkx-api {
 
 	@handler ListLlmUsageLogs
 	get /llm/usage-logs (ListLlmUsageLogsReq) returns (LlmUsageLogListResp)
+
+	@handler CreateAgent
+	post /agents (CreateAgentReq) returns (AgentResp)
+
+	@handler ListAgents
+	get /agents (ListAgentsReq) returns (AgentListResp)
+
+	@handler GetAgent
+	get /agents/:id (GetAgentReq) returns (AgentResp)
+
+	@handler UpdateAgent
+	put /agents/:id (UpdateAgentReq) returns (BaseResp)
+
+	@handler DeleteAgent
+	delete /agents/:id (DeleteAgentReq) returns (BaseResp)
+
+	@handler ListAgentBindings
+	get /agents/:id/bindings (ListAgentBindingsReq) returns (AgentBindingListResp)
+
+	@handler CreateAgentBinding
+	post /agents/:id/bindings (CreateAgentBindingReq) returns (AgentBindingResp)
+
+	@handler UpdateAgentBinding
+	put /agent-bindings/:id (UpdateAgentBindingReq) returns (BaseResp)
+
+	@handler DeleteAgentBinding
+	delete /agent-bindings/:id (DeleteAgentBindingReq) returns (BaseResp)
 }
