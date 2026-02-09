@@ -53,12 +53,16 @@ func (l *DeleteProjectLogic) DeleteProject(req *types.DeleteProjectReq) (resp *t
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-	subFiles := tx.Table("files").Select("id").Where("project_id = ?", req.Id)
+	subFiles := tx.Table("project_files").Select("file_id").Where("project_id = ?", req.Id)
 	if err = tx.Table("file_versions").Where("file_id IN (?)", subFiles).Delete(&model.FileVersions{}).Error; err != nil {
 		tx.Rollback()
 		return nil, err
 	}
-	if err = tx.Table("files").Where("project_id = ?", req.Id).Delete(&model.Files{}).Error; err != nil {
+	if err = tx.Table("files").Where("id IN (?)", subFiles).Delete(&model.Files{}).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	if err = tx.Table("project_files").Where("project_id = ?", req.Id).Delete(&model.ProjectFiles{}).Error; err != nil {
 		tx.Rollback()
 		return nil, err
 	}
