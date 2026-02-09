@@ -33,7 +33,7 @@ COPY --from=builder /app/etc /app/etc
 
 USER app
 
-EXPOSE 8890
+EXPOSE 6001
 
 ENTRYPOINT ["/app/sparkx-service"]
 CMD ["-f", "/app/etc/sparkx-api.yaml"]
