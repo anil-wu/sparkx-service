@@ -4,6 +4,7 @@
 package svc
 
 import (
+	"context"
 	"time"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
@@ -44,10 +45,16 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		}
 		sqlDB, err := db.DB()
 		if err == nil {
-			sqlDB.SetMaxOpenConns(10)
-			sqlDB.SetMaxIdleConns(10)
-			sqlDB.SetConnMaxLifetime(30 * time.Minute)
-			sqlDB.SetConnMaxIdleTime(10 * time.Minute)
+			sqlDB.SetMaxOpenConns(20)
+			sqlDB.SetMaxIdleConns(5)
+			sqlDB.SetConnMaxLifetime(5 * time.Minute)
+			sqlDB.SetConnMaxIdleTime(1 * time.Minute)
+
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			defer cancel()
+			if pingErr := sqlDB.PingContext(ctx); pingErr != nil {
+				logx.Errorf("mysql ping failed: %v", pingErr)
+			}
 		}
 	}
 	var conn sqlx.SqlConn
