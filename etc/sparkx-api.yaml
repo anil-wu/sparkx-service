@@ -1,6 +1,8 @@
 Name: sparkx-api
 Host: 0.0.0.0
-Port: 6001
+Port: 8890
+CertFile: etc/server.crt
+KeyFile: etc/server.key
 MySQL:
   DSN: "sparkplay:sparkplay@tcp(47.112.97.49:6003)/sparkplay?charset=utf8mb4&parseTime=true&loc=Local&timeout=5s&readTimeout=5s&writeTimeout=5s"
 Timeout: 10000
