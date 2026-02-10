@@ -73,6 +73,7 @@ type FilesTable struct {
 	FileFormat       string         `gorm:"column:file_format;type:varchar(50);not null;default:''"`
 	CurrentVersionId uint64         `gorm:"column:current_version_id;index:idx_files_current_version_id"`
 	CreatedAt        time.Time      `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt        time.Time      `gorm:"column:updated_at;autoUpdateTime"`
 	DeletedAt        gorm.DeletedAt `gorm:"column:deleted_at;index;softDelete"`
 }
 
@@ -83,6 +84,7 @@ type ProjectFilesTable struct {
 	ProjectId uint64    `gorm:"column:project_id;not null;uniqueIndex:uk_project_file,priority:1"`
 	FileId    uint64    `gorm:"column:file_id;not null;uniqueIndex:uk_project_file,priority:2;index:idx_project_files_file_id"`
 	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime"`
 }
 
 func (ProjectFilesTable) TableName() string { return "project_files" }
@@ -164,6 +166,7 @@ type LlmUsageLogsTable struct {
 	CacheHit     bool      `gorm:"column:cache_hit;not null;default:false"`
 	CostUsd      float64   `gorm:"column:cost_usd;type:decimal(10,6);not null;default:0"`
 	CreatedAt    time.Time `gorm:"column:created_at;autoCreateTime;index:idx_llm_usage_logs_created_at"`
+	UpdatedAt    time.Time `gorm:"column:updated_at;autoUpdateTime"`
 }
 
 func (LlmUsageLogsTable) TableName() string { return "llm_usage_logs" }
@@ -174,6 +177,7 @@ type AgentsTable struct {
 	Description sql.NullString `gorm:"column:description;type:text"`
 	AgentType   string         `gorm:"column:agent_type;type:enum('code','asset','design','test','build','ops');not null;default:'code';uniqueIndex:uk_agents_name_type,priority:2"`
 	CreatedAt   time.Time      `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt   time.Time      `gorm:"column:updated_at;autoUpdateTime"`
 }
 
 func (AgentsTable) TableName() string { return "agents" }
@@ -185,6 +189,7 @@ type AgentLlmBindingsTable struct {
 	Priority   int       `gorm:"column:priority;not null;default:0"`
 	IsActive   bool      `gorm:"column:is_active;not null;default:true"`
 	CreatedAt  time.Time `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt  time.Time `gorm:"column:updated_at;autoUpdateTime"`
 }
 
 func (AgentLlmBindingsTable) TableName() string { return "agent_llm_bindings" }

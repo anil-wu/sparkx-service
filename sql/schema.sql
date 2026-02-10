@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS `files` (
   `file_format` VARCHAR(50) NOT NULL COMMENT '文件格式，如 png, jpg, mp4, mp3, txt 等',
   `current_version_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '当前版本ID，关联 file_versions.id',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_files_current_version_id` (`current_version_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -70,6 +71,7 @@ CREATE TABLE IF NOT EXISTS `project_files` (
   `project_id` BIGINT UNSIGNED NOT NULL,
   `file_id` BIGINT UNSIGNED NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_project_file` (`project_id`,`file_id`),
   KEY `idx_project_files_file_id` (`file_id`)
@@ -160,6 +162,7 @@ CREATE TABLE IF NOT EXISTS `llm_usage_logs` (
   `cache_hit` BOOLEAN NOT NULL DEFAULT FALSE,
   `cost_usd` DECIMAL(10,6) NOT NULL DEFAULT 0,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_llm_usage_logs_model_id` (`llm_model_id`),
   KEY `idx_llm_usage_logs_project_id` (`project_id`),
@@ -173,6 +176,7 @@ CREATE TABLE IF NOT EXISTS `agents` (
   `description` TEXT,
   `agent_type` ENUM('code','asset','design','test','build','ops') NOT NULL DEFAULT 'code',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_agents_name_type` (`name`,`agent_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -185,6 +189,7 @@ CREATE TABLE IF NOT EXISTS `agent_llm_bindings` (
   `priority` INT NOT NULL DEFAULT 0,
   `is_active` BOOLEAN NOT NULL DEFAULT TRUE,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_agent_llm_bindings_agent_id` (`agent_id`),
   KEY `idx_agent_llm_bindings_model_id` (`llm_model_id`)
