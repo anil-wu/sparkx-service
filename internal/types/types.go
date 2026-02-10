@@ -76,6 +76,8 @@ type AgentBindingResp struct {
 	CreatedAt    string `json:"createdAt"`
 	ProviderId   int64  `json:"providerId"`
 	ProviderName string `json:"providerName"`
+	ProviderBaseUrl string `json:"providerBaseUrl"`
+	ProviderHasApiKey bool `json:"providerHasApiKey"`
 	ModelName    string `json:"modelName"`
 	ModelType    string `json:"modelType"`
 }
@@ -83,6 +85,11 @@ type AgentBindingResp struct {
 type AgentListResp struct {
 	List []AgentResp `json:"list"`
 	Page PageResp    `json:"page"`
+}
+
+type AgentConfigResp struct {
+	Agent    AgentResp          `json:"agent"`
+	Bindings []AgentBindingResp `json:"bindings"`
 }
 
 type AgentResp struct {
@@ -117,6 +124,26 @@ type CreateAgentReq struct {
 	AgentType   string `json:"agentType"` // code | asset | design | test | build | ops
 }
 
+type CreateBuildVersionReq struct {
+	Id                        int64  `json:"id,optional"`
+	ProjectId                 int64  `json:"projectId"`
+	SoftwareManifestId        int64  `json:"softwareManifestId"`
+	Description               string `json:"description,optional"`
+	BuildVersionFileId        int64  `json:"buildVersionFileId"`
+	BuildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
+}
+
+type CreateBuildVersionResp struct {
+	BuildVersionId            int64  `json:"buildVersionId"`
+	ProjectId                 int64  `json:"projectId"`
+	SoftwareManifestId        int64  `json:"softwareManifestId"`
+	Description               string `json:"description"`
+	BuildVersionFileId        int64  `json:"buildVersionFileId"`
+	BuildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
+	CreatedBy                 int64  `json:"createdBy"`
+	CreatedAt                 string `json:"createdAt"`
+}
+
 type CreateLlmModelReq struct {
 	ProviderId       int64   `json:"providerId"`
 	ModelName        string  `json:"modelName"`
@@ -140,6 +167,58 @@ type CreateProjectReq struct {
 	UserId      int64  `json:"userId"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+}
+
+type CreateReleaseReq struct {
+	Id                           int64  `json:"id,optional"`
+	ProjectId                    int64  `json:"projectId"`
+	BuildVersionId               int64  `json:"buildVersionId"`
+	ReleaseManifestFileId        int64  `json:"releaseManifestFileId"`
+	ReleaseManifestFileVersionId int64  `json:"releaseManifestFileVersionId"`
+	Name                         string `json:"name"`
+	Channel                      string `json:"channel"`
+	Platform                     string `json:"platform"`
+	Status                       string `json:"status,optional"`
+	VersionTag                   string `json:"versionTag,optional"`
+	ReleaseNotes                 string `json:"releaseNotes,optional"`
+	PublishedAt                  string `json:"publishedAt,optional"`
+}
+
+type CreateReleaseResp struct {
+	ReleaseId                    int64  `json:"releaseId"`
+	ProjectId                    int64  `json:"projectId"`
+	BuildVersionId               int64  `json:"buildVersionId"`
+	ReleaseManifestFileId        int64  `json:"releaseManifestFileId"`
+	ReleaseManifestFileVersionId int64  `json:"releaseManifestFileVersionId"`
+	Name                         string `json:"name"`
+	Channel                      string `json:"channel"`
+	Platform                     string `json:"platform"`
+	Status                       string `json:"status"`
+	VersionTag                   string `json:"versionTag"`
+	ReleaseNotes                 string `json:"releaseNotes"`
+	CreatedBy                    int64  `json:"createdBy"`
+	CreatedAt                    string `json:"createdAt"`
+	PublishedAt                  string `json:"publishedAt"`
+}
+
+type CreateSoftwareManifestReq struct {
+	Id                    int64  `json:"id,optional"`
+	ProjectId             int64  `json:"projectId"`
+	SoftwareId            int64  `json:"softwareId"`
+	ManifestFileId        int64  `json:"manifestFileId"`
+	ManifestFileVersionId int64  `json:"manifestFileVersionId"`
+	VersionDescription    string `json:"versionDescription,optional"`
+}
+
+type CreateSoftwareManifestResp struct {
+	ManifestId            int64  `json:"manifestId"`
+	ProjectId             int64  `json:"projectId"`
+	SoftwareId            int64  `json:"softwareId"`
+	ManifestFileId        int64  `json:"manifestFileId"`
+	ManifestFileVersionId int64  `json:"manifestFileVersionId"`
+	VersionDescription    string `json:"versionDescription"`
+	CreatedBy             int64  `json:"createdBy"`
+	CreatedAt             string `json:"createdAt"`
 }
 
 type CreateSoftwareReq struct {
@@ -167,46 +246,6 @@ type CreateSoftwareTemplateReq struct {
 	Name          string `json:"name"`
 	Description   string `json:"description,optional"`
 	ArchiveFileId int64  `json:"archiveFileId,optional"`
-}
-
-type CreateSoftwareManifestReq struct {
-	Id                    int64  `json:"id,optional"`
-	ProjectId             int64  `json:"projectId"`
-	SoftwareId            int64  `json:"softwareId"`
-	ManifestFileId        int64  `json:"manifestFileId"`
-	ManifestFileVersionId int64  `json:"manifestFileVersionId"`
-	VersionDescription    string `json:"versionDescription,optional"`
-}
-
-type CreateSoftwareManifestResp struct {
-	ManifestId            int64  `json:"manifestId"`
-	ProjectId             int64  `json:"projectId"`
-	SoftwareId            int64  `json:"softwareId"`
-	ManifestFileId        int64  `json:"manifestFileId"`
-	ManifestFileVersionId int64  `json:"manifestFileVersionId"`
-	VersionDescription    string `json:"versionDescription"`
-	CreatedBy             int64  `json:"createdBy"`
-	CreatedAt             string `json:"createdAt"`
-}
-
-type CreateBuildVersionReq struct {
-	Id                        int64  `json:"id,optional"`
-	ProjectId                 int64  `json:"projectId"`
-	SoftwareManifestId        int64  `json:"softwareManifestId"`
-	Description               string `json:"description,optional"`
-	BuildVersionFileId        int64  `json:"buildVersionFileId"`
-	BuildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
-}
-
-type CreateBuildVersionResp struct {
-	BuildVersionId            int64  `json:"buildVersionId"`
-	ProjectId                 int64  `json:"projectId"`
-	SoftwareManifestId        int64  `json:"softwareManifestId"`
-	Description               string `json:"description"`
-	BuildVersionFileId        int64  `json:"buildVersionFileId"`
-	BuildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
-	CreatedBy                 int64  `json:"createdBy"`
-	CreatedAt                 string `json:"createdAt"`
 }
 
 type DeleteAdminReq struct {
@@ -271,6 +310,10 @@ type FileVersionListResp struct {
 
 type GetAgentReq struct {
 	Id int64 `path:"id"`
+}
+
+type GetAgentByNameReq struct {
+	Name string `path:"name"`
 }
 
 type GetFileContentReq struct {

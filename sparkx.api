@@ -90,12 +90,12 @@ type (
 	}
 	// 软件工程
 	CreateSoftwareReq {
-		projectId          int64  `path:"projectId"`
-		name               string `json:"name"`
-		description        string `json:"description,optional"`
-		templateId         int64  `json:"templateId,optional"`
-		technologyStack    string `json:"technologyStack,optional"`
-		status             string `json:"status,optional"`
+		projectId       int64  `path:"projectId"`
+		name            string `json:"name"`
+		description     string `json:"description,optional"`
+		templateId      int64  `json:"templateId,optional"`
+		technologyStack string `json:"technologyStack,optional"`
+		status          string `json:"status,optional"`
 	}
 	CreateSoftwareResp {
 		softwareId      int64  `json:"softwareId"`
@@ -127,52 +127,52 @@ type (
 		createdAt             string `json:"createdAt"`
 	}
 	CreateBuildVersionReq {
-		id                      int64  `json:"id,optional"`
-		projectId               int64  `json:"projectId"`
-		softwareManifestId      int64  `json:"softwareManifestId"`
-		description             string `json:"description,optional"`
-		buildVersionFileId      int64  `json:"buildVersionFileId"`
-		buildVersionFileVersionId int64 `json:"buildVersionFileVersionId"`
+		id                        int64  `json:"id,optional"`
+		projectId                 int64  `json:"projectId"`
+		softwareManifestId        int64  `json:"softwareManifestId"`
+		description               string `json:"description,optional"`
+		buildVersionFileId        int64  `json:"buildVersionFileId"`
+		buildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
 	}
 	CreateBuildVersionResp {
-		buildVersionId          int64  `json:"buildVersionId"`
-		projectId               int64  `json:"projectId"`
-		softwareManifestId      int64  `json:"softwareManifestId"`
-		description             string `json:"description"`
-		buildVersionFileId      int64  `json:"buildVersionFileId"`
-		buildVersionFileVersionId int64 `json:"buildVersionFileVersionId"`
-		createdBy               int64  `json:"createdBy"`
-		createdAt               string `json:"createdAt"`
+		buildVersionId            int64  `json:"buildVersionId"`
+		projectId                 int64  `json:"projectId"`
+		softwareManifestId        int64  `json:"softwareManifestId"`
+		description               string `json:"description"`
+		buildVersionFileId        int64  `json:"buildVersionFileId"`
+		buildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
+		createdBy                 int64  `json:"createdBy"`
+		createdAt                 string `json:"createdAt"`
 	}
 	CreateReleaseReq {
-		id                          int64  `json:"id,optional"`
-		projectId                   int64  `json:"projectId"`
-		buildVersionId              int64  `json:"buildVersionId"`
-		releaseManifestFileId       int64  `json:"releaseManifestFileId"`
-		releaseManifestFileVersionId int64 `json:"releaseManifestFileVersionId"`
-		name                        string `json:"name"`
-		channel                     string `json:"channel"`
-		platform                    string `json:"platform"`
-		status                      string `json:"status,optional"`
-		versionTag                  string `json:"versionTag,optional"`
-		releaseNotes                string `json:"releaseNotes,optional"`
-		publishedAt                 string `json:"publishedAt,optional"`
+		id                           int64  `json:"id,optional"`
+		projectId                    int64  `json:"projectId"`
+		buildVersionId               int64  `json:"buildVersionId"`
+		releaseManifestFileId        int64  `json:"releaseManifestFileId"`
+		releaseManifestFileVersionId int64  `json:"releaseManifestFileVersionId"`
+		name                         string `json:"name"`
+		channel                      string `json:"channel"`
+		platform                     string `json:"platform"`
+		status                       string `json:"status,optional"`
+		versionTag                   string `json:"versionTag,optional"`
+		releaseNotes                 string `json:"releaseNotes,optional"`
+		publishedAt                  string `json:"publishedAt,optional"`
 	}
 	CreateReleaseResp {
-		releaseId                   int64  `json:"releaseId"`
-		projectId                   int64  `json:"projectId"`
-		buildVersionId              int64  `json:"buildVersionId"`
-		releaseManifestFileId       int64  `json:"releaseManifestFileId"`
-		releaseManifestFileVersionId int64 `json:"releaseManifestFileVersionId"`
-		name                        string `json:"name"`
-		channel                     string `json:"channel"`
-		platform                    string `json:"platform"`
-		status                      string `json:"status"`
-		versionTag                  string `json:"versionTag"`
-		releaseNotes                string `json:"releaseNotes"`
-		createdBy                   int64  `json:"createdBy"`
-		createdAt                   string `json:"createdAt"`
-		publishedAt                 string `json:"publishedAt"`
+		releaseId                    int64  `json:"releaseId"`
+		projectId                    int64  `json:"projectId"`
+		buildVersionId               int64  `json:"buildVersionId"`
+		releaseManifestFileId        int64  `json:"releaseManifestFileId"`
+		releaseManifestFileVersionId int64  `json:"releaseManifestFileVersionId"`
+		name                         string `json:"name"`
+		channel                      string `json:"channel"`
+		platform                     string `json:"platform"`
+		status                       string `json:"status"`
+		versionTag                   string `json:"versionTag"`
+		releaseNotes                 string `json:"releaseNotes"`
+		createdBy                    int64  `json:"createdBy"`
+		createdAt                    string `json:"createdAt"`
+		publishedAt                  string `json:"publishedAt"`
 	}
 	// 文件与版本
 	PreUploadReq {
@@ -481,6 +481,9 @@ type (
 	GetAgentReq {
 		id int64 `path:"id"`
 	}
+	GetAgentByNameReq {
+		name string `path:"name"`
+	}
 	DeleteAgentReq {
 		id int64 `path:"id"`
 	}
@@ -499,6 +502,10 @@ type (
 	AgentListResp {
 		list []AgentResp `json:"list"`
 		page PageResp    `json:"page"`
+	}
+	AgentConfigResp {
+		agent    AgentResp         `json:"agent"`
+		bindings []AgentBindingResp `json:"bindings"`
 	}
 	// Agent bindings
 	ListAgentBindingsReq {
@@ -528,6 +535,8 @@ type (
 		createdAt    string `json:"createdAt"`
 		providerId   int64  `json:"providerId"`
 		providerName string `json:"providerName"`
+		providerBaseUrl string `json:"providerBaseUrl"`
+		providerHasApiKey bool `json:"providerHasApiKey"`
 		modelName    string `json:"modelName"`
 		modelType    string `json:"modelType"`
 	}
@@ -638,6 +647,25 @@ service sparkx-api {
 
 	@handler CreateRelease
 	post /releases (CreateReleaseReq) returns (CreateReleaseResp)
+}
+
+@server (
+	group:  agents
+	prefix: /api/v1
+	jwt:    Auth
+)
+service sparkx-api {
+	@handler ListAvailableAgents
+	get /agents (ListAgentsReq) returns (AgentListResp)
+
+	@handler GetAvailableAgent
+	get /agents/:id (GetAgentReq) returns (AgentResp)
+
+	@handler ListAvailableAgentBindings
+	get /agents/:id/bindings (ListAgentBindingsReq) returns (AgentBindingListResp)
+
+	@handler GetAgentConfigByName
+	get /agents/by-name/:name (GetAgentByNameReq) returns (AgentConfigResp)
 }
 
 @server (

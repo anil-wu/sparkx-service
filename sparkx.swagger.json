@@ -1,1210 +1,4349 @@
 {
-  "swagger": "2.0",
-  "info": {
-    "title": "sparkx api",
-    "description": "Spark-X 项目 API 服务",
-    "version": "v1"
-  },
-  "schemes": [
-    "http",
-    "https"
-  ],
   "consumes": [
     "application/json"
   ],
   "produces": [
     "application/json"
   ],
+  "schemes": [
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "title": "sparkx api",
+    "version": "v1"
+  },
+  "basePath": "/",
   "paths": {
-    "/api/v1/auth/login": {
-      "post": {
-        "operationId": "Login",
+    "/api/v1/admin/admins": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListAdmins",
+        "operationId": "adminListAdmins",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "",
             "schema": {
-              "$ref": "#/definitions/LoginResp"
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "username",
+                      "role",
+                      "status",
+                      "lastLoginAt",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "properties": {
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "lastLoginAt": {
+                        "type": "string"
+                      },
+                      "role": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
             }
           }
-        },
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "CreateAdmin",
+        "operationId": "adminCreateAdmin",
         "parameters": [
           {
             "name": "body",
-            "description": " 用户",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/LoginReq"
+              "type": "object",
+              "required": [
+                "username",
+                "password",
+                "role"
+              ],
+              "properties": {
+                "password": {
+                  "type": "string"
+                },
+                "role": {
+                  "description": "super_admin | admin",
+                  "type": "string",
+                  "default": "admin",
+                  "example": "admin"
+                },
+                "username": {
+                  "type": "string"
+                }
+              }
             }
           }
         ],
-        "tags": [
-          "auth"
-        ]
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "createdAt": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "lastLoginAt": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/admins/{id}": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "UpdateAdmin",
+        "operationId": "adminUpdateAdmin",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": {
+                  "type": "string"
+                },
+                "role": {
+                  "description": "super_admin | admin",
+                  "type": "string"
+                },
+                "status": {
+                  "description": "active | disabled",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "DeleteAdmin",
+        "operationId": "adminDeleteAdmin",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/agent-bindings/{id}": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "UpdateAgentBinding",
+        "operationId": "adminUpdateAgentBinding",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "isActive": {
+                  "type": "boolean"
+                },
+                "llmModelId": {
+                  "type": "integer"
+                },
+                "priority": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "DeleteAgentBinding",
+        "operationId": "adminDeleteAgentBinding",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/agents": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListAgents",
+        "operationId": "adminListAgents",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "code | asset | design | test | build | ops",
+            "name": "agentType",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "agentType",
+                      "createdAt"
+                    ],
+                    "properties": {
+                      "agentType": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "CreateAgent",
+        "operationId": "adminCreateAgent",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "agentType"
+              ],
+              "properties": {
+                "agentType": {
+                  "description": "code | asset | design | test | build | ops",
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "agentType": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/agents/{id}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "GetAgent",
+        "operationId": "adminGetAgent",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "agentType": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "UpdateAgent",
+        "operationId": "adminUpdateAgent",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "agentType": {
+                  "description": "code | asset | design | test | build | ops",
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "DeleteAgent",
+        "operationId": "adminDeleteAgent",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/agents/{id}/bindings": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListAgentBindings",
+        "operationId": "adminListAgentBindings",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "agentId",
+                      "llmModelId",
+                      "priority",
+                      "isActive",
+                      "createdAt",
+                      "providerId",
+                      "providerName",
+                      "modelName",
+                      "modelType"
+                    ],
+                    "properties": {
+                      "agentId": {
+                        "type": "integer"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "isActive": {
+                        "type": "boolean"
+                      },
+                      "llmModelId": {
+                        "type": "integer"
+                      },
+                      "modelName": {
+                        "type": "string"
+                      },
+                      "modelType": {
+                        "type": "string"
+                      },
+                      "priority": {
+                        "type": "integer"
+                      },
+                      "providerId": {
+                        "type": "integer"
+                      },
+                      "providerName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "CreateAgentBinding",
+        "operationId": "adminCreateAgentBinding",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "llmModelId"
+              ],
+              "properties": {
+                "isActive": {
+                  "type": "boolean"
+                },
+                "llmModelId": {
+                  "type": "integer"
+                },
+                "priority": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "agentId": {
+                  "type": "integer"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "isActive": {
+                  "type": "boolean"
+                },
+                "llmModelId": {
+                  "type": "integer"
+                },
+                "modelName": {
+                  "type": "string"
+                },
+                "modelType": {
+                  "type": "string"
+                },
+                "priority": {
+                  "type": "integer"
+                },
+                "providerId": {
+                  "type": "integer"
+                },
+                "providerName": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/llm/models": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListLlmModels",
+        "operationId": "adminListLlmModels",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "providerId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "description": "llm | vlm | embedding",
+            "name": "modelType",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "providerId",
+                      "modelName",
+                      "modelType",
+                      "maxInputTokens",
+                      "maxOutputTokens",
+                      "supportStream",
+                      "supportJson",
+                      "priceInputPer1k",
+                      "priceOutputPer1k",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "properties": {
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "maxInputTokens": {
+                        "type": "integer"
+                      },
+                      "maxOutputTokens": {
+                        "type": "integer"
+                      },
+                      "modelName": {
+                        "type": "string"
+                      },
+                      "modelType": {
+                        "type": "string"
+                      },
+                      "priceInputPer1k": {
+                        "type": "number"
+                      },
+                      "priceOutputPer1k": {
+                        "type": "number"
+                      },
+                      "providerId": {
+                        "type": "integer"
+                      },
+                      "supportJson": {
+                        "type": "boolean"
+                      },
+                      "supportStream": {
+                        "type": "boolean"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "CreateLlmModel",
+        "operationId": "adminCreateLlmModel",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "providerId",
+                "modelName",
+                "modelType",
+                "maxInputTokens",
+                "maxOutputTokens",
+                "supportStream",
+                "supportJson",
+                "priceInputPer1k",
+                "priceOutputPer1k"
+              ],
+              "properties": {
+                "maxInputTokens": {
+                  "type": "integer"
+                },
+                "maxOutputTokens": {
+                  "type": "integer"
+                },
+                "modelName": {
+                  "type": "string"
+                },
+                "modelType": {
+                  "description": "llm | vlm | embedding",
+                  "type": "string"
+                },
+                "priceInputPer1k": {
+                  "type": "number"
+                },
+                "priceOutputPer1k": {
+                  "type": "number"
+                },
+                "providerId": {
+                  "type": "integer"
+                },
+                "supportJson": {
+                  "type": "boolean"
+                },
+                "supportStream": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "createdAt": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "maxInputTokens": {
+                  "type": "integer"
+                },
+                "maxOutputTokens": {
+                  "type": "integer"
+                },
+                "modelName": {
+                  "type": "string"
+                },
+                "modelType": {
+                  "type": "string"
+                },
+                "priceInputPer1k": {
+                  "type": "number"
+                },
+                "priceOutputPer1k": {
+                  "type": "number"
+                },
+                "providerId": {
+                  "type": "integer"
+                },
+                "supportJson": {
+                  "type": "boolean"
+                },
+                "supportStream": {
+                  "type": "boolean"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/llm/models/{id}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "GetLlmModel",
+        "operationId": "adminGetLlmModel",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "createdAt": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "maxInputTokens": {
+                  "type": "integer"
+                },
+                "maxOutputTokens": {
+                  "type": "integer"
+                },
+                "modelName": {
+                  "type": "string"
+                },
+                "modelType": {
+                  "type": "string"
+                },
+                "priceInputPer1k": {
+                  "type": "number"
+                },
+                "priceOutputPer1k": {
+                  "type": "number"
+                },
+                "providerId": {
+                  "type": "integer"
+                },
+                "supportJson": {
+                  "type": "boolean"
+                },
+                "supportStream": {
+                  "type": "boolean"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "UpdateLlmModel",
+        "operationId": "adminUpdateLlmModel",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "maxInputTokens": {
+                  "type": "integer"
+                },
+                "maxOutputTokens": {
+                  "type": "integer"
+                },
+                "modelName": {
+                  "type": "string"
+                },
+                "modelType": {
+                  "description": "llm | vlm | embedding",
+                  "type": "string"
+                },
+                "priceInputPer1k": {
+                  "type": "number"
+                },
+                "priceOutputPer1k": {
+                  "type": "number"
+                },
+                "providerId": {
+                  "type": "integer"
+                },
+                "supportJson": {
+                  "type": "boolean"
+                },
+                "supportStream": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "DeleteLlmModel",
+        "operationId": "adminDeleteLlmModel",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/llm/providers": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListLlmProviders",
+        "operationId": "adminListLlmProviders",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "name",
+                      "baseUrl",
+                      "hasApiKey",
+                      "description",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "properties": {
+                      "baseUrl": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "hasApiKey": {
+                        "type": "boolean"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "CreateLlmProvider",
+        "operationId": "adminCreateLlmProvider",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "baseUrl"
+              ],
+              "properties": {
+                "apiKey": {
+                  "type": "string"
+                },
+                "baseUrl": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "baseUrl": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "hasApiKey": {
+                  "type": "boolean"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/llm/providers/{id}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "GetLlmProvider",
+        "operationId": "adminGetLlmProvider",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "baseUrl": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "hasApiKey": {
+                  "type": "boolean"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "UpdateLlmProvider",
+        "operationId": "adminUpdateLlmProvider",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "apiKey": {
+                  "type": "string"
+                },
+                "baseUrl": {
+                  "type": "string"
+                },
+                "clearApiKey": {
+                  "type": "boolean"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "DeleteLlmProvider",
+        "operationId": "adminDeleteLlmProvider",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/llm/usage-logs": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListLlmUsageLogs",
+        "operationId": "adminListLlmUsageLogs",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "projectId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "name": "llmModelId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "llmModelId",
+                      "projectId",
+                      "inputTokens",
+                      "outputTokens",
+                      "cacheHit",
+                      "costUsd",
+                      "createdAt"
+                    ],
+                    "properties": {
+                      "cacheHit": {
+                        "type": "boolean"
+                      },
+                      "costUsd": {
+                        "type": "number"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "inputTokens": {
+                        "type": "integer"
+                      },
+                      "llmModelId": {
+                        "type": "integer"
+                      },
+                      "outputTokens": {
+                        "type": "integer"
+                      },
+                      "projectId": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/login": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "AdminLogin",
+        "operationId": "adminAuthAdminLogin",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "username",
+                "password"
+              ],
+              "properties": {
+                "password": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "adminId": {
+                  "type": "integer"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/profile": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "AdminProfile",
+        "operationId": "adminAdminProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "createdAt": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "lastLoginAt": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/projects": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "AdminListProjects",
+        "operationId": "adminAdminListProjects",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "coverFileId",
+                      "ownerId",
+                      "status",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "properties": {
+                      "coverFileId": {
+                        "type": "integer"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "ownerId": {
+                        "type": "integer"
+                      },
+                      "status": {
+                        "description": "active | archived",
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "AdminCreateProject",
+        "operationId": "adminAdminCreateProject",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "ownerId"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "ownerId": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coverFileId": {
+                  "type": "integer"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "ownerId": {
+                  "type": "integer"
+                },
+                "status": {
+                  "description": "active | archived",
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/projects/{id}": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "AdminUpdateProject",
+        "operationId": "adminAdminUpdateProject",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "description": "active | archived",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "AdminDeleteProject",
+        "operationId": "adminAdminDeleteProject",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/software-templates": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListSoftwareTemplates",
+        "operationId": "adminListSoftwareTemplates",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "archiveFileId",
+                      "createdBy",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "properties": {
+                      "archiveFileId": {
+                        "type": "integer"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "createdBy": {
+                        "type": "integer"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "CreateSoftwareTemplate",
+        "operationId": "adminCreateSoftwareTemplate",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "archiveFileId": {
+                  "type": "integer"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "archiveFileId": {
+                  "type": "integer"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "createdBy": {
+                  "type": "integer"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/software-templates/{id}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "GetSoftwareTemplate",
+        "operationId": "adminGetSoftwareTemplate",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "archiveFileId": {
+                  "type": "integer"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "createdBy": {
+                  "type": "integer"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "UpdateSoftwareTemplate",
+        "operationId": "adminUpdateSoftwareTemplate",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "archiveFileId": {
+                  "type": "integer"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "DeleteSoftwareTemplate",
+        "operationId": "adminDeleteSoftwareTemplate",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/users": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "AdminListUsers",
+        "operationId": "adminAdminListUsers",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "username",
+                      "email",
+                      "passwordHash",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "properties": {
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "passwordHash": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "AdminCreateUser",
+        "operationId": "adminAdminCreateUser",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "username",
+                "email",
+                "password"
+              ],
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "createdAt": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "passwordHash": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/users/{id}": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "AdminUpdateUser",
+        "operationId": "adminAdminUpdateUser",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "AdminDeleteUser",
+        "operationId": "adminAdminDeleteUser",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/agents": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListAvailableAgents",
+        "operationId": "agentsListAvailableAgents",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "code | asset | design | test | build | ops",
+            "name": "agentType",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "agentType",
+                      "createdAt"
+                    ],
+                    "properties": {
+                      "agentType": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/agents/{id}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "GetAvailableAgent",
+        "operationId": "agentsGetAvailableAgent",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "agentType": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/agents/{id}/bindings": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListAvailableAgentBindings",
+        "operationId": "agentsListAvailableAgentBindings",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "agentId",
+                      "llmModelId",
+                      "priority",
+                      "isActive",
+                      "createdAt",
+                      "providerId",
+                      "providerName",
+                      "modelName",
+                      "modelType"
+                    ],
+                    "properties": {
+                      "agentId": {
+                        "type": "integer"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "isActive": {
+                        "type": "boolean"
+                      },
+                      "llmModelId": {
+                        "type": "integer"
+                      },
+                      "modelName": {
+                        "type": "string"
+                      },
+                      "modelType": {
+                        "type": "string"
+                      },
+                      "priority": {
+                        "type": "integer"
+                      },
+                      "providerId": {
+                        "type": "integer"
+                      },
+                      "providerName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "Login",
+        "operationId": "authLogin",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "loginType"
+              ],
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "idToken": {
+                  "type": "string"
+                },
+                "loginType": {
+                  "description": "email | google",
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created": {
+                  "description": "如果是注册逻辑则为 true",
+                  "type": "boolean"
+                },
+                "token": {
+                  "type": "string"
+                },
+                "userId": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/build-versions": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "CreateBuildVersion",
+        "operationId": "buildsCreateBuildVersion",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "projectId",
+                "softwareManifestId",
+                "buildVersionFileId",
+                "buildVersionFileVersionId"
+              ],
+              "properties": {
+                "buildVersionFileId": {
+                  "type": "integer"
+                },
+                "buildVersionFileVersionId": {
+                  "type": "integer"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "projectId": {
+                  "type": "integer"
+                },
+                "softwareManifestId": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "buildVersionFileId": {
+                  "type": "integer"
+                },
+                "buildVersionFileVersionId": {
+                  "type": "integer"
+                },
+                "buildVersionId": {
+                  "type": "integer"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "createdBy": {
+                  "type": "integer"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "projectId": {
+                  "type": "integer"
+                },
+                "softwareManifestId": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/files/preupload": {
       "post": {
-        "operationId": "PreUploadFile",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/PreUploadResp"
-            }
-          }
-        },
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "PreUploadFile",
+        "operationId": "filesPreUploadFile",
         "parameters": [
           {
             "name": "body",
-            "description": " 文件与版本",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/PreUploadReq"
+              "type": "object",
+              "required": [
+                "projectId",
+                "name",
+                "fileCategory",
+                "fileFormat",
+                "sizeBytes",
+                "hash"
+              ],
+              "properties": {
+                "contentType": {
+                  "description": "上传文件的 Content-Type，如 text/plain, image/png 等",
+                  "type": "string"
+                },
+                "fileCategory": {
+                  "description": "text | image | video | audio | binary | archive",
+                  "type": "string"
+                },
+                "fileFormat": {
+                  "description": "文件格式，如 png, jpg, mp4, mp3, txt 等",
+                  "type": "string"
+                },
+                "hash": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "projectId": {
+                  "type": "integer"
+                },
+                "sizeBytes": {
+                  "type": "integer"
+                }
+              }
             }
           }
         ],
-        "tags": [
-          "files"
-        ],
-        "security": [
-          {
-            "apiKey": []
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "contentType": {
+                  "description": "上传时必须使用的 Content-Type",
+                  "type": "string"
+                },
+                "fileId": {
+                  "type": "integer"
+                },
+                "uploadUrl": {
+                  "type": "string"
+                },
+                "versionId": {
+                  "type": "integer"
+                },
+                "versionNumber": {
+                  "type": "integer"
+                }
+              }
+            }
           }
-        ]
+        }
       }
     },
     "/api/v1/files/{id}": {
       "delete": {
-        "operationId": "DeleteFile",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/BaseResp"
-            }
-          }
-        },
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "DeleteFile",
+        "operationId": "filesDeleteFile",
         "parameters": [
           {
+            "type": "integer",
             "name": "id",
             "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "description": " 文件删除",
-            "in": "body",
-            "required": true,
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
             "schema": {
-              "$ref": "#/definitions/DeleteFileReq"
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
             }
           }
+        }
+      }
+    },
+    "/api/v1/files/{id}/content": {
+      "get": {
+        "produces": [
+          "application/json"
         ],
-        "tags": [
-          "files"
+        "schemes": [
+          "https"
         ],
-        "security": [
+        "summary": "GetFileContent",
+        "operationId": "filesGetFileContent",
+        "parameters": [
           {
-            "apiKey": []
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {}
+          }
+        }
       }
     },
     "/api/v1/files/{id}/download": {
       "get": {
-        "operationId": "DownloadFile",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/DownloadFileResp"
-            }
-          }
-        },
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "DownloadFile",
+        "operationId": "filesDownloadFile",
         "parameters": [
           {
+            "type": "integer",
             "name": "id",
             "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "files"
-        ],
-        "security": [
+            "required": true
+          },
           {
-            "apiKey": []
+            "type": "integer",
+            "name": "versionId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "name": "versionNumber",
+            "in": "query",
+            "allowEmptyValue": true
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "downloadUrl": {
+                  "type": "string"
+                },
+                "expiresAt": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/files/{id}/rollback": {
       "post": {
-        "operationId": "RollbackVersion",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/BaseResp"
-            }
-          }
-        },
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "RollbackVersion",
+        "operationId": "filesRollbackVersion",
         "parameters": [
           {
+            "type": "integer",
             "name": "id",
             "in": "path",
-            "required": true,
-            "type": "string"
+            "required": true
           },
           {
             "name": "body",
-            "description": " 版本回滚",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/RollbackVersionReq"
+              "type": "object",
+              "required": [
+                "versionNumber"
+              ],
+              "properties": {
+                "versionNumber": {
+                  "type": "integer"
+                }
+              }
             }
           }
         ],
-        "tags": [
-          "files"
-        ],
-        "security": [
-          {
-            "apiKey": []
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
           }
-        ]
+        }
       }
     },
     "/api/v1/files/{id}/versions": {
       "get": {
-        "operationId": "ListFileVersions",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/FileVersionListResp"
-            }
-          }
-        },
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListFileVersions",
+        "operationId": "filesListFileVersions",
         "parameters": [
           {
+            "type": "integer",
             "name": "id",
             "in": "path",
-            "required": true,
-            "type": "string"
+            "required": true
           },
           {
+            "type": "integer",
+            "default": 1,
             "name": "page",
             "in": "query",
-            "required": true,
-            "type": "integer",
-            "format": "int64",
-            "default": "1"
+            "required": true
           },
           {
+            "type": "integer",
+            "default": 20,
             "name": "pageSize",
             "in": "query",
-            "required": true,
-            "type": "integer",
-            "format": "int64",
-            "default": "20"
+            "required": true
           }
         ],
-        "tags": [
-          "files"
-        ],
-        "consumes": [
-          "multipart/form-data"
-        ],
-        "security": [
-          {
-            "apiKey": []
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "fileId",
+                      "versionNumber",
+                      "sizeBytes",
+                      "hash",
+                      "storageKey",
+                      "createdAt",
+                      "updatedAt",
+                      "createdBy"
+                    ],
+                    "properties": {
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "createdBy": {
+                        "type": "integer"
+                      },
+                      "fileId": {
+                        "type": "integer"
+                      },
+                      "hash": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "sizeBytes": {
+                        "type": "integer"
+                      },
+                      "storageKey": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      },
+                      "versionNumber": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
           }
-        ]
+        }
       }
     },
     "/api/v1/projects": {
       "get": {
-        "operationId": "ListProjects",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/ProjectListResp"
-            }
-          }
-        },
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListProjects",
+        "operationId": "projectsListProjects",
         "parameters": [
           {
+            "type": "integer",
+            "default": 1,
             "name": "page",
             "in": "query",
-            "required": true,
-            "type": "integer",
-            "format": "int64",
-            "default": "1"
+            "required": true
           },
           {
+            "type": "integer",
+            "default": 20,
             "name": "pageSize",
             "in": "query",
-            "required": true,
-            "type": "integer",
-            "format": "int64",
-            "default": "20"
+            "required": true
           }
         ],
-        "tags": [
-          "projects"
-        ],
-        "consumes": [
-          "multipart/form-data"
-        ],
-        "security": [
-          {
-            "apiKey": []
-          }
-        ]
-      },
-      "post": {
-        "operationId": "CreateProject",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "",
             "schema": {
-              "$ref": "#/definitions/ProjectResp"
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "coverFileId",
+                      "ownerId",
+                      "status",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "properties": {
+                      "coverFileId": {
+                        "type": "integer"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "ownerId": {
+                        "type": "integer"
+                      },
+                      "status": {
+                        "description": "active | archived",
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
             }
           }
-        },
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "CreateProject",
+        "operationId": "projectsCreateProject",
         "parameters": [
           {
             "name": "body",
-            "description": " 项目",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/CreateProjectReq"
+              "type": "object",
+              "required": [
+                "userId",
+                "name",
+                "description"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "userId": {
+                  "type": "integer"
+                }
+              }
             }
           }
         ],
-        "tags": [
-          "projects"
-        ],
-        "security": [
-          {
-            "apiKey": []
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coverFileId": {
+                  "type": "integer"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "ownerId": {
+                  "type": "integer"
+                },
+                "status": {
+                  "description": "active | archived",
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              }
+            }
           }
-        ]
+        }
       }
     },
     "/api/v1/projects/{id}": {
       "get": {
-        "operationId": "GetProject",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/ProjectResp"
-            }
-          }
-        },
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "GetProject",
+        "operationId": "projectsGetProject",
         "parameters": [
           {
+            "type": "integer",
             "name": "id",
             "in": "path",
-            "required": true,
-            "type": "string"
+            "required": true
           }
         ],
-        "tags": [
-          "projects"
-        ],
-        "security": [
-          {
-            "apiKey": []
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "DeleteProject",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "",
             "schema": {
-              "$ref": "#/definitions/BaseResp"
+              "type": "object",
+              "properties": {
+                "coverFileId": {
+                  "type": "integer"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "ownerId": {
+                  "type": "integer"
+                },
+                "status": {
+                  "description": "active | archived",
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              }
             }
           }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/DeleteProjectReq"
-            }
-          }
-        ],
-        "tags": [
-          "projects"
-        ],
-        "security": [
-          {
-            "apiKey": []
-          }
-        ]
+        }
       },
       "put": {
-        "operationId": "UpdateProject",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/BaseResp"
-            }
-          }
-        },
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "UpdateProject",
+        "operationId": "projectsUpdateProject",
         "parameters": [
           {
+            "type": "integer",
             "name": "id",
             "in": "path",
-            "required": true,
-            "type": "string"
+            "required": true
           },
           {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/UpdateProjectReq"
+              "type": "object",
+              "properties": {
+                "coverFileId": {
+                  "type": "integer"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "description": "active | archived",
+                  "type": "string"
+                }
+              }
             }
           }
         ],
-        "tags": [
-          "projects"
-        ],
-        "security": [
-          {
-            "apiKey": []
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
           }
-        ]
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "DeleteProject",
+        "operationId": "projectsDeleteProject",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/projects/{id}/invite": {
       "post": {
-        "operationId": "InviteMember",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/BaseResp"
-            }
-          }
-        },
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "InviteMember",
+        "operationId": "projectsInviteMember",
         "parameters": [
           {
+            "type": "integer",
             "name": "id",
             "in": "path",
-            "required": true,
-            "type": "string"
+            "required": true
           },
           {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/InviteMemberReq"
+              "type": "object",
+              "required": [
+                "userId",
+                "invitedUserId",
+                "role"
+              ],
+              "properties": {
+                "invitedUserId": {
+                  "description": "被邀请者",
+                  "type": "integer"
+                },
+                "role": {
+                  "description": "owner | admin | developer | viewer",
+                  "type": "string"
+                },
+                "userId": {
+                  "description": "发起者",
+                  "type": "integer"
+                }
+              }
             }
           }
         ],
-        "tags": [
-          "projects"
-        ],
-        "security": [
-          {
-            "apiKey": []
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
           }
-        ]
+        }
       }
     },
     "/api/v1/projects/{projectId}/files": {
       "get": {
-        "operationId": "ListProjectFiles",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/ProjectFileListResp"
-            }
-          }
-        },
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListProjectFiles",
+        "operationId": "filesListProjectFiles",
         "parameters": [
           {
+            "type": "integer",
             "name": "projectId",
             "in": "path",
-            "required": true,
-            "type": "string"
+            "required": true
           },
           {
+            "type": "integer",
+            "default": 1,
             "name": "page",
             "in": "query",
-            "required": true,
-            "type": "integer",
-            "format": "int64",
-            "default": "1"
+            "required": true
           },
           {
+            "type": "integer",
+            "default": 20,
             "name": "pageSize",
             "in": "query",
-            "required": true,
-            "type": "integer",
-            "format": "int64",
-            "default": "20"
+            "required": true
           }
         ],
-        "tags": [
-          "files"
-        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "projectId",
+                      "name",
+                      "fileCategory",
+                      "fileFormat",
+                      "currentVersionId",
+                      "versionId",
+                      "versionNumber",
+                      "sizeBytes",
+                      "hash",
+                      "createdAt",
+                      "storageKey"
+                    ],
+                    "properties": {
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "currentVersionId": {
+                        "type": "integer"
+                      },
+                      "fileCategory": {
+                        "type": "string"
+                      },
+                      "fileFormat": {
+                        "type": "string"
+                      },
+                      "hash": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "projectId": {
+                        "type": "integer"
+                      },
+                      "sizeBytes": {
+                        "type": "integer"
+                      },
+                      "storageKey": {
+                        "type": "string"
+                      },
+                      "versionId": {
+                        "type": "integer"
+                      },
+                      "versionNumber": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectId}/softwares": {
+      "post": {
         "consumes": [
-          "multipart/form-data"
+          "application/json"
         ],
-        "security": [
-          {
-            "apiKey": []
-          }
-        ]
-      }
-    },
-    "/api/v1/users": {
-      "get": {
-        "operationId": "ListUsers",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/UserListResp"
-            }
-          }
-        },
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "CreateSoftware",
+        "operationId": "softwaresCreateSoftware",
         "parameters": [
           {
-            "name": "page",
-            "in": "query",
-            "required": true,
             "type": "integer",
-            "format": "int64",
-            "default": "1"
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "required": true,
-            "type": "integer",
-            "format": "int64",
-            "default": "20"
-          }
-        ],
-        "tags": [
-          "users"
-        ],
-        "consumes": [
-          "multipart/form-data"
-        ],
-        "security": [
-          {
-            "apiKey": []
-          }
-        ]
-      }
-    },
-    "/api/v1/users/email/{email}": {
-      "get": {
-        "operationId": "GetUserByEmail",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/UserInfoResp"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "email",
+            "name": "projectId",
             "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "users"
-        ],
-        "security": [
-          {
-            "apiKey": []
-          }
-        ]
-      }
-    },
-    "/api/v1/users/{id}": {
-      "put": {
-        "operationId": "UpdateUser",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/BaseResp"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
+            "required": true
           },
           {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/UpdateUserReq"
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "technologyStack": {
+                  "type": "string"
+                },
+                "templateId": {
+                  "type": "integer"
+                }
+              }
             }
           }
         ],
-        "tags": [
-          "users"
-        ],
-        "security": [
-          {
-            "apiKey": []
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "createdAt": {
+                  "type": "string"
+                },
+                "createdBy": {
+                  "type": "integer"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "projectId": {
+                  "type": "integer"
+                },
+                "softwareId": {
+                  "type": "integer"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "technologyStack": {
+                  "type": "string"
+                },
+                "templateId": {
+                  "type": "integer"
+                }
+              }
+            }
           }
-        ]
+        }
+      }
+    },
+    "/api/v1/releases": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "CreateRelease",
+        "operationId": "buildsCreateRelease",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "projectId",
+                "buildVersionId",
+                "releaseManifestFileId",
+                "releaseManifestFileVersionId",
+                "name",
+                "channel",
+                "platform"
+              ],
+              "properties": {
+                "buildVersionId": {
+                  "type": "integer"
+                },
+                "channel": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "platform": {
+                  "type": "string"
+                },
+                "projectId": {
+                  "type": "integer"
+                },
+                "publishedAt": {
+                  "type": "string"
+                },
+                "releaseManifestFileId": {
+                  "type": "integer"
+                },
+                "releaseManifestFileVersionId": {
+                  "type": "integer"
+                },
+                "releaseNotes": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "versionTag": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "buildVersionId": {
+                  "type": "integer"
+                },
+                "channel": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "createdBy": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "platform": {
+                  "type": "string"
+                },
+                "projectId": {
+                  "type": "integer"
+                },
+                "publishedAt": {
+                  "type": "string"
+                },
+                "releaseId": {
+                  "type": "integer"
+                },
+                "releaseManifestFileId": {
+                  "type": "integer"
+                },
+                "releaseManifestFileVersionId": {
+                  "type": "integer"
+                },
+                "releaseNotes": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "versionTag": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/software-manifests": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "CreateSoftwareManifest",
+        "operationId": "softwaresCreateSoftwareManifest",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "projectId",
+                "softwareId",
+                "manifestFileId",
+                "manifestFileVersionId"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "manifestFileId": {
+                  "type": "integer"
+                },
+                "manifestFileVersionId": {
+                  "type": "integer"
+                },
+                "projectId": {
+                  "type": "integer"
+                },
+                "softwareId": {
+                  "type": "integer"
+                },
+                "versionDescription": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "createdAt": {
+                  "type": "string"
+                },
+                "createdBy": {
+                  "type": "integer"
+                },
+                "manifestFileId": {
+                  "type": "integer"
+                },
+                "manifestFileVersionId": {
+                  "type": "integer"
+                },
+                "manifestId": {
+                  "type": "integer"
+                },
+                "projectId": {
+                  "type": "integer"
+                },
+                "softwareId": {
+                  "type": "integer"
+                },
+                "versionDescription": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListUsers",
+        "operationId": "usersListUsers",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "username",
+                      "email",
+                      "passwordHash",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "properties": {
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "passwordHash": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/email/{email}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "GetUserByEmail",
+        "operationId": "usersGetUserByEmail",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "email",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "createdAt": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "passwordHash": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "UpdateUser",
+        "operationId": "usersUpdateUser",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "username"
+              ],
+              "properties": {
+                "username": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
-  "definitions": {
-    "BaseResp": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "msg": {
-          "type": "string"
-        }
-      },
-      "title": "BaseResp",
-      "required": [
-        "code",
-        "msg"
-      ]
-    },
-    "CreateProjectReq": {
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        }
-      },
-      "title": "CreateProjectReq",
-      "required": [
-        "userId",
-        "name",
-        "description"
-      ]
-    },
-    "DeleteFileReq": {
-      "type": "object",
-      "title": "DeleteFileReq"
-    },
-    "DeleteProjectReq": {
-      "type": "object",
-      "title": "DeleteProjectReq"
-    },
-    "DownloadFileReq": {
-      "type": "object",
-      "title": "DownloadFileReq"
-    },
-    "DownloadFileResp": {
-      "type": "object",
-      "properties": {
-        "downloadUrl": {
-          "type": "string"
-        },
-        "expiresAt": {
-          "type": "string"
-        }
-      },
-      "title": "DownloadFileResp",
-      "required": [
-        "downloadUrl",
-        "expiresAt"
-      ]
-    },
-    "FileVersionItem": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "fileId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "versionNumber": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "sizeBytes": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "hash": {
-          "type": "string"
-        },
-        "storageKey": {
-          "type": "string"
-        },
-        "createdAt": {
-          "type": "string"
-        },
-        "updatedAt": {
-          "type": "string"
-        },
-        "createdBy": {
-          "type": "integer",
-          "format": "int64"
-        }
-      },
-      "title": "FileVersionItem",
-      "required": [
-        "id",
-        "fileId",
-        "versionNumber",
-        "sizeBytes",
-        "hash",
-        "storageKey",
-        "createdAt",
-        "updatedAt",
-        "createdBy"
-      ]
-    },
-    "FileVersionListResp": {
-      "type": "object",
-      "properties": {
-        "list": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/FileVersionItem"
-          }
-        },
-        "page": {
-          "$ref": "#/definitions/PageResp"
-        }
-      },
-      "title": "FileVersionListResp",
-      "required": [
-        "list",
-        "page"
-      ]
-    },
-    "GetProjectReq": {
-      "type": "object",
-      "title": "GetProjectReq"
-    },
-    "GetUserByEmailReq": {
-      "type": "object",
-      "title": "GetUserByEmailReq"
-    },
-    "InviteMemberReq": {
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "integer",
-          "format": "int64",
-          "description": " 发起者"
-        },
-        "invitedUserId": {
-          "type": "integer",
-          "format": "int64",
-          "description": " 被邀请者"
-        },
-        "role": {
-          "type": "string",
-          "description": " owner | admin | developer | viewer"
-        }
-      },
-      "title": "InviteMemberReq",
-      "required": [
-        "userId",
-        "invitedUserId",
-        "role"
-      ]
-    },
-    "ListFileVersionsReq": {
-      "type": "object",
-      "properties": {
-        "page": {
-          "type": "integer",
-          "format": "int64",
-          "default": "1"
-        },
-        "pageSize": {
-          "type": "integer",
-          "format": "int64",
-          "default": "20"
-        }
-      },
-      "title": "ListFileVersionsReq",
-      "required": [
-        "page",
-        "pageSize"
-      ]
-    },
-    "ListProjectFilesReq": {
-      "type": "object",
-      "properties": {
-        "page": {
-          "type": "integer",
-          "format": "int64",
-          "default": "1"
-        },
-        "pageSize": {
-          "type": "integer",
-          "format": "int64",
-          "default": "20"
-        }
-      },
-      "title": "ListProjectFilesReq",
-      "required": [
-        "page",
-        "pageSize"
-      ]
-    },
-    "LoginReq": {
-      "type": "object",
-      "properties": {
-        "loginType": {
-          "type": "string",
-          "description": " email | google"
-        },
-        "email": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        },
-        "idToken": {
-          "type": "string"
-        }
-      },
-      "title": "LoginReq",
-      "required": [
-        "loginType"
-      ]
-    },
-    "LoginResp": {
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "created": {
-          "type": "boolean",
-          "format": "boolean",
-          "description": " 如果是注册逻辑则为 true"
-        },
-        "token": {
-          "type": "string"
-        }
-      },
-      "title": "LoginResp",
-      "required": [
-        "userId",
-        "created",
-        "token"
-      ]
-    },
-    "PageReq": {
-      "type": "object",
-      "properties": {
-        "page": {
-          "type": "integer",
-          "format": "int64",
-          "default": "1"
-        },
-        "pageSize": {
-          "type": "integer",
-          "format": "int64",
-          "default": "20"
-        }
-      },
-      "title": "PageReq",
-      "required": [
-        "page",
-        "pageSize"
-      ]
-    },
-    "PageResp": {
-      "type": "object",
-      "properties": {
-        "page": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "pageSize": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "total": {
-          "type": "integer",
-          "format": "int64"
-        }
-      },
-      "title": "PageResp",
-      "required": [
-        "page",
-        "pageSize",
-        "total"
-      ]
-    },
-    "PreUploadReq": {
-      "type": "object",
-      "properties": {
-        "projectId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
-        },
-        "fileCategory": {
-          "type": "string",
-          "description": " text | image | video | audio | binary | archive"
-        },
-        "fileFormat": {
-          "type": "string",
-          "description": " 文件格式，如 png, jpg, mp4, mp3, txt 等"
-        },
-        "sizeBytes": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "hash": {
-          "type": "string"
-        },
-        "contentType": {
-          "type": "string",
-          "description": " 上传文件的 Content-Type，如 text/plain, image/png 等"
-        }
-      },
-      "title": "PreUploadReq",
-      "required": [
-        "projectId",
-        "name",
-        "fileCategory",
-        "fileFormat",
-        "sizeBytes",
-        "hash"
-      ]
-    },
-    "PreUploadResp": {
-      "type": "object",
-      "properties": {
-        "uploadUrl": {
-          "type": "string"
-        },
-        "fileId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "versionId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "versionNumber": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "contentType": {
-          "type": "string",
-          "description": " 上传时必须使用的 Content-Type"
-        }
-      },
-      "title": "PreUploadResp",
-      "required": [
-        "uploadUrl",
-        "fileId",
-        "versionId",
-        "versionNumber",
-        "contentType"
-      ]
-    },
-    "ProjectFileItem": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "projectId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
-        },
-        "fileCategory": {
-          "type": "string"
-        },
-        "fileFormat": {
-          "type": "string"
-        },
-        "currentVersionId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "versionId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "versionNumber": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "sizeBytes": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "hash": {
-          "type": "string"
-        },
-        "createdAt": {
-          "type": "string"
-        },
-        "storageKey": {
-          "type": "string"
-        }
-      },
-      "title": "ProjectFileItem",
-      "required": [
-        "id",
-        "projectId",
-        "name",
-        "fileCategory",
-        "fileFormat",
-        "currentVersionId",
-        "versionId",
-        "versionNumber",
-        "sizeBytes",
-        "hash",
-        "createdAt",
-        "storageKey"
-      ]
-    },
-    "ProjectFileListResp": {
-      "type": "object",
-      "properties": {
-        "list": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ProjectFileItem"
-          }
-        },
-        "page": {
-          "$ref": "#/definitions/PageResp"
-        }
-      },
-      "title": "ProjectFileListResp",
-      "required": [
-        "list",
-        "page"
-      ]
-    },
-    "ProjectListResp": {
-      "type": "object",
-      "properties": {
-        "list": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ProjectResp"
-          }
-        },
-        "page": {
-          "$ref": "#/definitions/PageResp"
-        }
-      },
-      "title": "ProjectListResp",
-      "required": [
-        "list",
-        "page"
-      ]
-    },
-    "ProjectResp": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "ownerId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "status": {
-          "type": "string",
-          "description": " active | archived"
-        },
-        "createdAt": {
-          "type": "string"
-        },
-        "updatedAt": {
-          "type": "string"
-        }
-      },
-      "title": "ProjectResp",
-      "required": [
-        "id",
-        "name",
-        "description",
-        "ownerId",
-        "status",
-        "createdAt",
-        "updatedAt"
-      ]
-    },
-    "RollbackVersionReq": {
-      "type": "object",
-      "properties": {
-        "versionNumber": {
-          "type": "integer",
-          "format": "int64"
-        }
-      },
-      "title": "RollbackVersionReq",
-      "required": [
-        "versionNumber"
-      ]
-    },
-    "UpdateProjectReq": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "status": {
-          "type": "string",
-          "description": " active | archived"
-        }
-      },
-      "title": "UpdateProjectReq",
-      "required": [
-        "name",
-        "description",
-        "status"
-      ]
-    },
-    "UpdateUserReq": {
-      "type": "object",
-      "properties": {
-        "username": {
-          "type": "string"
-        }
-      },
-      "title": "UpdateUserReq",
-      "required": [
-        "username"
-      ]
-    },
-    "UserInfoResp": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "username": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "passwordHash": {
-          "type": "string"
-        },
-        "createdAt": {
-          "type": "string"
-        },
-        "updatedAt": {
-          "type": "string"
-        }
-      },
-      "title": "UserInfoResp",
-      "required": [
-        "id",
-        "username",
-        "email",
-        "passwordHash",
-        "createdAt",
-        "updatedAt"
-      ]
-    },
-    "UserListResp": {
-      "type": "object",
-      "properties": {
-        "list": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/UserInfoResp"
-          }
-        },
-        "page": {
-          "$ref": "#/definitions/PageResp"
-        }
-      },
-      "title": "UserListResp",
-      "required": [
-        "list",
-        "page"
-      ]
-    }
-  },
-  "securityDefinitions": {
-    "apiKey": {
-      "type": "apiKey",
-      "description": "Enter JWT Bearer token **_only_**",
-      "name": "Authorization",
-      "in": "header"
-    }
-  }
+  "x-date": "2026-02-10 17:45:48",
+  "x-description": "This is a goctl generated swagger file.",
+  "x-github": "https://github.com/zeromicro/go-zero",
+  "x-go-zero-doc": "https://go-zero.dev/",
+  "x-goctl-version": "1.9.2"
 }
