@@ -128,6 +128,34 @@ type SoftwareTemplatesTable struct {
 
 func (SoftwareTemplatesTable) TableName() string { return "software_templates" }
 
+type SoftwaresTable struct {
+	Id              uint64         `gorm:"column:id;primaryKey;autoIncrement"`
+	ProjectId       uint64         `gorm:"column:project_id;not null;index:idx_softwares_project_id"`
+	Name            string         `gorm:"column:name;type:varchar(128);not null"`
+	Description     sql.NullString `gorm:"column:description;type:text"`
+	TemplateId      uint64         `gorm:"column:template_id;type:bigint;not null;default:0;index:idx_softwares_template_id"`
+	TechnologyStack string         `gorm:"column:technology_stack;type:varchar(128);not null;default:''"`
+	Status          string         `gorm:"column:status;type:enum('active','archived');not null;default:'active'"`
+	CreatedBy       uint64         `gorm:"column:created_by;not null"`
+	CreatedAt       time.Time      `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt       time.Time      `gorm:"column:updated_at;autoUpdateTime"`
+}
+
+func (SoftwaresTable) TableName() string { return "softwares" }
+
+type SoftwareManifestsTable struct {
+	Id                    uint64         `gorm:"column:id;primaryKey;autoIncrement"`
+	ProjectId             uint64         `gorm:"column:project_id;not null;index:idx_software_manifests_project_id"`
+	SoftwareId            uint64         `gorm:"column:software_id;not null;index:idx_software_manifests_software_id"`
+	ManifestFileId        uint64         `gorm:"column:manifest_file_id;not null;index:idx_software_manifests_manifest_file_id"`
+	ManifestFileVersionId uint64         `gorm:"column:manifest_file_version_id;type:bigint;not null;default:0"`
+	VersionDescription    sql.NullString `gorm:"column:version_description;type:text"`
+	CreatedBy             uint64         `gorm:"column:created_by;not null"`
+	CreatedAt             time.Time      `gorm:"column:created_at;autoCreateTime"`
+}
+
+func (SoftwareManifestsTable) TableName() string { return "software_manifests" }
+
 type LlmProvidersTable struct {
 	Id          uint64         `gorm:"column:id;primaryKey;autoIncrement"`
 	Name        string         `gorm:"column:name;type:varchar(128);not null;uniqueIndex:uk_llm_providers_name"`
@@ -194,7 +222,11 @@ type AgentLlmBindingsTable struct {
 
 func (AgentLlmBindingsTable) TableName() string { return "agent_llm_bindings" }
 
-func enforceSingleBindingPerAgent(db *gorm.DB) error {
+func cleanupDuplicateAgentBindings(db *gorm.DB) error {
+	if !db.Migrator().HasTable("agent_llm_bindings") {
+		return nil
+	}
+
 	type dupRow struct {
 		AgentId uint64 `gorm:"column:agent_id"`
 		Cnt     int64  `gorm:"column:cnt"`
@@ -233,8 +265,20 @@ func enforceSingleBindingPerAgent(db *gorm.DB) error {
 		}
 	}
 
-	_ = db.Migrator().DropIndex(&AgentLlmBindingsTable{}, "uk_agent_llm_bindings_agent_model")
-	_ = db.Migrator().DropIndex(&AgentLlmBindingsTable{}, "idx_agent_llm_bindings_agent_id")
+	return nil
+}
+
+func enforceSingleBindingPerAgent(db *gorm.DB) error {
+	if err := cleanupDuplicateAgentBindings(db); err != nil {
+		return err
+	}
+
+	if db.Migrator().HasIndex(&AgentLlmBindingsTable{}, "uk_agent_llm_bindings_agent_model") {
+		_ = db.Migrator().DropIndex(&AgentLlmBindingsTable{}, "uk_agent_llm_bindings_agent_model")
+	}
+	if db.Migrator().HasIndex(&AgentLlmBindingsTable{}, "idx_agent_llm_bindings_agent_id") {
+		_ = db.Migrator().DropIndex(&AgentLlmBindingsTable{}, "idx_agent_llm_bindings_agent_id")
+	}
 
 	if !db.Migrator().HasIndex(&AgentLlmBindingsTable{}, "uk_agent_llm_bindings_agent_id") {
 		if err := db.Migrator().CreateIndex(&AgentLlmBindingsTable{}, "uk_agent_llm_bindings_agent_id"); err != nil {
@@ -262,30 +306,42 @@ func migrateWithRetry(targetDSN string) error {
 			sqlDB.SetConnMaxIdleTime(5 * time.Minute)
 		}
 
-		err = db.AutoMigrate(
-			&UsersTable{},
-			&UserIdentitiesTable{},
-			&ProjectsTable{},
-			&ProjectMembersTable{},
-			&FilesTable{},
-			&ProjectFilesTable{},
-			&FileVersionsTable{},
-			&AdminsTable{},
-			&SoftwareTemplatesTable{},
-			&LlmProvidersTable{},
-			&LlmModelsTable{},
-			&LlmUsageLogsTable{},
-			&AgentsTable{},
-			&AgentLlmBindingsTable{},
-		)
-		if err == nil {
-			if err := enforceSingleBindingPerAgent(db); err == nil {
-				return nil
+		if err := cleanupDuplicateAgentBindings(db); err != nil {
+			lastErr = err
+		} else {
+			err = db.AutoMigrate(
+				&UsersTable{},
+				&UserIdentitiesTable{},
+				&ProjectsTable{},
+				&ProjectMembersTable{},
+				&FilesTable{},
+				&ProjectFilesTable{},
+				&FileVersionsTable{},
+				&AdminsTable{},
+				&SoftwareTemplatesTable{},
+				&SoftwaresTable{},
+				&SoftwareManifestsTable{},
+				&LlmProvidersTable{},
+				&LlmModelsTable{},
+				&LlmUsageLogsTable{},
+				&AgentsTable{},
+				&AgentLlmBindingsTable{},
+			)
+			if err == nil {
+				if err := enforceSingleBindingPerAgent(db); err == nil {
+					requiredTables := []string{"softwares", "software_manifests"}
+					for _, t := range requiredTables {
+						if !db.Migrator().HasTable(t) {
+							return fmt.Errorf("missing table: %s", t)
+						}
+					}
+					return nil
+				} else {
+					lastErr = err
+				}
 			} else {
 				lastErr = err
 			}
-		} else {
-			lastErr = err
 		}
 
 		if sqlDB != nil {

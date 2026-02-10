@@ -11,6 +11,7 @@ import (
 	auth "github.com/anil-wu/spark-x/internal/handler/auth"
 	files "github.com/anil-wu/spark-x/internal/handler/files"
 	projects "github.com/anil-wu/spark-x/internal/handler/projects"
+	softwares "github.com/anil-wu/spark-x/internal/handler/softwares"
 	users "github.com/anil-wu/spark-x/internal/handler/users"
 	"github.com/anil-wu/spark-x/internal/svc"
 
@@ -39,6 +40,106 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodDelete,
 				Path:    "/admins/:id",
 				Handler: admin.DeleteAdminHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/agent-bindings/:id",
+				Handler: admin.UpdateAgentBindingHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/agent-bindings/:id",
+				Handler: admin.DeleteAgentBindingHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/agents",
+				Handler: admin.CreateAgentHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/agents",
+				Handler: admin.ListAgentsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/agents/:id",
+				Handler: admin.GetAgentHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/agents/:id",
+				Handler: admin.UpdateAgentHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/agents/:id",
+				Handler: admin.DeleteAgentHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/agents/:id/bindings",
+				Handler: admin.ListAgentBindingsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/agents/:id/bindings",
+				Handler: admin.CreateAgentBindingHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/llm/models",
+				Handler: admin.CreateLlmModelHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/llm/models",
+				Handler: admin.ListLlmModelsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/llm/models/:id",
+				Handler: admin.GetLlmModelHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/llm/models/:id",
+				Handler: admin.UpdateLlmModelHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/llm/models/:id",
+				Handler: admin.DeleteLlmModelHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/llm/providers",
+				Handler: admin.CreateLlmProviderHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/llm/providers",
+				Handler: admin.ListLlmProvidersHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/llm/providers/:id",
+				Handler: admin.GetLlmProviderHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/llm/providers/:id",
+				Handler: admin.UpdateLlmProviderHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/llm/providers/:id",
+				Handler: admin.DeleteLlmProviderHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/llm/usage-logs",
+				Handler: admin.ListLlmUsageLogsHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
@@ -89,121 +190,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/software-templates/:id",
 				Handler: admin.GetSoftwareTemplateHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/llm/providers",
-				Handler: admin.CreateLlmProviderHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/llm/providers",
-				Handler: admin.ListLlmProvidersHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/llm/providers/:id",
-				Handler: admin.GetLlmProviderHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPut,
-				Path:    "/llm/providers/:id",
-				Handler: admin.UpdateLlmProviderHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodDelete,
-				Path:    "/llm/providers/:id",
-				Handler: admin.DeleteLlmProviderHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/llm/models",
-				Handler: admin.CreateLlmModelHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/llm/models",
-				Handler: admin.ListLlmModelsHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/llm/models/:id",
-				Handler: admin.GetLlmModelHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPut,
-				Path:    "/llm/models/:id",
-				Handler: admin.UpdateLlmModelHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodDelete,
-				Path:    "/llm/models/:id",
-				Handler: admin.DeleteLlmModelHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/llm/usage-logs",
-				Handler: admin.ListLlmUsageLogsHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/agents",
-				Handler: admin.CreateAgentHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/agents",
-				Handler: admin.ListAgentsHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/agents/:id",
-				Handler: admin.GetAgentHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPut,
-				Path:    "/agents/:id",
-				Handler: admin.UpdateAgentHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodDelete,
-				Path:    "/agents/:id",
-				Handler: admin.DeleteAgentHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/agents/:id/bindings",
-				Handler: admin.ListAgentBindingsHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/agents/:id/bindings",
-				Handler: admin.CreateAgentBindingHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPut,
-				Path:    "/agent-bindings/:id",
-				Handler: admin.UpdateAgentBindingHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodDelete,
-				Path:    "/agent-bindings/:id",
-				Handler: admin.DeleteAgentBindingHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/files/preupload",
-				Handler: files.PreUploadFileHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/files/:id/versions",
-				Handler: files.ListFileVersionsHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/files/:id/download",
-				Handler: files.DownloadFileHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
@@ -325,6 +311,23 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/projects/:id/invite",
 				Handler: projects.InviteMemberHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/projects/:projectId/softwares",
+				Handler: softwares.CreateSoftwareHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/software-manifests",
+				Handler: softwares.CreateSoftwareManifestHandler(serverCtx),
 			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),

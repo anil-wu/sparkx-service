@@ -120,6 +120,39 @@ CREATE TABLE IF NOT EXISTS `software_templates` (
   KEY `idx_software_templates_created_by` (`created_by`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- softwares
+CREATE TABLE IF NOT EXISTS `softwares` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `project_id` BIGINT UNSIGNED NOT NULL,
+  `name` VARCHAR(128) NOT NULL,
+  `description` TEXT,
+  `template_id` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  `technology_stack` VARCHAR(128) NOT NULL DEFAULT '',
+  `status` ENUM('active','archived') NOT NULL DEFAULT 'active',
+  `created_by` BIGINT UNSIGNED NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_softwares_project_id` (`project_id`),
+  KEY `idx_softwares_template_id` (`template_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- software_manifests
+CREATE TABLE IF NOT EXISTS `software_manifests` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `project_id` BIGINT UNSIGNED NOT NULL,
+  `software_id` BIGINT UNSIGNED NOT NULL,
+  `manifest_file_id` BIGINT UNSIGNED NOT NULL,
+  `manifest_file_version_id` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  `version_description` TEXT,
+  `created_by` BIGINT UNSIGNED NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_software_manifests_project_id` (`project_id`),
+  KEY `idx_software_manifests_software_id` (`software_id`),
+  KEY `idx_software_manifests_manifest_file_id` (`manifest_file_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- llm_providers
 CREATE TABLE IF NOT EXISTS `llm_providers` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

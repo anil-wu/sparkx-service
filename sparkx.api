@@ -88,6 +88,44 @@ type (
 		projectId     int64  `path:"id"`
 		role          string `json:"role"` // owner | admin | developer | viewer
 	}
+	// 软件工程
+	CreateSoftwareReq {
+		projectId          int64  `path:"projectId"`
+		name               string `json:"name"`
+		description        string `json:"description,optional"`
+		templateId         int64  `json:"templateId,optional"`
+		technologyStack    string `json:"technologyStack,optional"`
+		status             string `json:"status,optional"`
+	}
+	CreateSoftwareResp {
+		softwareId      int64  `json:"softwareId"`
+		projectId       int64  `json:"projectId"`
+		name            string `json:"name"`
+		description     string `json:"description"`
+		templateId      int64  `json:"templateId"`
+		technologyStack string `json:"technologyStack"`
+		status          string `json:"status"`
+		createdBy       int64  `json:"createdBy"`
+		createdAt       string `json:"createdAt"`
+	}
+	CreateSoftwareManifestReq {
+		id                    int64  `json:"id,optional"`
+		projectId             int64  `json:"projectId"`
+		softwareId            int64  `json:"softwareId"`
+		manifestFileId        int64  `json:"manifestFileId"`
+		manifestFileVersionId int64  `json:"manifestFileVersionId"`
+		versionDescription    string `json:"versionDescription,optional"`
+	}
+	CreateSoftwareManifestResp {
+		manifestId            int64  `json:"manifestId"`
+		projectId             int64  `json:"projectId"`
+		softwareId            int64  `json:"softwareId"`
+		manifestFileId        int64  `json:"manifestFileId"`
+		manifestFileVersionId int64  `json:"manifestFileVersionId"`
+		versionDescription    string `json:"versionDescription"`
+		createdBy             int64  `json:"createdBy"`
+		createdAt             string `json:"createdAt"`
+	}
 	// 文件与版本
 	PreUploadReq {
 		projectId    int64  `json:"projectId"`
@@ -150,7 +188,9 @@ type (
 	}
 	// 文件下载
 	DownloadFileReq {
-		id int64 `path:"id"`
+		id            int64 `path:"id"`
+		versionId     int64 `form:"versionId,optional"`
+		versionNumber int64 `form:"versionNumber,optional"`
 	}
 	DownloadFileResp {
 		downloadUrl string `json:"downloadUrl"`
@@ -305,26 +345,26 @@ type (
 	}
 	// LLM Models
 	CreateLlmModelReq {
-		providerId      int64   `json:"providerId"`
-		modelName       string  `json:"modelName"`
-		modelType       string  `json:"modelType"` // llm | vlm | embedding
-		maxInputTokens  int64   `json:"maxInputTokens"`
-		maxOutputTokens int64   `json:"maxOutputTokens"`
-		supportStream   bool    `json:"supportStream"`
-		supportJson     bool    `json:"supportJson"`
-		priceInputPer1k float64 `json:"priceInputPer1k"`
+		providerId       int64   `json:"providerId"`
+		modelName        string  `json:"modelName"`
+		modelType        string  `json:"modelType"` // llm | vlm | embedding
+		maxInputTokens   int64   `json:"maxInputTokens"`
+		maxOutputTokens  int64   `json:"maxOutputTokens"`
+		supportStream    bool    `json:"supportStream"`
+		supportJson      bool    `json:"supportJson"`
+		priceInputPer1k  float64 `json:"priceInputPer1k"`
 		priceOutputPer1k float64 `json:"priceOutputPer1k"`
 	}
 	UpdateLlmModelReq {
-		id              int64    `path:"id"`
-		providerId      *int64   `json:"providerId,optional"`
-		modelName       string   `json:"modelName,optional"`
-		modelType       string   `json:"modelType,optional"` // llm | vlm | embedding
-		maxInputTokens  *int64   `json:"maxInputTokens,optional"`
-		maxOutputTokens *int64   `json:"maxOutputTokens,optional"`
-		supportStream   *bool    `json:"supportStream,optional"`
-		supportJson     *bool    `json:"supportJson,optional"`
-		priceInputPer1k *float64 `json:"priceInputPer1k,optional"`
+		id               int64    `path:"id"`
+		providerId       *int64   `json:"providerId,optional"`
+		modelName        string   `json:"modelName,optional"`
+		modelType        string   `json:"modelType,optional"` // llm | vlm | embedding
+		maxInputTokens   *int64   `json:"maxInputTokens,optional"`
+		maxOutputTokens  *int64   `json:"maxOutputTokens,optional"`
+		supportStream    *bool    `json:"supportStream,optional"`
+		supportJson      *bool    `json:"supportJson,optional"`
+		priceInputPer1k  *float64 `json:"priceInputPer1k,optional"`
 		priceOutputPer1k *float64 `json:"priceOutputPer1k,optional"`
 	}
 	GetLlmModelReq {
@@ -417,10 +457,10 @@ type (
 		agentId int64 `path:"id"`
 	}
 	CreateAgentBindingReq {
-		agentId     int64 `path:"id"`
-		llmModelId  int64 `json:"llmModelId"`
-		priority    int64 `json:"priority,optional"`
-		isActive    *bool `json:"isActive,optional"`
+		agentId    int64 `path:"id"`
+		llmModelId int64 `json:"llmModelId"`
+		priority   int64 `json:"priority,optional"`
+		isActive   *bool `json:"isActive,optional"`
 	}
 	UpdateAgentBindingReq {
 		id         int64  `path:"id"`
@@ -432,16 +472,16 @@ type (
 		id int64 `path:"id"`
 	}
 	AgentBindingResp {
-		id            int64  `json:"id"`
-		agentId       int64  `json:"agentId"`
-		llmModelId     int64  `json:"llmModelId"`
-		priority       int64  `json:"priority"`
-		isActive       bool   `json:"isActive"`
-		createdAt      string `json:"createdAt"`
-		providerId     int64  `json:"providerId"`
-		providerName   string `json:"providerName"`
-		modelName      string `json:"modelName"`
-		modelType      string `json:"modelType"`
+		id           int64  `json:"id"`
+		agentId      int64  `json:"agentId"`
+		llmModelId   int64  `json:"llmModelId"`
+		priority     int64  `json:"priority"`
+		isActive     bool   `json:"isActive"`
+		createdAt    string `json:"createdAt"`
+		providerId   int64  `json:"providerId"`
+		providerName string `json:"providerName"`
+		modelName    string `json:"modelName"`
+		modelType    string `json:"modelType"`
 	}
 	AgentBindingListResp {
 		list []AgentBindingResp `json:"list"`
@@ -524,6 +564,19 @@ service sparkx-api {
 
 	@handler GetFileContent
 	get /files/:id/content (GetFileContentReq)
+}
+
+@server (
+	group:  softwares
+	prefix: /api/v1
+	jwt:    Auth
+)
+service sparkx-api {
+	@handler CreateSoftware
+	post /projects/:projectId/softwares (CreateSoftwareReq) returns (CreateSoftwareResp)
+
+	@handler CreateSoftwareManifest
+	post /software-manifests (CreateSoftwareManifestReq) returns (CreateSoftwareManifestResp)
 }
 
 @server (
