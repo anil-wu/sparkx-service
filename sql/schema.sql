@@ -169,6 +169,28 @@ CREATE TABLE IF NOT EXISTS `build_versions` (
   KEY `idx_build_versions_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- releases
+CREATE TABLE IF NOT EXISTS `releases` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `project_id` BIGINT UNSIGNED NOT NULL,
+  `build_version_id` BIGINT UNSIGNED NOT NULL,
+  `release_manifest_file_id` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  `release_manifest_file_version_id` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  `name` VARCHAR(255) NOT NULL DEFAULT '',
+  `channel` ENUM('dev','qa','beta','prod') NOT NULL DEFAULT 'dev',
+  `platform` ENUM('web','android','ios','desktop') NOT NULL DEFAULT 'web',
+  `status` ENUM('active','rolled_back','archived') NOT NULL DEFAULT 'active',
+  `version_tag` VARCHAR(255) NOT NULL DEFAULT '',
+  `release_notes` TEXT,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `published_at` TIMESTAMP NULL DEFAULT NULL,
+  `created_by` BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_releases_project_id` (`project_id`),
+  KEY `idx_releases_build_version_id` (`build_version_id`),
+  KEY `idx_releases_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- llm_providers
 CREATE TABLE IF NOT EXISTS `llm_providers` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

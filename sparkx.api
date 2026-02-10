@@ -144,6 +144,36 @@ type (
 		createdBy               int64  `json:"createdBy"`
 		createdAt               string `json:"createdAt"`
 	}
+	CreateReleaseReq {
+		id                          int64  `json:"id,optional"`
+		projectId                   int64  `json:"projectId"`
+		buildVersionId              int64  `json:"buildVersionId"`
+		releaseManifestFileId       int64  `json:"releaseManifestFileId"`
+		releaseManifestFileVersionId int64 `json:"releaseManifestFileVersionId"`
+		name                        string `json:"name"`
+		channel                     string `json:"channel"`
+		platform                    string `json:"platform"`
+		status                      string `json:"status,optional"`
+		versionTag                  string `json:"versionTag,optional"`
+		releaseNotes                string `json:"releaseNotes,optional"`
+		publishedAt                 string `json:"publishedAt,optional"`
+	}
+	CreateReleaseResp {
+		releaseId                   int64  `json:"releaseId"`
+		projectId                   int64  `json:"projectId"`
+		buildVersionId              int64  `json:"buildVersionId"`
+		releaseManifestFileId       int64  `json:"releaseManifestFileId"`
+		releaseManifestFileVersionId int64 `json:"releaseManifestFileVersionId"`
+		name                        string `json:"name"`
+		channel                     string `json:"channel"`
+		platform                    string `json:"platform"`
+		status                      string `json:"status"`
+		versionTag                  string `json:"versionTag"`
+		releaseNotes                string `json:"releaseNotes"`
+		createdBy                   int64  `json:"createdBy"`
+		createdAt                   string `json:"createdAt"`
+		publishedAt                 string `json:"publishedAt"`
+	}
 	// 文件与版本
 	PreUploadReq {
 		projectId    int64  `json:"projectId"`
@@ -605,6 +635,9 @@ service sparkx-api {
 service sparkx-api {
 	@handler CreateBuildVersion
 	post /build-versions (CreateBuildVersionReq) returns (CreateBuildVersionResp)
+
+	@handler CreateRelease
+	post /releases (CreateReleaseReq) returns (CreateReleaseResp)
 }
 
 @server (

@@ -335,6 +335,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/build-versions",
 				Handler: builds.CreateBuildVersionHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/releases",
+				Handler: builds.CreateReleaseHandler(serverCtx),
+			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1"),
