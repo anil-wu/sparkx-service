@@ -9,6 +9,7 @@ import (
 	admin "github.com/anil-wu/spark-x/internal/handler/admin"
 	admin_auth "github.com/anil-wu/spark-x/internal/handler/admin_auth"
 	auth "github.com/anil-wu/spark-x/internal/handler/auth"
+	builds "github.com/anil-wu/spark-x/internal/handler/builds"
 	files "github.com/anil-wu/spark-x/internal/handler/files"
 	projects "github.com/anil-wu/spark-x/internal/handler/projects"
 	softwares "github.com/anil-wu/spark-x/internal/handler/softwares"
@@ -328,6 +329,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/software-manifests",
 				Handler: softwares.CreateSoftwareManifestHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/build-versions",
+				Handler: builds.CreateBuildVersionHandler(serverCtx),
 			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),

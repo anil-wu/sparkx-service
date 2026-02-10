@@ -153,6 +153,64 @@ type RollbackVersionReq struct {
 	VersionNumber int64 `json:"versionNumber"`
 }
 
+type CreateSoftwareReq struct {
+	Name            string `json:"name"`
+	Description     string `json:"description"`
+	TemplateId      int64  `json:"templateId"`
+	TechnologyStack string `json:"technologyStack"`
+	Status          string `json:"status"`
+}
+
+type CreateSoftwareResp struct {
+	SoftwareId      int64  `json:"softwareId"`
+	ProjectId       int64  `json:"projectId"`
+	Name            string `json:"name"`
+	Description     string `json:"description"`
+	TemplateId      int64  `json:"templateId"`
+	TechnologyStack string `json:"technologyStack"`
+	Status          string `json:"status"`
+	CreatedBy       int64  `json:"createdBy"`
+	CreatedAt       string `json:"createdAt"`
+}
+
+type CreateSoftwareManifestReq struct {
+	ProjectId             int64  `json:"projectId"`
+	SoftwareId            int64  `json:"softwareId"`
+	ManifestFileId        int64  `json:"manifestFileId"`
+	ManifestFileVersionId int64  `json:"manifestFileVersionId"`
+	VersionDescription    string `json:"versionDescription"`
+}
+
+type CreateSoftwareManifestResp struct {
+	ManifestId            int64  `json:"manifestId"`
+	ProjectId             int64  `json:"projectId"`
+	SoftwareId            int64  `json:"softwareId"`
+	ManifestFileId        int64  `json:"manifestFileId"`
+	ManifestFileVersionId int64  `json:"manifestFileVersionId"`
+	VersionDescription    string `json:"versionDescription"`
+	CreatedBy             int64  `json:"createdBy"`
+	CreatedAt             string `json:"createdAt"`
+}
+
+type CreateBuildVersionReq struct {
+	ProjectId                 int64  `json:"projectId"`
+	SoftwareManifestId        int64  `json:"softwareManifestId"`
+	Description               string `json:"description"`
+	BuildVersionFileId        int64  `json:"buildVersionFileId"`
+	BuildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
+}
+
+type CreateBuildVersionResp struct {
+	BuildVersionId            int64  `json:"buildVersionId"`
+	ProjectId                 int64  `json:"projectId"`
+	SoftwareManifestId        int64  `json:"softwareManifestId"`
+	Description               string `json:"description"`
+	BuildVersionFileId        int64  `json:"buildVersionFileId"`
+	BuildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
+	CreatedBy                 int64  `json:"createdBy"`
+	CreatedAt                 string `json:"createdAt"`
+}
+
 // BaseResp 基础响应
 type BaseResp struct {
 	Code int32  `json:"code"`
@@ -338,9 +396,81 @@ func TestWorkflow(t *testing.T) {
 	}
 
 	// ==========================================
-	// 4. Cleanup
+	// 4. Build Versions
 	// ==========================================
-	t.Log("Step 4: Cleanup - Delete Project")
+	t.Log("Step 4.1: Create Software")
+	createSoftwareReq := CreateSoftwareReq{
+		Name:        "Test Software",
+		Description: "Integration test software",
+	}
+	var createSoftwareResp CreateSoftwareResp
+	client.Post(fmt.Sprintf("/projects/%d/softwares", projectResp.Id), createSoftwareReq, &createSoftwareResp)
+	if createSoftwareResp.SoftwareId == 0 {
+		t.Fatal("CreateSoftware failed")
+	}
+
+	t.Log("Step 4.2: PreUpload Software Manifest File")
+	preUploadManifestReq := PreUploadReq{
+		ProjectId:    projectResp.Id,
+		Name:         "software.manifest.json",
+		FileCategory: "text",
+		FileFormat:   "json",
+		SizeBytes:    1024,
+		Hash:         "manifesthash123456",
+	}
+	var preUploadManifestResp PreUploadResp
+	client.Post("/files/preupload", preUploadManifestReq, &preUploadManifestResp)
+	if preUploadManifestResp.FileId == 0 || preUploadManifestResp.VersionId == 0 {
+		t.Fatal("PreUpload Software Manifest failed")
+	}
+
+	t.Log("Step 4.3: Create Software Manifest")
+	createSoftwareManifestReq := CreateSoftwareManifestReq{
+		ProjectId:             projectResp.Id,
+		SoftwareId:            createSoftwareResp.SoftwareId,
+		ManifestFileId:        preUploadManifestResp.FileId,
+		ManifestFileVersionId: preUploadManifestResp.VersionId,
+		VersionDescription:    "it",
+	}
+	var createSoftwareManifestResp CreateSoftwareManifestResp
+	client.Post("/software-manifests", createSoftwareManifestReq, &createSoftwareManifestResp)
+	if createSoftwareManifestResp.ManifestId == 0 {
+		t.Fatal("CreateSoftwareManifest failed")
+	}
+
+	t.Log("Step 4.4: PreUpload Build Manifest File")
+	preUploadBuildReq := PreUploadReq{
+		ProjectId:    projectResp.Id,
+		Name:         "build.manifest.json",
+		FileCategory: "text",
+		FileFormat:   "json",
+		SizeBytes:    1024,
+		Hash:         "buildhash123456",
+	}
+	var preUploadBuildResp PreUploadResp
+	client.Post("/files/preupload", preUploadBuildReq, &preUploadBuildResp)
+	if preUploadBuildResp.FileId == 0 || preUploadBuildResp.VersionId == 0 {
+		t.Fatal("PreUpload Build Manifest failed")
+	}
+
+	t.Log("Step 4.5: Create Build Version")
+	createBuildReq := CreateBuildVersionReq{
+		ProjectId:                 projectResp.Id,
+		SoftwareManifestId:        createSoftwareManifestResp.ManifestId,
+		Description:               "it build",
+		BuildVersionFileId:        preUploadBuildResp.FileId,
+		BuildVersionFileVersionId: preUploadBuildResp.VersionId,
+	}
+	var createBuildResp CreateBuildVersionResp
+	client.Post("/build-versions", createBuildReq, &createBuildResp)
+	if createBuildResp.BuildVersionId == 0 {
+		t.Fatal("CreateBuildVersion failed")
+	}
+
+	// ==========================================
+	// 5. Cleanup
+	// ==========================================
+	t.Log("Step 5: Cleanup - Delete Project")
 	var deleteProjectResp BaseResp
 	client.Do("DELETE", fmt.Sprintf("/projects/%d", projectResp.Id), nil, &deleteProjectResp)
 	if deleteProjectResp.Code != 0 {

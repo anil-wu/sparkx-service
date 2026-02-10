@@ -153,6 +153,22 @@ CREATE TABLE IF NOT EXISTS `software_manifests` (
   KEY `idx_software_manifests_manifest_file_id` (`manifest_file_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- build_versions
+CREATE TABLE IF NOT EXISTS `build_versions` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `project_id` BIGINT UNSIGNED NOT NULL,
+  `software_manifest_id` BIGINT UNSIGNED NOT NULL,
+  `description` TEXT,
+  `build_version_file_id` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  `build_version_file_version_id` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_by` BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_build_versions_project_id` (`project_id`),
+  KEY `idx_build_versions_software_manifest_id` (`software_manifest_id`),
+  KEY `idx_build_versions_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- llm_providers
 CREATE TABLE IF NOT EXISTS `llm_providers` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

@@ -156,6 +156,19 @@ type SoftwareManifestsTable struct {
 
 func (SoftwareManifestsTable) TableName() string { return "software_manifests" }
 
+type BuildVersionsTable struct {
+	Id                       uint64         `gorm:"column:id;primaryKey;autoIncrement"`
+	ProjectId                uint64         `gorm:"column:project_id;not null;index:idx_build_versions_project_id"`
+	SoftwareManifestId       uint64         `gorm:"column:software_manifest_id;not null;index:idx_build_versions_software_manifest_id"`
+	Description              sql.NullString `gorm:"column:description;type:text"`
+	BuildVersionFileId       uint64         `gorm:"column:build_version_file_id;type:bigint;not null;default:0"`
+	BuildVersionFileVersionId uint64        `gorm:"column:build_version_file_version_id;type:bigint;not null;default:0"`
+	CreatedAt                time.Time      `gorm:"column:created_at;autoCreateTime;index:idx_build_versions_created_at"`
+	CreatedBy                uint64         `gorm:"column:created_by;not null"`
+}
+
+func (BuildVersionsTable) TableName() string { return "build_versions" }
+
 type LlmProvidersTable struct {
 	Id          uint64         `gorm:"column:id;primaryKey;autoIncrement"`
 	Name        string         `gorm:"column:name;type:varchar(128);not null;uniqueIndex:uk_llm_providers_name"`
@@ -321,6 +334,7 @@ func migrateWithRetry(targetDSN string) error {
 				&SoftwareTemplatesTable{},
 				&SoftwaresTable{},
 				&SoftwareManifestsTable{},
+				&BuildVersionsTable{},
 				&LlmProvidersTable{},
 				&LlmModelsTable{},
 				&LlmUsageLogsTable{},
@@ -329,7 +343,7 @@ func migrateWithRetry(targetDSN string) error {
 			)
 			if err == nil {
 				if err := enforceSingleBindingPerAgent(db); err == nil {
-					requiredTables := []string{"softwares", "software_manifests"}
+					requiredTables := []string{"softwares", "software_manifests", "build_versions"}
 					for _, t := range requiredTables {
 						if !db.Migrator().HasTable(t) {
 							return fmt.Errorf("missing table: %s", t)

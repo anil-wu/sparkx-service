@@ -126,6 +126,24 @@ type (
 		createdBy             int64  `json:"createdBy"`
 		createdAt             string `json:"createdAt"`
 	}
+	CreateBuildVersionReq {
+		id                      int64  `json:"id,optional"`
+		projectId               int64  `json:"projectId"`
+		softwareManifestId      int64  `json:"softwareManifestId"`
+		description             string `json:"description,optional"`
+		buildVersionFileId      int64  `json:"buildVersionFileId"`
+		buildVersionFileVersionId int64 `json:"buildVersionFileVersionId"`
+	}
+	CreateBuildVersionResp {
+		buildVersionId          int64  `json:"buildVersionId"`
+		projectId               int64  `json:"projectId"`
+		softwareManifestId      int64  `json:"softwareManifestId"`
+		description             string `json:"description"`
+		buildVersionFileId      int64  `json:"buildVersionFileId"`
+		buildVersionFileVersionId int64 `json:"buildVersionFileVersionId"`
+		createdBy               int64  `json:"createdBy"`
+		createdAt               string `json:"createdAt"`
+	}
 	// 文件与版本
 	PreUploadReq {
 		projectId    int64  `json:"projectId"`
@@ -577,6 +595,16 @@ service sparkx-api {
 
 	@handler CreateSoftwareManifest
 	post /software-manifests (CreateSoftwareManifestReq) returns (CreateSoftwareManifestResp)
+}
+
+@server (
+	group:  builds
+	prefix: /api/v1
+	jwt:    Auth
+)
+service sparkx-api {
+	@handler CreateBuildVersion
+	post /build-versions (CreateBuildVersionReq) returns (CreateBuildVersionResp)
 }
 
 @server (

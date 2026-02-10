@@ -189,6 +189,26 @@ type CreateSoftwareManifestResp struct {
 	CreatedAt             string `json:"createdAt"`
 }
 
+type CreateBuildVersionReq struct {
+	Id                        int64  `json:"id,optional"`
+	ProjectId                 int64  `json:"projectId"`
+	SoftwareManifestId        int64  `json:"softwareManifestId"`
+	Description               string `json:"description,optional"`
+	BuildVersionFileId        int64  `json:"buildVersionFileId"`
+	BuildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
+}
+
+type CreateBuildVersionResp struct {
+	BuildVersionId            int64  `json:"buildVersionId"`
+	ProjectId                 int64  `json:"projectId"`
+	SoftwareManifestId        int64  `json:"softwareManifestId"`
+	Description               string `json:"description"`
+	BuildVersionFileId        int64  `json:"buildVersionFileId"`
+	BuildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
+	CreatedBy                 int64  `json:"createdBy"`
+	CreatedAt                 string `json:"createdAt"`
+}
+
 type DeleteAdminReq struct {
 	Id int64 `path:"id"`
 }
