@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"database/sql"
 	"encoding/hex"
+	"strings"
 	"time"
 
 	"github.com/anil-wu/spark-x/internal/model"
@@ -34,10 +35,6 @@ func (l *AdminLoginLogic) AdminLogin(req *types.AdminLoginReq) (resp *types.Admi
 		return nil, model.InputParamInvalid
 	}
 
-	// md5 hash
-	sum := md5.Sum([]byte(req.Password))
-	passHash := hex.EncodeToString(sum[:])
-
 	// find admin by username
 	admin, findErr := l.svcCtx.AdminsModel.FindOneByUsername(l.ctx, req.Username)
 	if findErr != nil {
@@ -48,12 +45,12 @@ func (l *AdminLoginLogic) AdminLogin(req *types.AdminLoginReq) (resp *types.Admi
 	}
 
 	// check password
-	if admin.PasswordHash != passHash {
+	if !passwordMatches(admin.PasswordHash, req.Password) {
 		return nil, model.InputParamInvalid
 	}
 
 	// check status
-	if admin.Status != "active" {
+	if !statusAllowsLogin(admin.Status) {
 		return nil, model.InputParamInvalid
 	}
 
@@ -88,4 +85,62 @@ func (l *AdminLoginLogic) generateToken(adminId int64, role string) (string, err
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(accessSecret))
+}
+
+func statusAllowsLogin(status string) bool {
+	normalized := strings.ToLower(strings.TrimSpace(status))
+	switch normalized {
+	case "", "active", "enabled", "1", "true":
+		return true
+	case "disabled", "inactive", "0", "false":
+		return false
+	default:
+		return false
+	}
+}
+
+func passwordMatches(storedHashOrPassword string, inputPassword string) bool {
+	stored := strings.TrimSpace(storedHashOrPassword)
+	input := strings.TrimSpace(inputPassword)
+	if stored == "" || input == "" {
+		return false
+	}
+
+	if isHex32(stored) {
+		if isHex32(input) {
+			return strings.EqualFold(stored, input)
+		}
+		return strings.EqualFold(stored, md5HexLower(input))
+	}
+
+	if stored == input {
+		return true
+	}
+
+	if isHex32(input) {
+		return strings.EqualFold(stored, input)
+	}
+
+	return false
+}
+
+func md5HexLower(value string) string {
+	sum := md5.Sum([]byte(value))
+	return hex.EncodeToString(sum[:])
+}
+
+func isHex32(value string) bool {
+	if len(value) != 32 {
+		return false
+	}
+	for _, r := range value {
+		switch {
+		case r >= '0' && r <= '9':
+		case r >= 'a' && r <= 'f':
+		case r >= 'A' && r <= 'F':
+		default:
+			return false
+		}
+	}
+	return true
 }
