@@ -17,12 +17,12 @@ import (
 )
 
 var agentTypes = map[string]struct{}{
-	"code":   {},
-	"asset":  {},
-	"design": {},
-	"test":   {},
-	"build":  {},
-	"ops":    {},
+	"code":    {},
+	"asset":   {},
+	"design":  {},
+	"test":    {},
+	"build":   {},
+	"ops":     {},
 	"project": {},
 }
 
@@ -100,15 +100,11 @@ func (l *ListAvailableAgentsLogic) ListAvailableAgents(req *types.ListAgentsReq)
 
 	out := make([]types.AgentResp, 0, len(list))
 	for _, a := range list {
-		instruction := a.Instruction.String
-		if strings.TrimSpace(instruction) == "" {
-			instruction = a.LegacyCommand.String
-		}
 		out = append(out, types.AgentResp{
 			Id:          int64(a.Id),
 			Name:        a.Name,
 			Description: a.Description.String,
-			Instruction: instruction,
+			Instruction: a.Instruction.String,
 			AgentType:   a.AgentType,
 			CreatedAt:   a.CreatedAt.Format("2006-01-02 15:04:05"),
 		})
