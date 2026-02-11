@@ -471,14 +471,14 @@ type (
 		name        string `json:"name"`
 		description string `json:"description,optional"`
 		instruction string `json:"instruction,optional"`
-		agentType   string `json:"agentType"` // code | asset | design | test | build | ops
+		agentType   string `json:"agentType"` // code | asset | design | test | build | ops | project
 	}
 	UpdateAgentReq {
 		id          int64  `path:"id"`
 		name        string `json:"name,optional"`
 		description string `json:"description,optional"`
 		instruction string `json:"instruction,optional"`
-		agentType   string `json:"agentType,optional"` // code | asset | design | test | build | ops
+		agentType   string `json:"agentType,optional"` // code | asset | design | test | build | ops | project
 	}
 	GetAgentReq {
 		id int64 `path:"id"`
@@ -490,7 +490,7 @@ type (
 		id int64 `path:"id"`
 	}
 	ListAgentsReq {
-		agentType string `form:"agentType,optional"` // code | asset | design | test | build | ops
+		agentType string `form:"agentType,optional"` // code | asset | design | test | build | ops | project
 		page      int64  `form:"page,default=1"`
 		pageSize  int64  `form:"pageSize,default=20"`
 	}

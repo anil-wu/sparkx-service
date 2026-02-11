@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/anil-wu/spark-x/internal/config"
@@ -217,7 +218,7 @@ type AgentsTable struct {
 	Name        string         `gorm:"column:name;type:varchar(128);not null;uniqueIndex:uk_agents_name_type,priority:1"`
 	Description sql.NullString `gorm:"column:description;type:text"`
 	Instruction sql.NullString `gorm:"column:instruction;type:text"`
-	AgentType   string         `gorm:"column:agent_type;type:enum('code','asset','design','test','build','ops');not null;default:'code';uniqueIndex:uk_agents_name_type,priority:2"`
+	AgentType   string         `gorm:"column:agent_type;type:enum('code','asset','design','test','build','ops','project');not null;default:'code';uniqueIndex:uk_agents_name_type,priority:2"`
 	CreatedAt   time.Time      `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt   time.Time      `gorm:"column:updated_at;autoUpdateTime"`
 }
@@ -330,6 +331,31 @@ func ensureAgentsInstructionColumn(db *gorm.DB) error {
 	return db.Exec("ALTER TABLE `agents` CHANGE COLUMN `command` `instruction` TEXT").Error
 }
 
+func ensureAgentsAgentTypeEnum(db *gorm.DB) error {
+	if !db.Migrator().HasTable("agents") {
+		return nil
+	}
+
+	var columnType string
+	if err := db.
+		Raw(
+			"SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1",
+			"agents",
+			"agent_type",
+		).
+		Scan(&columnType).Error; err != nil {
+		return err
+	}
+
+	if strings.Contains(columnType, "'project'") {
+		return nil
+	}
+
+	return db.Exec(
+		"ALTER TABLE `agents` MODIFY COLUMN `agent_type` ENUM('code','asset','design','test','build','ops','project') NOT NULL DEFAULT 'code'",
+	).Error
+}
+
 func migrateWithRetry(targetDSN string) error {
 	var lastErr error
 	for attempt := 1; attempt <= 5; attempt++ {
@@ -352,6 +378,14 @@ func migrateWithRetry(targetDSN string) error {
 			lastErr = err
 		} else {
 			if err := ensureAgentsInstructionColumn(db); err != nil {
+				lastErr = err
+				if sqlDB != nil {
+					_ = sqlDB.Close()
+				}
+				time.Sleep(time.Duration(attempt) * time.Second)
+				continue
+			}
+			if err := ensureAgentsAgentTypeEnum(db); err != nil {
 				lastErr = err
 				if sqlDB != nil {
 					_ = sqlDB.Close()

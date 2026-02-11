@@ -123,7 +123,7 @@ type CreateAgentReq struct {
 	Name        string `json:"name"`
 	Description string `json:"description,optional"`
 	Instruction string `json:"instruction,optional"`
-	AgentType   string `json:"agentType"` // code | asset | design | test | build | ops
+	AgentType   string `json:"agentType"` // code | asset | design | test | build | ops | project
 }
 
 type CreateBuildVersionReq struct {

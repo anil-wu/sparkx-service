@@ -23,6 +23,7 @@ var agentTypes = map[string]struct{}{
 	"test":   {},
 	"build":  {},
 	"ops":    {},
+	"project": {},
 }
 
 func normalizeAgentType(s string) string {

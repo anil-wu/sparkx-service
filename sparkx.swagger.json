@@ -388,7 +388,7 @@
         "parameters": [
           {
             "type": "string",
-            "description": "code | asset | design | test | build | ops",
+            "description": "code | asset | design | test | build | ops | project",
             "name": "agentType",
             "in": "query",
             "allowEmptyValue": true
@@ -493,7 +493,7 @@
               ],
               "properties": {
                 "agentType": {
-                  "description": "code | asset | design | test | build | ops",
+                  "description": "code | asset | design | test | build | ops | project",
                   "type": "string"
                 },
                 "description": {
@@ -604,7 +604,7 @@
               "type": "object",
               "properties": {
                 "agentType": {
-                  "description": "code | asset | design | test | build | ops",
+                  "description": "code | asset | design | test | build | ops | project",
                   "type": "string"
                 },
                 "description": {
@@ -2620,7 +2620,7 @@
         "parameters": [
           {
             "type": "string",
-            "description": "code | asset | design | test | build | ops",
+            "description": "code | asset | design | test | build | ops | project",
             "name": "agentType",
             "in": "query",
             "allowEmptyValue": true

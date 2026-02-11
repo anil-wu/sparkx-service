@@ -246,7 +246,7 @@ CREATE TABLE IF NOT EXISTS `agents` (
   `name` VARCHAR(128) NOT NULL,
   `description` TEXT,
   `instruction` TEXT,
-  `agent_type` ENUM('code','asset','design','test','build','ops') NOT NULL DEFAULT 'code',
+  `agent_type` ENUM('code','asset','design','test','build','ops','project') NOT NULL DEFAULT 'code',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
