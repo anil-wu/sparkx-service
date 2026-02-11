@@ -69,6 +69,7 @@ func (l *CreateAgentLogic) CreateAgent(req *types.CreateAgentReq) (resp *types.A
 	a := &model.Agents{
 		Name:        strings.TrimSpace(req.Name),
 		Description: sql.NullString{String: req.Description, Valid: strings.TrimSpace(req.Description) != ""},
+		Instruction: sql.NullString{String: req.Instruction, Valid: strings.TrimSpace(req.Instruction) != ""},
 		AgentType:   agentType,
 	}
 
@@ -80,6 +81,7 @@ func (l *CreateAgentLogic) CreateAgent(req *types.CreateAgentReq) (resp *types.A
 		Id:          int64(a.Id),
 		Name:        a.Name,
 		Description: a.Description.String,
+		Instruction: a.Instruction.String,
 		AgentType:   a.AgentType,
 		CreatedAt:   a.CreatedAt.Format("2006-01-02 15:04:05"),
 	}, nil
@@ -133,10 +135,15 @@ func (l *ListAgentsLogic) ListAgents(req *types.ListAgentsReq) (resp *types.Agen
 
 	out := make([]types.AgentResp, 0, len(list))
 	for _, a := range list {
+		instruction := a.Instruction.String
+		if strings.TrimSpace(instruction) == "" {
+			instruction = a.LegacyCommand.String
+		}
 		out = append(out, types.AgentResp{
 			Id:          int64(a.Id),
 			Name:        a.Name,
 			Description: a.Description.String,
+			Instruction: instruction,
 			AgentType:   a.AgentType,
 			CreatedAt:   a.CreatedAt.Format("2006-01-02 15:04:05"),
 		})
@@ -182,10 +189,15 @@ func (l *GetAgentLogic) GetAgent(req *types.GetAgentReq) (resp *types.AgentResp,
 		return nil, err
 	}
 
+	instruction := a.Instruction.String
+	if strings.TrimSpace(instruction) == "" {
+		instruction = a.LegacyCommand.String
+	}
 	return &types.AgentResp{
 		Id:          int64(a.Id),
 		Name:        a.Name,
 		Description: a.Description.String,
+		Instruction: instruction,
 		AgentType:   a.AgentType,
 		CreatedAt:   a.CreatedAt.Format("2006-01-02 15:04:05"),
 	}, nil
@@ -219,6 +231,9 @@ func (l *UpdateAgentLogic) UpdateAgent(req *types.UpdateAgentReq) (resp *types.B
 	}
 	if req.Description != "" {
 		updates["description"] = req.Description
+	}
+	if req.Instruction != "" {
+		updates["instruction"] = req.Instruction
 	}
 	if req.AgentType != "" {
 		agentType := normalizeAgentType(req.AgentType)

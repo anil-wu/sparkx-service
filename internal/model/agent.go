@@ -6,11 +6,14 @@ import (
 )
 
 type Agents struct {
-	Id          uint64         `db:"id" gorm:"column:id;primaryKey"`
-	Name        string         `db:"name" gorm:"column:name"`
-	Description sql.NullString `db:"description" gorm:"column:description"`
-	AgentType   string         `db:"agent_type" gorm:"column:agent_type"`
-	CreatedAt   time.Time      `db:"created_at" gorm:"column:created_at"`
+	Id            uint64         `db:"id" gorm:"column:id;primaryKey"`
+	Name          string         `db:"name" gorm:"column:name"`
+	Description   sql.NullString `db:"description" gorm:"column:description"`
+	Instruction   sql.NullString `db:"instruction" gorm:"column:instruction"`
+	LegacyCommand sql.NullString `db:"command" gorm:"column:command;->"`
+	AgentType     string         `db:"agent_type" gorm:"column:agent_type"`
+	CreatedAt     time.Time      `db:"created_at" gorm:"column:created_at"`
+	UpdatedAt     time.Time      `db:"updated_at" gorm:"column:updated_at"`
 }
 
 func (Agents) TableName() string { return "agents" }

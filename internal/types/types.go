@@ -68,18 +68,18 @@ type AgentBindingListResp struct {
 }
 
 type AgentBindingResp struct {
-	Id           int64  `json:"id"`
-	AgentId      int64  `json:"agentId"`
-	LlmModelId   int64  `json:"llmModelId"`
-	Priority     int64  `json:"priority"`
-	IsActive     bool   `json:"isActive"`
-	CreatedAt    string `json:"createdAt"`
-	ProviderId   int64  `json:"providerId"`
-	ProviderName string `json:"providerName"`
-	ProviderBaseUrl string `json:"providerBaseUrl"`
-	ProviderHasApiKey bool `json:"providerHasApiKey"`
-	ModelName    string `json:"modelName"`
-	ModelType    string `json:"modelType"`
+	Id                int64  `json:"id"`
+	AgentId           int64  `json:"agentId"`
+	LlmModelId        int64  `json:"llmModelId"`
+	Priority          int64  `json:"priority"`
+	IsActive          bool   `json:"isActive"`
+	CreatedAt         string `json:"createdAt"`
+	ProviderId        int64  `json:"providerId"`
+	ProviderName      string `json:"providerName"`
+	ProviderBaseUrl   string `json:"providerBaseUrl"`
+	ProviderHasApiKey bool   `json:"providerHasApiKey"`
+	ModelName         string `json:"modelName"`
+	ModelType         string `json:"modelType"`
 }
 
 type AgentListResp struct {
@@ -96,6 +96,7 @@ type AgentResp struct {
 	Id          int64  `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	Instruction string `json:"instruction"`
 	AgentType   string `json:"agentType"`
 	CreatedAt   string `json:"createdAt"`
 }
@@ -121,6 +122,7 @@ type CreateAgentBindingReq struct {
 type CreateAgentReq struct {
 	Name        string `json:"name"`
 	Description string `json:"description,optional"`
+	Instruction string `json:"instruction,optional"`
 	AgentType   string `json:"agentType"` // code | asset | design | test | build | ops
 }
 
@@ -555,6 +557,7 @@ type UpdateAgentReq struct {
 	Id          int64  `path:"id"`
 	Name        string `json:"name,optional"`
 	Description string `json:"description,optional"`
+	Instruction string `json:"instruction,optional"`
 	AgentType   string `json:"agentType,optional"` // code | asset | design | test | build | ops
 }
 

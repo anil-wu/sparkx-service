@@ -101,11 +101,16 @@ func (l *GetAgentConfigByNameLogic) GetAgentConfigByName(req *types.GetAgentByNa
 		})
 	}
 
+	instruction := a.Instruction.String
+	if strings.TrimSpace(instruction) == "" {
+		instruction = a.LegacyCommand.String
+	}
 	return &types.AgentConfigResp{
 		Agent: types.AgentResp{
 			Id:          int64(a.Id),
 			Name:        a.Name,
 			Description: a.Description.String,
+			Instruction: instruction,
 			AgentType:   a.AgentType,
 			CreatedAt:   a.CreatedAt.Format("2006-01-02 15:04:05"),
 		},

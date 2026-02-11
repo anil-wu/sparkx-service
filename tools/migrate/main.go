@@ -157,14 +157,14 @@ type SoftwareManifestsTable struct {
 func (SoftwareManifestsTable) TableName() string { return "software_manifests" }
 
 type BuildVersionsTable struct {
-	Id                       uint64         `gorm:"column:id;primaryKey;autoIncrement"`
-	ProjectId                uint64         `gorm:"column:project_id;not null;index:idx_build_versions_project_id"`
-	SoftwareManifestId       uint64         `gorm:"column:software_manifest_id;not null;index:idx_build_versions_software_manifest_id"`
-	Description              sql.NullString `gorm:"column:description;type:text"`
-	BuildVersionFileId       uint64         `gorm:"column:build_version_file_id;type:bigint;not null;default:0"`
-	BuildVersionFileVersionId uint64        `gorm:"column:build_version_file_version_id;type:bigint;not null;default:0"`
-	CreatedAt                time.Time      `gorm:"column:created_at;autoCreateTime;index:idx_build_versions_created_at"`
-	CreatedBy                uint64         `gorm:"column:created_by;not null"`
+	Id                        uint64         `gorm:"column:id;primaryKey;autoIncrement"`
+	ProjectId                 uint64         `gorm:"column:project_id;not null;index:idx_build_versions_project_id"`
+	SoftwareManifestId        uint64         `gorm:"column:software_manifest_id;not null;index:idx_build_versions_software_manifest_id"`
+	Description               sql.NullString `gorm:"column:description;type:text"`
+	BuildVersionFileId        uint64         `gorm:"column:build_version_file_id;type:bigint;not null;default:0"`
+	BuildVersionFileVersionId uint64         `gorm:"column:build_version_file_version_id;type:bigint;not null;default:0"`
+	CreatedAt                 time.Time      `gorm:"column:created_at;autoCreateTime;index:idx_build_versions_created_at"`
+	CreatedBy                 uint64         `gorm:"column:created_by;not null"`
 }
 
 func (BuildVersionsTable) TableName() string { return "build_versions" }
@@ -216,6 +216,7 @@ type AgentsTable struct {
 	Id          uint64         `gorm:"column:id;primaryKey;autoIncrement"`
 	Name        string         `gorm:"column:name;type:varchar(128);not null;uniqueIndex:uk_agents_name_type,priority:1"`
 	Description sql.NullString `gorm:"column:description;type:text"`
+	Instruction sql.NullString `gorm:"column:instruction;type:text"`
 	AgentType   string         `gorm:"column:agent_type;type:enum('code','asset','design','test','build','ops');not null;default:'code';uniqueIndex:uk_agents_name_type,priority:2"`
 	CreatedAt   time.Time      `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt   time.Time      `gorm:"column:updated_at;autoUpdateTime"`
@@ -301,6 +302,34 @@ func enforceSingleBindingPerAgent(db *gorm.DB) error {
 	return nil
 }
 
+func ensureAgentsInstructionColumn(db *gorm.DB) error {
+	if !db.Migrator().HasTable("agents") {
+		return nil
+	}
+
+	var hasInstruction int64
+	if err := db.
+		Raw("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?", "agents", "instruction").
+		Scan(&hasInstruction).Error; err != nil {
+		return err
+	}
+	if hasInstruction > 0 {
+		return nil
+	}
+
+	var hasCommand int64
+	if err := db.
+		Raw("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?", "agents", "command").
+		Scan(&hasCommand).Error; err != nil {
+		return err
+	}
+	if hasCommand == 0 {
+		return nil
+	}
+
+	return db.Exec("ALTER TABLE `agents` CHANGE COLUMN `command` `instruction` TEXT").Error
+}
+
 func migrateWithRetry(targetDSN string) error {
 	var lastErr error
 	for attempt := 1; attempt <= 5; attempt++ {
@@ -322,6 +351,14 @@ func migrateWithRetry(targetDSN string) error {
 		if err := cleanupDuplicateAgentBindings(db); err != nil {
 			lastErr = err
 		} else {
+			if err := ensureAgentsInstructionColumn(db); err != nil {
+				lastErr = err
+				if sqlDB != nil {
+					_ = sqlDB.Close()
+				}
+				time.Sleep(time.Duration(attempt) * time.Second)
+				continue
+			}
 			err = db.AutoMigrate(
 				&UsersTable{},
 				&UserIdentitiesTable{},

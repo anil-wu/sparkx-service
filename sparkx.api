@@ -470,12 +470,14 @@ type (
 	CreateAgentReq {
 		name        string `json:"name"`
 		description string `json:"description,optional"`
+		instruction string `json:"instruction,optional"`
 		agentType   string `json:"agentType"` // code | asset | design | test | build | ops
 	}
 	UpdateAgentReq {
 		id          int64  `path:"id"`
 		name        string `json:"name,optional"`
 		description string `json:"description,optional"`
+		instruction string `json:"instruction,optional"`
 		agentType   string `json:"agentType,optional"` // code | asset | design | test | build | ops
 	}
 	GetAgentReq {
@@ -496,6 +498,7 @@ type (
 		id          int64  `json:"id"`
 		name        string `json:"name"`
 		description string `json:"description"`
+		instruction string `json:"instruction"`
 		agentType   string `json:"agentType"`
 		createdAt   string `json:"createdAt"`
 	}

@@ -245,6 +245,7 @@ CREATE TABLE IF NOT EXISTS `agents` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(128) NOT NULL,
   `description` TEXT,
+  `instruction` TEXT,
   `agent_type` ENUM('code','asset','design','test','build','ops') NOT NULL DEFAULT 'code',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

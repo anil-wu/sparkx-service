@@ -6,6 +6,7 @@ package agents
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/anil-wu/spark-x/internal/model"
 	"github.com/anil-wu/spark-x/internal/svc"
@@ -49,10 +50,15 @@ func (l *GetAvailableAgentLogic) GetAvailableAgent(req *types.GetAgentReq) (resp
 		return nil, err
 	}
 
+	instruction := a.Instruction.String
+	if strings.TrimSpace(instruction) == "" {
+		instruction = a.LegacyCommand.String
+	}
 	return &types.AgentResp{
 		Id:          int64(a.Id),
 		Name:        a.Name,
 		Description: a.Description.String,
+		Instruction: instruction,
 		AgentType:   a.AgentType,
 		CreatedAt:   a.CreatedAt.Format("2006-01-02 15:04:05"),
 	}, nil
