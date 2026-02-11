@@ -66,6 +66,7 @@ func (l *GetAgentConfigByNameLogic) GetAgentConfigByName(req *types.GetAgentByNa
 		ProviderId        uint64    `gorm:"column:provider_id"`
 		ProviderName      string    `gorm:"column:provider_name"`
 		ProviderBaseUrl   string    `gorm:"column:provider_base_url"`
+		ProviderApiKey    string    `gorm:"column:provider_api_key"`
 		ProviderHasApiKey bool      `gorm:"column:provider_has_api_key"`
 		ModelName         string    `gorm:"column:model_name"`
 		ModelType         string    `gorm:"column:model_type"`
@@ -74,7 +75,7 @@ func (l *GetAgentConfigByNameLogic) GetAgentConfigByName(req *types.GetAgentByNa
 	var rows []agentBindingRow
 	if err := l.svcCtx.DB.WithContext(l.ctx).
 		Table("agent_llm_bindings AS b").
-		Select("b.id, b.agent_id, b.llm_model_id, b.priority, b.is_active, b.created_at, m.provider_id, p.name AS provider_name, p.base_url AS provider_base_url, (p.api_key IS NOT NULL AND p.api_key <> '') AS provider_has_api_key, m.model_name, m.model_type").
+		Select("b.id, b.agent_id, b.llm_model_id, b.priority, b.is_active, b.created_at, m.provider_id, p.name AS provider_name, p.base_url AS provider_base_url, p.api_key AS provider_api_key, (p.api_key IS NOT NULL AND p.api_key <> '') AS provider_has_api_key, m.model_name, m.model_type").
 		Joins("JOIN llm_models AS m ON m.id = b.llm_model_id").
 		Joins("JOIN llm_providers AS p ON p.id = m.provider_id").
 		Where("b.agent_id = ? AND b.is_active = ?", a.Id, true).
@@ -95,6 +96,7 @@ func (l *GetAgentConfigByNameLogic) GetAgentConfigByName(req *types.GetAgentByNa
 			ProviderId:        int64(r.ProviderId),
 			ProviderName:      r.ProviderName,
 			ProviderBaseUrl:   r.ProviderBaseUrl,
+			ProviderApiKey:    r.ProviderApiKey,
 			ProviderHasApiKey: r.ProviderHasApiKey,
 			ModelName:         r.ModelName,
 			ModelType:         r.ModelType,

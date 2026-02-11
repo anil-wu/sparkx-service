@@ -539,6 +539,7 @@ type (
 		providerId   int64  `json:"providerId"`
 		providerName string `json:"providerName"`
 		providerBaseUrl string `json:"providerBaseUrl"`
+		providerApiKey string `json:"providerApiKey"`
 		providerHasApiKey bool `json:"providerHasApiKey"`
 		modelName    string `json:"modelName"`
 		modelType    string `json:"modelType"`

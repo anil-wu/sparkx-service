@@ -77,6 +77,7 @@ type AgentBindingResp struct {
 	ProviderId        int64  `json:"providerId"`
 	ProviderName      string `json:"providerName"`
 	ProviderBaseUrl   string `json:"providerBaseUrl"`
+	ProviderApiKey    string `json:"providerApiKey"`
 	ProviderHasApiKey bool   `json:"providerHasApiKey"`
 	ModelName         string `json:"modelName"`
 	ModelType         string `json:"modelType"`
