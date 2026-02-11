@@ -93,6 +93,34 @@ type AgentConfigResp struct {
 	Bindings []AgentBindingResp `json:"bindings"`
 }
 
+type AgentModelResp struct {
+	LlmModelId        int64  `json:"llmModelId"`
+	ProviderId        int64  `json:"providerId"`
+	ProviderName      string `json:"providerName"`
+	ProviderBaseUrl   string `json:"providerBaseUrl"`
+	ProviderApiKey    string `json:"providerApiKey"`
+	ProviderHasApiKey bool   `json:"providerHasApiKey"`
+	ModelName         string `json:"modelName"`
+	ModelType         string `json:"modelType"`
+}
+
+type AgentInfoBindingResp struct {
+	Id         int64 `json:"id"`
+	Priority   int64 `json:"priority"`
+	IsActive   bool  `json:"isActive"`
+	ModelIndex int64 `json:"modelIndex"`
+}
+
+type AgentInfoResp struct {
+	Agent    AgentResp              `json:"agent"`
+	Bindings []AgentInfoBindingResp `json:"bindings"`
+}
+
+type AgentConfigListResp struct {
+	Models     []AgentModelResp `json:"models"`
+	Agentinfos []AgentInfoResp  `json:"agentinfos"`
+}
+
 type AgentResp struct {
 	Id          int64  `json:"id"`
 	Name        string `json:"name"`
@@ -363,6 +391,10 @@ type ListAgentsReq struct {
 	AgentType string `form:"agentType,optional"` // code | asset | design | test | build | ops
 	Page      int64  `form:"page,default=1"`
 	PageSize  int64  `form:"pageSize,default=20"`
+}
+
+type ListAgentConfigsReq struct {
+	AgentType string `form:"agentType,optional"` // code | asset | design | test | build | ops
 }
 
 type ListFileVersionsReq struct {

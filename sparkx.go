@@ -6,11 +6,13 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 
 	"github.com/anil-wu/spark-x/internal/config"
 	"github.com/anil-wu/spark-x/internal/handler"
+	agents "github.com/anil-wu/spark-x/internal/handler/agents"
 	"github.com/anil-wu/spark-x/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
@@ -52,6 +54,17 @@ func main() {
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/agents/configs",
+				Handler: agents.ListAgentConfigsHandler(ctx),
+			},
+		},
+		rest.WithJwt(ctx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	server.Start()

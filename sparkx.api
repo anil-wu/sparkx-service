@@ -494,6 +494,9 @@ type (
 		page      int64  `form:"page,default=1"`
 		pageSize  int64  `form:"pageSize,default=20"`
 	}
+	ListAgentConfigsReq {
+		agentType string `form:"agentType,optional"` // code | asset | design | test | build | ops | project
+	}
 	AgentResp {
 		id          int64  `json:"id"`
 		name        string `json:"name"`
@@ -509,6 +512,30 @@ type (
 	AgentConfigResp {
 		agent    AgentResp         `json:"agent"`
 		bindings []AgentBindingResp `json:"bindings"`
+	}
+	AgentModelResp {
+		llmModelId        int64  `json:"llmModelId"`
+		providerId        int64  `json:"providerId"`
+		providerName      string `json:"providerName"`
+		providerBaseUrl   string `json:"providerBaseUrl"`
+		providerApiKey    string `json:"providerApiKey"`
+		providerHasApiKey bool   `json:"providerHasApiKey"`
+		modelName         string `json:"modelName"`
+		modelType         string `json:"modelType"`
+	}
+	AgentInfoBindingResp {
+		id         int64 `json:"id"`
+		priority   int64 `json:"priority"`
+		isActive   bool  `json:"isActive"`
+		modelIndex int64 `json:"modelIndex"`
+	}
+	AgentInfoResp {
+		agent    AgentResp            `json:"agent"`
+		bindings []AgentInfoBindingResp `json:"bindings"`
+	}
+	AgentConfigListResp {
+		models    []AgentModelResp `json:"models"`
+		agentinfos []AgentInfoResp `json:"agentinfos"`
 	}
 	// Agent bindings
 	ListAgentBindingsReq {
@@ -661,6 +688,9 @@ service sparkx-api {
 service sparkx-api {
 	@handler ListAvailableAgents
 	get /agents (ListAgentsReq) returns (AgentListResp)
+
+	@handler ListAgentConfigs
+	get /agents/configs (ListAgentConfigsReq) returns (AgentConfigListResp)
 
 	@handler GetAvailableAgent
 	get /agents/:id (GetAgentReq) returns (AgentResp)
