@@ -108,6 +108,27 @@ type (
 		createdBy       int64  `json:"createdBy"`
 		createdAt       string `json:"createdAt"`
 	}
+	SoftwareItem {
+		id              int64  `json:"id"`
+		projectId       int64  `json:"projectId"`
+		name            string `json:"name"`
+		description     string `json:"description"`
+		templateId      int64  `json:"templateId"`
+		technologyStack string `json:"technologyStack"`
+		status          string `json:"status"`
+		createdBy       int64  `json:"createdBy"`
+		createdAt       string `json:"createdAt"`
+		updatedAt       string `json:"updatedAt"`
+	}
+	SoftwareListResp {
+		list []SoftwareItem `json:"list"`
+		page PageResp       `json:"page"`
+	}
+	ListProjectSoftwaresReq {
+		projectId int64 `path:"projectId"`
+		page      int64 `form:"page,default=1"`
+		pageSize  int64 `form:"pageSize,default=20"`
+	}
 	CreateSoftwareManifestReq {
 		id                    int64  `json:"id,optional"`
 		projectId             int64  `json:"projectId"`
@@ -125,6 +146,23 @@ type (
 		versionDescription    string `json:"versionDescription"`
 		createdBy             int64  `json:"createdBy"`
 		createdAt             string `json:"createdAt"`
+	}
+	ListLatestSoftwareManifestsReq {
+		projectId    int64  `path:"projectId"`
+		softwareIds  string `form:"software_ids"`
+	}
+	LatestSoftwareManifestItem {
+		softwareId            int64  `json:"softwareId"`
+		hasRecord             bool   `json:"hasRecord"`
+		manifestId            int64  `json:"manifestId"`
+		manifestFileId        int64  `json:"manifestFileId"`
+		manifestFileVersionId int64  `json:"manifestFileVersionId"`
+		versionDescription    string `json:"versionDescription"`
+		createdBy             int64  `json:"createdBy"`
+		createdAt             string `json:"createdAt"`
+	}
+	LatestSoftwareManifestListResp {
+		list []LatestSoftwareManifestItem `json:"list"`
 	}
 	CreateBuildVersionReq {
 		id                        int64  `json:"id,optional"`
@@ -660,6 +698,12 @@ service sparkx-api {
 	jwt:    Auth
 )
 service sparkx-api {
+	@handler ListProjectSoftwares
+	get /projects/:projectId/softwares (ListProjectSoftwaresReq) returns (SoftwareListResp)
+
+	@handler ListLatestSoftwareManifests
+	get /projects/:projectId/software_manifests (ListLatestSoftwareManifestsReq) returns (LatestSoftwareManifestListResp)
+
 	@handler CreateSoftware
 	post /projects/:projectId/softwares (CreateSoftwareReq) returns (CreateSoftwareResp)
 

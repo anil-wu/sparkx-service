@@ -252,6 +252,26 @@ type CreateSoftwareManifestResp struct {
 	CreatedAt             string `json:"createdAt"`
 }
 
+type ListLatestSoftwareManifestsReq struct {
+	ProjectId   int64  `path:"projectId"`
+	SoftwareIds string `form:"software_ids"`
+}
+
+type LatestSoftwareManifestItem struct {
+	SoftwareId            int64  `json:"softwareId"`
+	HasRecord             bool   `json:"hasRecord"`
+	ManifestId            int64  `json:"manifestId"`
+	ManifestFileId        int64  `json:"manifestFileId"`
+	ManifestFileVersionId int64  `json:"manifestFileVersionId"`
+	VersionDescription    string `json:"versionDescription"`
+	CreatedBy             int64  `json:"createdBy"`
+	CreatedAt             string `json:"createdAt"`
+}
+
+type LatestSoftwareManifestListResp struct {
+	List []LatestSoftwareManifestItem `json:"list"`
+}
+
 type CreateSoftwareReq struct {
 	ProjectId       int64  `path:"projectId"`
 	Name            string `json:"name"`
@@ -271,6 +291,30 @@ type CreateSoftwareResp struct {
 	Status          string `json:"status"`
 	CreatedBy       int64  `json:"createdBy"`
 	CreatedAt       string `json:"createdAt"`
+}
+
+type ListProjectSoftwaresReq struct {
+	ProjectId int64 `path:"projectId"`
+	Page      int64 `form:"page,default=1"`
+	PageSize  int64 `form:"pageSize,default=20"`
+}
+
+type SoftwareItem struct {
+	Id              int64  `json:"id"`
+	ProjectId       int64  `json:"projectId"`
+	Name            string `json:"name"`
+	Description     string `json:"description"`
+	TemplateId      int64  `json:"templateId"`
+	TechnologyStack string `json:"technologyStack"`
+	Status          string `json:"status"`
+	CreatedBy       int64  `json:"createdBy"`
+	CreatedAt       string `json:"createdAt"`
+	UpdatedAt       string `json:"updatedAt"`
+}
+
+type SoftwareListResp struct {
+	List []SoftwareItem `json:"list"`
+	Page PageResp       `json:"page"`
 }
 
 type CreateSoftwareTemplateReq struct {

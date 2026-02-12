@@ -366,6 +366,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				Method:  http.MethodGet,
+				Path:    "/projects/:projectId/softwares",
+				Handler: softwares.ListProjectSoftwaresHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/projects/:projectId/software_manifests",
+				Handler: softwares.ListLatestSoftwareManifestsHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPost,
 				Path:    "/projects/:projectId/softwares",
 				Handler: softwares.CreateSoftwareHandler(serverCtx),
