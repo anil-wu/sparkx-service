@@ -212,7 +212,7 @@ func (l *ListAgentConfigsLogic) ListAgentConfigs(req *types.ListAgentConfigsReq)
 				ProviderId:        int64(r.ProviderId),
 				ProviderName:      r.ProviderName,
 				ProviderBaseUrl:   r.ProviderBaseUrl,
-				ProviderApiKey:    "",
+				ProviderApiKey:    r.ProviderApiKey,
 				ProviderHasApiKey: r.ProviderHasApiKey,
 				ModelName:         r.ModelName,
 				ModelType:         r.ModelType,
