@@ -695,6 +695,17 @@ service sparkx-api {
 	get /files/:id/content (GetFileContentReq)
 }
 
+// 模板下载接口 - 需要普通用户认证
+@server (
+	group:  files
+	prefix: /api/v1
+	jwt:    Auth
+)
+service sparkx-api {
+	@handler DownloadTemplate
+	get /files/:id/download-template (DownloadFileReq) returns (DownloadFileResp)
+}
+
 @server (
 	group:  files
 	prefix: /api/v1/admin

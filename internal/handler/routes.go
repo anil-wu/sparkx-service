@@ -335,14 +335,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/files/:id/download",
-				Handler: files.DownloadFileHandler(serverCtx),
+				Path:    "/files/:id/download-template",
+				Handler: files.DownloadTemplateHandler(serverCtx),
 			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/files/:id/versions",
-				Handler: files.ListFileVersionsHandler(serverCtx),
-			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
 			{
 				Method:  http.MethodPost,
 				Path:    "/files/preupload",
