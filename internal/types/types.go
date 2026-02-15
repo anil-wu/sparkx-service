@@ -83,25 +83,14 @@ type AgentBindingResp struct {
 	ModelType         string `json:"modelType"`
 }
 
-type AgentListResp struct {
-	List []AgentResp `json:"list"`
-	Page PageResp    `json:"page"`
+type AgentConfigListResp struct {
+	Models     []AgentModelResp `json:"models"`
+	Agentinfos []AgentInfoResp  `json:"agentinfos"`
 }
 
 type AgentConfigResp struct {
 	Agent    AgentResp          `json:"agent"`
 	Bindings []AgentBindingResp `json:"bindings"`
-}
-
-type AgentModelResp struct {
-	LlmModelId        int64  `json:"llmModelId"`
-	ProviderId        int64  `json:"providerId"`
-	ProviderName      string `json:"providerName"`
-	ProviderBaseUrl   string `json:"providerBaseUrl"`
-	ProviderApiKey    string `json:"providerApiKey"`
-	ProviderHasApiKey bool   `json:"providerHasApiKey"`
-	ModelName         string `json:"modelName"`
-	ModelType         string `json:"modelType"`
 }
 
 type AgentInfoBindingResp struct {
@@ -116,9 +105,20 @@ type AgentInfoResp struct {
 	Bindings []AgentInfoBindingResp `json:"bindings"`
 }
 
-type AgentConfigListResp struct {
-	Models     []AgentModelResp `json:"models"`
-	Agentinfos []AgentInfoResp  `json:"agentinfos"`
+type AgentListResp struct {
+	List []AgentResp `json:"list"`
+	Page PageResp    `json:"page"`
+}
+
+type AgentModelResp struct {
+	LlmModelId        int64  `json:"llmModelId"`
+	ProviderId        int64  `json:"providerId"`
+	ProviderName      string `json:"providerName"`
+	ProviderBaseUrl   string `json:"providerBaseUrl"`
+	ProviderApiKey    string `json:"providerApiKey"`
+	ProviderHasApiKey bool   `json:"providerHasApiKey"`
+	ModelName         string `json:"modelName"`
+	ModelType         string `json:"modelType"`
 }
 
 type AgentResp struct {
@@ -252,26 +252,6 @@ type CreateSoftwareManifestResp struct {
 	CreatedAt             string `json:"createdAt"`
 }
 
-type ListLatestSoftwareManifestsReq struct {
-	ProjectId   int64  `path:"projectId"`
-	SoftwareIds string `form:"software_ids"`
-}
-
-type LatestSoftwareManifestItem struct {
-	SoftwareId            int64  `json:"softwareId"`
-	HasRecord             bool   `json:"hasRecord"`
-	ManifestId            int64  `json:"manifestId"`
-	ManifestFileId        int64  `json:"manifestFileId"`
-	ManifestFileVersionId int64  `json:"manifestFileVersionId"`
-	VersionDescription    string `json:"versionDescription"`
-	CreatedBy             int64  `json:"createdBy"`
-	CreatedAt             string `json:"createdAt"`
-}
-
-type LatestSoftwareManifestListResp struct {
-	List []LatestSoftwareManifestItem `json:"list"`
-}
-
 type CreateSoftwareReq struct {
 	ProjectId       int64  `path:"projectId"`
 	Name            string `json:"name"`
@@ -291,30 +271,6 @@ type CreateSoftwareResp struct {
 	Status          string `json:"status"`
 	CreatedBy       int64  `json:"createdBy"`
 	CreatedAt       string `json:"createdAt"`
-}
-
-type ListProjectSoftwaresReq struct {
-	ProjectId int64 `path:"projectId"`
-	Page      int64 `form:"page,default=1"`
-	PageSize  int64 `form:"pageSize,default=20"`
-}
-
-type SoftwareItem struct {
-	Id              int64  `json:"id"`
-	ProjectId       int64  `json:"projectId"`
-	Name            string `json:"name"`
-	Description     string `json:"description"`
-	TemplateId      int64  `json:"templateId"`
-	TechnologyStack string `json:"technologyStack"`
-	Status          string `json:"status"`
-	CreatedBy       int64  `json:"createdBy"`
-	CreatedAt       string `json:"createdAt"`
-	UpdatedAt       string `json:"updatedAt"`
-}
-
-type SoftwareListResp struct {
-	List []SoftwareItem `json:"list"`
-	Page PageResp       `json:"page"`
 }
 
 type CreateSoftwareTemplateReq struct {
@@ -383,12 +339,12 @@ type FileVersionListResp struct {
 	Page PageResp          `json:"page"`
 }
 
-type GetAgentReq struct {
-	Id int64 `path:"id"`
-}
-
 type GetAgentByNameReq struct {
 	Name string `path:"name"`
+}
+
+type GetAgentReq struct {
+	Id int64 `path:"id"`
 }
 
 type GetFileContentReq struct {
@@ -407,6 +363,10 @@ type GetProjectReq struct {
 	Id int64 `path:"id"`
 }
 
+type GetSoftwareTemplateByNameReq struct {
+	Name string `path:"name"`
+}
+
 type GetSoftwareTemplateReq struct {
 	Id int64 `path:"id"`
 }
@@ -422,6 +382,21 @@ type InviteMemberReq struct {
 	Role          string `json:"role"` // owner | admin | developer | viewer
 }
 
+type LatestSoftwareManifestItem struct {
+	SoftwareId            int64  `json:"softwareId"`
+	HasRecord             bool   `json:"hasRecord"`
+	ManifestId            int64  `json:"manifestId"`
+	ManifestFileId        int64  `json:"manifestFileId"`
+	ManifestFileVersionId int64  `json:"manifestFileVersionId"`
+	VersionDescription    string `json:"versionDescription"`
+	CreatedBy             int64  `json:"createdBy"`
+	CreatedAt             string `json:"createdAt"`
+}
+
+type LatestSoftwareManifestListResp struct {
+	List []LatestSoftwareManifestItem `json:"list"`
+}
+
 type ListAdminsReq struct {
 	Page     int64 `form:"page,default=1"`
 	PageSize int64 `form:"pageSize,default=20"`
@@ -431,20 +406,25 @@ type ListAgentBindingsReq struct {
 	AgentId int64 `path:"id"`
 }
 
-type ListAgentsReq struct {
-	AgentType string `form:"agentType,optional"` // code | asset | design | test | build | ops
-	Page      int64  `form:"page,default=1"`
-	PageSize  int64  `form:"pageSize,default=20"`
+type ListAgentConfigsReq struct {
+	AgentType string `form:"agentType,optional"` // code | asset | design | test | build | ops | project
 }
 
-type ListAgentConfigsReq struct {
-	AgentType string `form:"agentType,optional"` // code | asset | design | test | build | ops
+type ListAgentsReq struct {
+	AgentType string `form:"agentType,optional"` // code | asset | design | test | build | ops | project
+	Page      int64  `form:"page,default=1"`
+	PageSize  int64  `form:"pageSize,default=20"`
 }
 
 type ListFileVersionsReq struct {
 	Id       int64 `path:"id"`
 	Page     int64 `form:"page,default=1"`
 	PageSize int64 `form:"pageSize,default=20"`
+}
+
+type ListLatestSoftwareManifestsReq struct {
+	ProjectId   int64  `path:"projectId"`
+	SoftwareIds string `form:"software_ids"`
 }
 
 type ListLlmModelsReq struct {
@@ -462,6 +442,12 @@ type ListLlmUsageLogsReq struct {
 }
 
 type ListProjectFilesReq struct {
+	ProjectId int64 `path:"projectId"`
+	Page      int64 `form:"page,default=1"`
+	PageSize  int64 `form:"pageSize,default=20"`
+}
+
+type ListProjectSoftwaresReq struct {
 	ProjectId int64 `path:"projectId"`
 	Page      int64 `form:"page,default=1"`
 	PageSize  int64 `form:"pageSize,default=20"`
@@ -601,6 +587,24 @@ type RollbackVersionReq struct {
 	VersionNumber int64 `json:"versionNumber"`
 }
 
+type SoftwareItem struct {
+	Id              int64  `json:"id"`
+	ProjectId       int64  `json:"projectId"`
+	Name            string `json:"name"`
+	Description     string `json:"description"`
+	TemplateId      int64  `json:"templateId"`
+	TechnologyStack string `json:"technologyStack"`
+	Status          string `json:"status"`
+	CreatedBy       int64  `json:"createdBy"`
+	CreatedAt       string `json:"createdAt"`
+	UpdatedAt       string `json:"updatedAt"`
+}
+
+type SoftwareListResp struct {
+	List []SoftwareItem `json:"list"`
+	Page PageResp       `json:"page"`
+}
+
 type SoftwareTemplateListResp struct {
 	List []SoftwareTemplateResp `json:"list"`
 	Page PageResp               `json:"page"`
@@ -635,7 +639,7 @@ type UpdateAgentReq struct {
 	Name        string `json:"name,optional"`
 	Description string `json:"description,optional"`
 	Instruction string `json:"instruction,optional"`
-	AgentType   string `json:"agentType,optional"` // code | asset | design | test | build | ops
+	AgentType   string `json:"agentType,optional"` // code | asset | design | test | build | ops | project
 }
 
 type UpdateLlmModelReq struct {

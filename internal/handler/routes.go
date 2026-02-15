@@ -238,18 +238,23 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodGet,
+				Path:    "/agents/:id/bindings",
+				Handler: agents.ListAvailableAgentBindingsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
 				Path:    "/agents/by-name/:name",
 				Handler: agents.GetAgentConfigByNameHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
-				Path:    "/agents/:id",
-				Handler: agents.GetAvailableAgentHandler(serverCtx),
+				Path:    "/agents/configs",
+				Handler: agents.ListAgentConfigsHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
-				Path:    "/agents/:id/bindings",
-				Handler: agents.ListAvailableAgentBindingsHandler(serverCtx),
+				Path:    "/agents/id/:id",
+				Handler: agents.GetAvailableAgentHandler(serverCtx),
 			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
@@ -329,6 +334,28 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				Method:  http.MethodGet,
+				Path:    "/files/:id/download",
+				Handler: files.DownloadFileHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/files/:id/versions",
+				Handler: files.ListFileVersionsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/files/preupload",
+				Handler: files.PreUploadFileAdminHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.AdminAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/admin"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
 				Method:  http.MethodPost,
 				Path:    "/projects",
 				Handler: projects.CreateProjectHandler(serverCtx),
@@ -367,13 +394,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/projects/:projectId/softwares",
-				Handler: softwares.ListProjectSoftwaresHandler(serverCtx),
+				Path:    "/projects/:projectId/software_manifests",
+				Handler: softwares.ListLatestSoftwareManifestsHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
-				Path:    "/projects/:projectId/software_manifests",
-				Handler: softwares.ListLatestSoftwareManifestsHandler(serverCtx),
+				Path:    "/projects/:projectId/softwares",
+				Handler: softwares.ListProjectSoftwaresHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
@@ -387,6 +414,27 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/software-templates",
+				Handler: softwares.ListSoftwareTemplatesPublicHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/software-templates/:id",
+				Handler: softwares.GetSoftwareTemplatePublicHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/software-templates/by-name/:name",
+				Handler: softwares.GetSoftwareTemplateByNamePublicHandler(serverCtx),
+			},
+		},
 		rest.WithPrefix("/api/v1"),
 	)
 

@@ -148,8 +148,8 @@ type (
 		createdAt             string `json:"createdAt"`
 	}
 	ListLatestSoftwareManifestsReq {
-		projectId    int64  `path:"projectId"`
-		softwareIds  string `form:"software_ids"`
+		projectId   int64  `path:"projectId"`
+		softwareIds string `form:"software_ids"`
 	}
 	LatestSoftwareManifestItem {
 		softwareId            int64  `json:"softwareId"`
@@ -379,6 +379,9 @@ type (
 	GetSoftwareTemplateReq {
 		id int64 `path:"id"`
 	}
+	GetSoftwareTemplateByNameReq {
+		name string `path:"name"`
+	}
 	DeleteSoftwareTemplateReq {
 		id int64 `path:"id"`
 	}
@@ -548,7 +551,7 @@ type (
 		page PageResp    `json:"page"`
 	}
 	AgentConfigResp {
-		agent    AgentResp         `json:"agent"`
+		agent    AgentResp          `json:"agent"`
 		bindings []AgentBindingResp `json:"bindings"`
 	}
 	AgentModelResp {
@@ -568,12 +571,12 @@ type (
 		modelIndex int64 `json:"modelIndex"`
 	}
 	AgentInfoResp {
-		agent    AgentResp            `json:"agent"`
+		agent    AgentResp              `json:"agent"`
 		bindings []AgentInfoBindingResp `json:"bindings"`
 	}
 	AgentConfigListResp {
-		models    []AgentModelResp `json:"models"`
-		agentinfos []AgentInfoResp `json:"agentinfos"`
+		models     []AgentModelResp `json:"models"`
+		agentinfos []AgentInfoResp  `json:"agentinfos"`
 	}
 	// Agent bindings
 	ListAgentBindingsReq {
@@ -595,19 +598,19 @@ type (
 		id int64 `path:"id"`
 	}
 	AgentBindingResp {
-		id           int64  `json:"id"`
-		agentId      int64  `json:"agentId"`
-		llmModelId   int64  `json:"llmModelId"`
-		priority     int64  `json:"priority"`
-		isActive     bool   `json:"isActive"`
-		createdAt    string `json:"createdAt"`
-		providerId   int64  `json:"providerId"`
-		providerName string `json:"providerName"`
-		providerBaseUrl string `json:"providerBaseUrl"`
-		providerApiKey string `json:"providerApiKey"`
-		providerHasApiKey bool `json:"providerHasApiKey"`
-		modelName    string `json:"modelName"`
-		modelType    string `json:"modelType"`
+		id                int64  `json:"id"`
+		agentId           int64  `json:"agentId"`
+		llmModelId        int64  `json:"llmModelId"`
+		priority          int64  `json:"priority"`
+		isActive          bool   `json:"isActive"`
+		createdAt         string `json:"createdAt"`
+		providerId        int64  `json:"providerId"`
+		providerName      string `json:"providerName"`
+		providerBaseUrl   string `json:"providerBaseUrl"`
+		providerApiKey    string `json:"providerApiKey"`
+		providerHasApiKey bool   `json:"providerHasApiKey"`
+		modelName         string `json:"modelName"`
+		modelType         string `json:"modelType"`
 	}
 	AgentBindingListResp {
 		list []AgentBindingResp `json:"list"`
@@ -693,6 +696,16 @@ service sparkx-api {
 }
 
 @server (
+	group:  files
+	prefix: /api/v1/admin
+	jwt:    AdminAuth
+)
+service sparkx-api {
+	@handler PreUploadFileAdmin
+	post /files/preupload (PreUploadReq) returns (PreUploadResp)
+}
+
+@server (
 	group:  softwares
 	prefix: /api/v1
 	jwt:    Auth
@@ -709,6 +722,21 @@ service sparkx-api {
 
 	@handler CreateSoftwareManifest
 	post /software-manifests (CreateSoftwareManifestReq) returns (CreateSoftwareManifestResp)
+}
+
+@server (
+	group:  softwares
+	prefix: /api/v1
+)
+service sparkx-api {
+	@handler ListSoftwareTemplatesPublic
+	get /software-templates (PageReq) returns (SoftwareTemplateListResp)
+
+	@handler GetSoftwareTemplateByNamePublic
+	get /software-templates/by-name/:name (GetSoftwareTemplateByNameReq) returns (SoftwareTemplateResp)
+
+	@handler GetSoftwareTemplatePublic
+	get /software-templates/:id (GetSoftwareTemplateReq) returns (SoftwareTemplateResp)
 }
 
 @server (
@@ -737,7 +765,7 @@ service sparkx-api {
 	get /agents/configs (ListAgentConfigsReq) returns (AgentConfigListResp)
 
 	@handler GetAvailableAgent
-	get /agents/:id (GetAgentReq) returns (AgentResp)
+	get /agents/id/:id (GetAgentReq) returns (AgentResp)
 
 	@handler ListAvailableAgentBindings
 	get /agents/:id/bindings (ListAgentBindingsReq) returns (AgentBindingListResp)
@@ -875,3 +903,4 @@ service sparkx-api {
 	@handler DeleteAgentBinding
 	delete /agent-bindings/:id (DeleteAgentBindingReq) returns (BaseResp)
 }
+

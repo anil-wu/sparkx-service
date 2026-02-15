@@ -5,6 +5,8 @@ package svc
 
 import (
 	"context"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
@@ -33,6 +35,46 @@ type ServiceContext struct {
 
 	OSSClient *oss.Client
 	OSSBucket *oss.Bucket
+}
+
+func normalizeOSSEndpoint(rawEndpoint, bucket string) string {
+	raw := strings.TrimSpace(rawEndpoint)
+	if raw == "" {
+		return raw
+	}
+
+	b := strings.TrimSpace(bucket)
+
+	var scheme string
+	var host string
+
+	u, err := url.Parse(raw)
+	if err == nil && u.Host != "" {
+		scheme = u.Scheme
+		host = u.Host
+	} else {
+		u2, err2 := url.Parse("https://" + raw)
+		if err2 == nil && u2.Host != "" {
+			scheme = "https"
+			host = u2.Host
+		} else {
+			host = raw
+		}
+	}
+
+	host = strings.TrimSuffix(host, "/")
+
+	if b != "" {
+		prefix := b + "."
+		for strings.HasPrefix(host, prefix) {
+			host = strings.TrimPrefix(host, prefix)
+		}
+	}
+
+	if scheme != "" {
+		return scheme + "://" + host
+	}
+	return host
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -88,7 +130,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	var ossClient *oss.Client
 	var bucket *oss.Bucket
 	if c.OSS.Endpoint != "" && c.OSS.Bucket != "" {
-		ossClient, err = oss.New(c.OSS.Endpoint, c.OSS.AccessKeyId, c.OSS.AccessKeySecret)
+		endpoint := normalizeOSSEndpoint(c.OSS.Endpoint, c.OSS.Bucket)
+		ossClient, err = oss.New(endpoint, c.OSS.AccessKeyId, c.OSS.AccessKeySecret)
 		if err != nil {
 			logx.Errorf("oss init failed: %v", err)
 		} else {
