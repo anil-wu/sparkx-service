@@ -135,6 +135,22 @@ type BaseResp struct {
 	Msg  string `json:"msg"`
 }
 
+type BuildVersionItem struct {
+	BuildVersionId            int64  `json:"buildVersionId"`
+	ProjectId                 int64  `json:"projectId"`
+	SoftwareManifestId        int64  `json:"softwareManifestId"`
+	Description               string `json:"description"`
+	BuildVersionFileId        int64  `json:"buildVersionFileId"`
+	BuildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
+	CreatedBy                 int64  `json:"createdBy"`
+	CreatedAt                 string `json:"createdAt"`
+}
+
+type BuildVersionListResp struct {
+	List []BuildVersionItem `json:"list"`
+	Page PageResp           `json:"page"`
+}
+
 type CreateAdminReq struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -414,6 +430,12 @@ type ListAgentsReq struct {
 	AgentType string `form:"agentType,optional"` // code | asset | design | test | build | ops | project
 	Page      int64  `form:"page,default=1"`
 	PageSize  int64  `form:"pageSize,default=20"`
+}
+
+type ListBuildVersionsReq struct {
+	ProjectId int64 `path:"projectId"`
+	Page      int64 `form:"page,default=1"`
+	PageSize  int64 `form:"pageSize,default=20"`
 }
 
 type ListFileVersionsReq struct {

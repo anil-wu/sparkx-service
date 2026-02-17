@@ -182,6 +182,25 @@ type (
 		createdBy                 int64  `json:"createdBy"`
 		createdAt                 string `json:"createdAt"`
 	}
+	ListBuildVersionsReq {
+		projectId int64 `path:"projectId"`
+		page      int64 `form:"page,default=1"`
+		pageSize  int64 `form:"pageSize,default=20"`
+	}
+	BuildVersionItem {
+		buildVersionId            int64  `json:"buildVersionId"`
+		projectId                 int64  `json:"projectId"`
+		softwareManifestId        int64  `json:"softwareManifestId"`
+		description               string `json:"description"`
+		buildVersionFileId        int64  `json:"buildVersionFileId"`
+		buildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
+		createdBy                 int64  `json:"createdBy"`
+		createdAt                 string `json:"createdAt"`
+	}
+	BuildVersionListResp {
+		list []BuildVersionItem `json:"list"`
+		page PageResp           `json:"page"`
+	}
 	CreateReleaseReq {
 		id                           int64  `json:"id,optional"`
 		projectId                    int64  `json:"projectId"`
@@ -756,6 +775,9 @@ service sparkx-api {
 	jwt:    Auth
 )
 service sparkx-api {
+	@handler ListBuildVersions
+	get /projects/:projectId/build-versions (ListBuildVersionsReq) returns (BuildVersionListResp)
+
 	@handler CreateBuildVersion
 	post /build-versions (CreateBuildVersionReq) returns (CreateBuildVersionResp)
 

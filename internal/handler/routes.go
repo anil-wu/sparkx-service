@@ -280,6 +280,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: builds.CreateBuildVersionHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodGet,
+				Path:    "/projects/:projectId/build-versions",
+				Handler: builds.ListBuildVersionsHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPost,
 				Path:    "/releases",
 				Handler: builds.CreateReleaseHandler(serverCtx),
