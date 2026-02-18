@@ -144,13 +144,15 @@ CREATE TABLE IF NOT EXISTS `software_manifests` (
   `software_id` BIGINT UNSIGNED NOT NULL,
   `manifest_file_id` BIGINT UNSIGNED NOT NULL,
   `manifest_file_version_id` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  `version_number` INT UNSIGNED NOT NULL DEFAULT 0,
   `version_description` TEXT,
   `created_by` BIGINT UNSIGNED NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_software_manifests_project_id` (`project_id`),
   KEY `idx_software_manifests_software_id` (`software_id`),
-  KEY `idx_software_manifests_manifest_file_id` (`manifest_file_id`)
+  KEY `idx_software_manifests_manifest_file_id` (`manifest_file_id`),
+  KEY `idx_software_manifests_version_number` (`version_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- build_versions

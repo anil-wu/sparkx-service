@@ -26,6 +26,7 @@ type SoftwareManifests struct {
 	SoftwareId            uint64         `db:"software_id" gorm:"column:software_id"`
 	ManifestFileId        uint64         `db:"manifest_file_id" gorm:"column:manifest_file_id"`
 	ManifestFileVersionId uint64         `db:"manifest_file_version_id" gorm:"column:manifest_file_version_id"`
+	VersionNumber         uint32         `db:"version_number" gorm:"column:version_number"`
 	VersionDescription    sql.NullString `db:"version_description" gorm:"column:version_description"`
 	CreatedAt             time.Time      `db:"created_at" gorm:"column:created_at"`
 	CreatedBy             uint64         `db:"created_by" gorm:"column:created_by"`

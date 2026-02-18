@@ -99,6 +99,7 @@ func (l *ListLatestSoftwareManifestsLogic) ListLatestSoftwareManifests(req *type
 			ManifestId:            int64(m.Id),
 			ManifestFileId:        int64(m.ManifestFileId),
 			ManifestFileVersionId: int64(m.ManifestFileVersionId),
+			VersionNumber:         int64(m.VersionNumber),
 			VersionDescription:    m.VersionDescription.String,
 			CreatedBy:             int64(m.CreatedBy),
 			CreatedAt:             m.CreatedAt.Format("2006-01-02 15:04:05"),

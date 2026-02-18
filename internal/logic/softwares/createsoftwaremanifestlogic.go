@@ -83,11 +83,21 @@ func (l *CreateSoftwareManifestLogic) CreateSoftwareManifest(req *types.CreateSo
 		}
 	}()
 
+	// 获取当前软件工程下最大的 version_number
+	var maxVersionNumber uint32
+	if err := tx.Model(&model.SoftwareManifests{}).
+		Where("software_id = ?", req.SoftwareId).
+		Select("COALESCE(MAX(version_number), 0)").
+		Scan(&maxVersionNumber).Error; err != nil {
+		return nil, err
+	}
+
 	sm := &model.SoftwareManifests{
 		ProjectId:             uint64(req.ProjectId),
 		SoftwareId:            uint64(req.SoftwareId),
 		ManifestFileId:        uint64(req.ManifestFileId),
 		ManifestFileVersionId: uint64(req.ManifestFileVersionId),
+		VersionNumber:         maxVersionNumber + 1,
 		VersionDescription:    sql.NullString{String: req.VersionDescription, Valid: strings.TrimSpace(req.VersionDescription) != ""},
 		CreatedBy:             uint64(userId),
 	}
@@ -109,6 +119,7 @@ func (l *CreateSoftwareManifestLogic) CreateSoftwareManifest(req *types.CreateSo
 		SoftwareId:            req.SoftwareId,
 		ManifestFileId:        req.ManifestFileId,
 		ManifestFileVersionId: req.ManifestFileVersionId,
+		VersionNumber:         int64(sm.VersionNumber),
 		VersionDescription:    sm.VersionDescription.String,
 		CreatedBy:             int64(sm.CreatedBy),
 		CreatedAt:             sm.CreatedAt.Format("2006-01-02 15:04:05"),

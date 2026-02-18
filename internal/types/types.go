@@ -266,6 +266,7 @@ type CreateSoftwareManifestResp struct {
 	SoftwareId            int64  `json:"softwareId"`
 	ManifestFileId        int64  `json:"manifestFileId"`
 	ManifestFileVersionId int64  `json:"manifestFileVersionId"`
+	VersionNumber         int64  `json:"versionNumber"`
 	VersionDescription    string `json:"versionDescription"`
 	CreatedBy             int64  `json:"createdBy"`
 	CreatedAt             string `json:"createdAt"`
@@ -407,6 +408,7 @@ type LatestSoftwareManifestItem struct {
 	ManifestId            int64  `json:"manifestId"`
 	ManifestFileId        int64  `json:"manifestFileId"`
 	ManifestFileVersionId int64  `json:"manifestFileVersionId"`
+	VersionNumber         int64  `json:"versionNumber"`
 	VersionDescription    string `json:"versionDescription"`
 	CreatedBy             int64  `json:"createdBy"`
 	CreatedAt             string `json:"createdAt"`

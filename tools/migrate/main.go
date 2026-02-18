@@ -150,6 +150,7 @@ type SoftwareManifestsTable struct {
 	SoftwareId            uint64         `gorm:"column:software_id;not null;index:idx_software_manifests_software_id"`
 	ManifestFileId        uint64         `gorm:"column:manifest_file_id;not null;index:idx_software_manifests_manifest_file_id"`
 	ManifestFileVersionId uint64         `gorm:"column:manifest_file_version_id;type:bigint;not null;default:0"`
+	VersionNumber         uint32         `gorm:"column:version_number;type:int unsigned;not null;default:0;index:idx_software_manifests_version_number"`
 	VersionDescription    sql.NullString `gorm:"column:version_description;type:text"`
 	CreatedBy             uint64         `gorm:"column:created_by;not null"`
 	CreatedAt             time.Time      `gorm:"column:created_at;autoCreateTime"`
