@@ -70,9 +70,27 @@ func (l *CreateBuildVersionLogic) CreateBuildVersion(req *types.CreateBuildVersi
 		}
 	}()
 
+	// 如果未提供 version_number，自动计算下一个版本号
+	versionNumber := uint32(req.VersionNumber)
+	if versionNumber == 0 {
+		var maxVersionNumber sql.NullInt64
+		if err := l.svcCtx.DB.WithContext(l.ctx).Model(&model.BuildVersions{}).
+			Where("project_id = ? AND software_manifest_id = ?", req.ProjectId, req.SoftwareManifestId).
+			Select("MAX(version_number)").
+			Scan(&maxVersionNumber).Error; err != nil {
+			return nil, err
+		}
+		if maxVersionNumber.Valid {
+			versionNumber = uint32(maxVersionNumber.Int64) + 1
+		} else {
+			versionNumber = 1
+		}
+	}
+
 	bv := &model.BuildVersions{
 		ProjectId:                 uint64(req.ProjectId),
 		SoftwareManifestId:        uint64(req.SoftwareManifestId),
+		VersionNumber:             versionNumber,
 		Description:               sql.NullString{String: req.Description, Valid: strings.TrimSpace(req.Description) != ""},
 		BuildVersionFileId:        uint64(req.BuildVersionFileId),
 		BuildVersionFileVersionId: uint64(req.BuildVersionFileVersionId),
@@ -94,6 +112,7 @@ func (l *CreateBuildVersionLogic) CreateBuildVersion(req *types.CreateBuildVersi
 		BuildVersionId:            int64(bv.Id),
 		ProjectId:                 req.ProjectId,
 		SoftwareManifestId:        req.SoftwareManifestId,
+		VersionNumber:             int64(bv.VersionNumber),
 		Description:               bv.Description.String,
 		BuildVersionFileId:        req.BuildVersionFileId,
 		BuildVersionFileVersionId: req.BuildVersionFileVersionId,
@@ -101,4 +120,3 @@ func (l *CreateBuildVersionLogic) CreateBuildVersion(req *types.CreateBuildVersi
 		CreatedAt:                 bv.CreatedAt.Format("2006-01-02 15:04:05"),
 	}, nil
 }
-

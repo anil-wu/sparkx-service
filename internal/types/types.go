@@ -139,6 +139,7 @@ type BuildVersionItem struct {
 	BuildVersionId            int64  `json:"buildVersionId"`
 	ProjectId                 int64  `json:"projectId"`
 	SoftwareManifestId        int64  `json:"softwareManifestId"`
+	VersionNumber             int64  `json:"versionNumber"`
 	Description               string `json:"description"`
 	BuildVersionFileId        int64  `json:"buildVersionFileId"`
 	BuildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
@@ -175,6 +176,7 @@ type CreateBuildVersionReq struct {
 	Id                        int64  `json:"id,optional"`
 	ProjectId                 int64  `json:"projectId"`
 	SoftwareManifestId        int64  `json:"softwareManifestId"`
+	VersionNumber             int64  `json:"versionNumber,optional"`
 	Description               string `json:"description,optional"`
 	BuildVersionFileId        int64  `json:"buildVersionFileId"`
 	BuildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
@@ -184,6 +186,7 @@ type CreateBuildVersionResp struct {
 	BuildVersionId            int64  `json:"buildVersionId"`
 	ProjectId                 int64  `json:"projectId"`
 	SoftwareManifestId        int64  `json:"softwareManifestId"`
+	VersionNumber             int64  `json:"versionNumber"`
 	Description               string `json:"description"`
 	BuildVersionFileId        int64  `json:"buildVersionFileId"`
 	BuildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`

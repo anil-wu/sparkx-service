@@ -168,6 +168,7 @@ type (
 		id                        int64  `json:"id,optional"`
 		projectId                 int64  `json:"projectId"`
 		softwareManifestId        int64  `json:"softwareManifestId"`
+		versionNumber             int64  `json:"versionNumber,optional"`
 		description               string `json:"description,optional"`
 		buildVersionFileId        int64  `json:"buildVersionFileId"`
 		buildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
@@ -176,6 +177,7 @@ type (
 		buildVersionId            int64  `json:"buildVersionId"`
 		projectId                 int64  `json:"projectId"`
 		softwareManifestId        int64  `json:"softwareManifestId"`
+		versionNumber             int64  `json:"versionNumber"`
 		description               string `json:"description"`
 		buildVersionFileId        int64  `json:"buildVersionFileId"`
 		buildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
@@ -191,6 +193,7 @@ type (
 		buildVersionId            int64  `json:"buildVersionId"`
 		projectId                 int64  `json:"projectId"`
 		softwareManifestId        int64  `json:"softwareManifestId"`
+		versionNumber             int64  `json:"versionNumber"`
 		description               string `json:"description"`
 		buildVersionFileId        int64  `json:"buildVersionFileId"`
 		buildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`

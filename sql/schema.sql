@@ -158,6 +158,7 @@ CREATE TABLE IF NOT EXISTS `build_versions` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `project_id` BIGINT UNSIGNED NOT NULL,
   `software_manifest_id` BIGINT UNSIGNED NOT NULL,
+  `version_number` INT UNSIGNED NOT NULL DEFAULT 0,
   `description` TEXT,
   `build_version_file_id` BIGINT UNSIGNED NOT NULL DEFAULT 0,
   `build_version_file_version_id` BIGINT UNSIGNED NOT NULL DEFAULT 0,
@@ -166,6 +167,7 @@ CREATE TABLE IF NOT EXISTS `build_versions` (
   PRIMARY KEY (`id`),
   KEY `idx_build_versions_project_id` (`project_id`),
   KEY `idx_build_versions_software_manifest_id` (`software_manifest_id`),
+  KEY `idx_build_versions_version_number` (`version_number`),
   KEY `idx_build_versions_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

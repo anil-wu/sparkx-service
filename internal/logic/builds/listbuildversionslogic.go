@@ -89,6 +89,7 @@ func (l *ListBuildVersionsLogic) ListBuildVersions(req *types.ListBuildVersionsR
 			BuildVersionId:            int64(bv.Id),
 			ProjectId:                 int64(bv.ProjectId),
 			SoftwareManifestId:        int64(bv.SoftwareManifestId),
+			VersionNumber:             int64(bv.VersionNumber),
 			Description:               bv.Description.String,
 			BuildVersionFileId:        int64(bv.BuildVersionFileId),
 			BuildVersionFileVersionId: int64(bv.BuildVersionFileVersionId),

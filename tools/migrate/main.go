@@ -161,6 +161,7 @@ type BuildVersionsTable struct {
 	Id                        uint64         `gorm:"column:id;primaryKey;autoIncrement"`
 	ProjectId                 uint64         `gorm:"column:project_id;not null;index:idx_build_versions_project_id"`
 	SoftwareManifestId        uint64         `gorm:"column:software_manifest_id;not null;index:idx_build_versions_software_manifest_id"`
+	VersionNumber             uint32         `gorm:"column:version_number;type:int unsigned;not null;default:0;index:idx_build_versions_version_number"`
 	Description               sql.NullString `gorm:"column:description;type:text"`
 	BuildVersionFileId        uint64         `gorm:"column:build_version_file_id;type:bigint;not null;default:0"`
 	BuildVersionFileVersionId uint64         `gorm:"column:build_version_file_version_id;type:bigint;not null;default:0"`
