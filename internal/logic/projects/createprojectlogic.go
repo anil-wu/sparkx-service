@@ -59,6 +59,20 @@ func (l *CreateProjectLogic) CreateProject(req *types.CreateProjectReq) (resp *t
 	if err != nil {
 		return nil, err
 	}
+
+	// 自动创建默认画布
+	canvas := &model.WorkspaceCanvas{
+		ProjectId:       p.Id,
+		Name:            "Main Canvas",
+		BackgroundColor: "#ffffff",
+		CreatedBy:       uint64(req.UserId),
+	}
+	_, err = l.svcCtx.WorkspaceCanvasModel.Insert(l.ctx, canvas)
+	if err != nil {
+		l.Logger.Errorf("Failed to create default canvas for project %d: %v", p.Id, err)
+		// 画布创建失败不影响项目创建，只记录日志
+	}
+
 	resp = &types.ProjectResp{
 		Id:          int64(p.Id),
 		Name:        p.Name,

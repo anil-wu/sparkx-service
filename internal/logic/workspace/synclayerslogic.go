@@ -66,6 +66,10 @@ func (l *SyncLayersLogic) SyncLayers(req *types.SyncLayersReq) (resp *types.Sync
 
 	// 遍历所有图层进行同步
 	for _, layerInput := range req.Layers {
+		// Debug log
+		l.Logger.Infof("Processing layer: id=%s, name=%s, type=%s, zIndex=%d",
+			layerInput.Id, layerInput.Name, layerInput.LayerType, layerInput.ZIndex)
+
 		// 序列化 properties 为 JSON
 		propertiesJSON, err := json.Marshal(layerInput.Properties)
 		if err != nil {
@@ -73,6 +77,8 @@ func (l *SyncLayersLogic) SyncLayers(req *types.SyncLayersReq) (resp *types.Sync
 			resp.Skipped++
 			continue
 		}
+
+		l.Logger.Infof("Layer properties JSON: %s", string(propertiesJSON))
 
 		layer := &model.WorkspaceLayer{
 			CanvasId:   canvas.Id,
@@ -100,18 +106,26 @@ func (l *SyncLayersLogic) SyncLayers(req *types.SyncLayersReq) (resp *types.Sync
 		// 实际生产中应该通过 layerInput.Id 来查找现有图层
 
 		// 尝试查找是否有同名图层（简化逻辑）
-		existingLayers, _ := l.svcCtx.WorkspaceLayerModel.FindByCanvasId(l.ctx, canvas.Id)
+		existingLayers, err := l.svcCtx.WorkspaceLayerModel.FindByCanvasId(l.ctx, canvas.Id)
+		if err != nil {
+			l.Logger.Errorf("failed to find existing layers: %v", err)
+		}
+		l.Logger.Infof("Found %d existing layers for canvas %d", len(existingLayers), canvas.Id)
+
 		found := false
 		for _, existing := range existingLayers {
+			l.Logger.Infof("Checking existing layer: id=%d, name=%s, type=%s",
+				existing.Id, existing.Name, existing.LayerType)
 			if existing.Name == layerInput.Name && existing.LayerType == layerInput.LayerType {
 				// 更新现有图层
 				layer.Id = existing.Id
-				_, err := l.svcCtx.WorkspaceLayerModel.Update(l.ctx, int64(layer.Id), layer)
+				rowsAffected, err := l.svcCtx.WorkspaceLayerModel.Update(l.ctx, int64(layer.Id), layer)
 				if err != nil {
 					l.Logger.Errorf("update layer error: %v", err)
 					resp.Skipped++
 					continue
 				}
+				l.Logger.Infof("Updated layer id=%d, rowsAffected=%d", layer.Id, rowsAffected)
 				resp.Updated++
 				resp.LayerMapping[layerInput.Id] = int64(layer.Id)
 				found = true
@@ -128,6 +142,7 @@ func (l *SyncLayersLogic) SyncLayers(req *types.SyncLayersReq) (resp *types.Sync
 				resp.Skipped++
 				continue
 			}
+			l.Logger.Infof("Inserted layer id=%d", layerId)
 			resp.Uploaded++
 			resp.LayerMapping[layerInput.Id] = layerId
 		}

@@ -16,6 +16,7 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 type ServiceContext struct {
@@ -83,7 +84,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	var db *gorm.DB
 	var err error
 	if c.MySQL.DSN != "" {
-		db, err = gorm.Open(mysql.Open(c.MySQL.DSN), &gorm.Config{})
+		db, err = gorm.Open(mysql.Open(c.MySQL.DSN), &gorm.Config{
+			NamingStrategy: schema.NamingStrategy{
+				SingularTable: true,
+			},
+		})
 		if err != nil {
 			panic(err)
 		}
