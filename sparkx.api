@@ -942,3 +942,194 @@ service sparkx-api {
 	delete /agent-bindings/:id (DeleteAgentBindingReq) returns (BaseResp)
 }
 
+// Workspace 相关类型定义
+type (
+	// 画布
+	CanvasMetadata {
+		gridSize    int64 `json:"gridSize,optional"`
+		snapEnabled bool  `json:"snapEnabled,optional"`
+	}
+	CanvasResp {
+		id              int64           `json:"id"`
+		projectId       int64           `json:"projectId"`
+		name            string          `json:"name"`
+		backgroundColor string          `json:"backgroundColor"`
+		metadata        *CanvasMetadata `json:"metadata,optional"`
+		createdAt       string          `json:"createdAt"`
+		updatedAt       string          `json:"updatedAt"`
+		createdBy       int64           `json:"createdBy"`
+	}
+	GetCanvasReq {
+		projectId int64 `path:"projectId"`
+	}
+	CreateCanvasReq {
+		projectId       int64           `json:"projectId"`
+		name            string          `json:"name,optional"`
+		backgroundColor string          `json:"backgroundColor,optional"`
+		metadata        *CanvasMetadata `json:"metadata,optional"`
+	}
+	CreateCanvasResp {
+		canvasId int64 `json:"canvasId"`
+	}
+	// 图层
+	LayerProperties {
+		// Image 属性
+		src       string  `json:"src,optional"`
+		opacity   float64 `json:"opacity,optional"`
+		blendMode string  `json:"blendMode,optional"`
+		// Shape 属性
+		color           string  `json:"color,optional"`
+		stroke          string  `json:"stroke,optional"`
+		strokeWidth     float64 `json:"strokeWidth,optional"`
+		strokeStyle     string  `json:"strokeStyle,optional"`
+		cornerRadius    float64 `json:"cornerRadius,optional"`
+		sides           int64   `json:"sides,optional"`
+		starInnerRadius float64 `json:"starInnerRadius,optional"`
+		// Text 属性
+		text            string  `json:"text,optional"`
+		fontSize        float64 `json:"fontSize,optional"`
+		fontFamily      string  `json:"fontFamily,optional"`
+		textColor       string  `json:"textColor,optional"`
+		fontStyle       string  `json:"fontStyle,optional"`
+		align           string  `json:"align,optional"`
+		lineHeight      float64 `json:"lineHeight,optional"`
+		letterSpacing   float64 `json:"letterSpacing,optional"`
+		textDecoration  string  `json:"textDecoration,optional"`
+		textTransform   string  `json:"textTransform,optional"`
+		textStroke      string  `json:"textStroke,optional"`
+		textStrokeWidth float64 `json:"textStrokeWidth,optional"`
+		// Draw 属性
+		points  []float64 `json:"points,optional"`
+		fill    string    `json:"fill,optional"`
+		tension float64   `json:"tension,optional"`
+	}
+	LayerResp {
+		id         int64            `json:"id"`
+		canvasId   int64            `json:"canvasId"`
+		layerType  string           `json:"layerType"`
+		name       string           `json:"name"`
+		zIndex     int64            `json:"zIndex"`
+		positionX  float64          `json:"positionX"`
+		positionY  float64          `json:"positionY"`
+		width      float64          `json:"width"`
+		height     float64          `json:"height"`
+		rotation   float64          `json:"rotation"`
+		visible    bool             `json:"visible"`
+		locked     bool             `json:"locked"`
+		properties *LayerProperties `json:"properties"`
+		fileId     *int64           `json:"fileId,optional"`
+		deleted    bool             `json:"deleted"`
+		deletedAt  *string          `json:"deletedAt,optional"`
+		createdAt  string           `json:"createdAt"`
+		updatedAt  string           `json:"updatedAt"`
+		createdBy  int64            `json:"createdBy"`
+	}
+	LayerInput {
+		id         string           `json:"id,optional"`
+		layerType  string           `json:"layerType"`
+		name       string           `json:"name"`
+		zIndex     int64            `json:"zIndex"`
+		x          float64          `json:"x"`
+		y          float64          `json:"y"`
+		width      float64          `json:"width"`
+		height     float64          `json:"height"`
+		rotation   float64          `json:"rotation"`
+		visible    bool             `json:"visible"`
+		locked     bool             `json:"locked"`
+		properties *LayerProperties `json:"properties"`
+		fileId     *int64           `json:"fileId,optional"`
+	}
+	CanvasWithLayersResp {
+		canvas CanvasResp  `json:"canvas"`
+		layers []LayerResp `json:"layers"`
+	}
+	GetCanvasWithLayersReq {
+		projectId int64 `path:"projectId"`
+	}
+	SyncLayersReq {
+		projectId int64        `path:"projectId"`
+		layers    []LayerInput `json:"layers"`
+	}
+	SyncLayersResp {
+		uploaded     int64            `json:"uploaded"`
+		updated      int64            `json:"updated"`
+		skipped      int64            `json:"skipped"`
+		layerMapping map[string]int64 `json:"layerMapping"`
+	}
+	UpdateLayerReq {
+		id         int64            `path:"id"`
+		name       *string          `json:"name,optional"`
+		x          *float64         `json:"x,optional"`
+		y          *float64         `json:"y,optional"`
+		width      *float64         `json:"width,optional"`
+		height     *float64         `json:"height,optional"`
+		rotation   *float64         `json:"rotation,optional"`
+		zIndex     *int64           `json:"zIndex,optional"`
+		visible    *bool            `json:"visible,optional"`
+		locked     *bool            `json:"locked,optional"`
+		properties *LayerProperties `json:"properties,optional"`
+	}
+	DeleteLayerReq {
+		id int64 `path:"id"`
+	}
+	DeleteLayerResp {
+		layerId   int64  `json:"layerId"`
+		deleted   bool   `json:"deleted"`
+		deletedAt string `json:"deletedAt"`
+	}
+	RestoreLayerReq {
+		id int64 `path:"id"`
+	}
+	RestoreLayerResp {
+		layerId    int64  `json:"layerId"`
+		restored   bool   `json:"restored"`
+		restoredAt string `json:"restoredAt"`
+	}
+	GetDeletedLayersReq {
+		canvasId int64 `form:"canvasId"`
+		limit    int64 `form:"limit,default=50"`
+	}
+	DeletedLayerInfo {
+		id        int64  `json:"id"`
+		name      string `json:"name"`
+		layerType string `json:"layerType"`
+		deletedAt string `json:"deletedAt"`
+		deletedBy int64  `json:"deletedBy"`
+	}
+	DeletedLayersResp {
+		deletedLayers []DeletedLayerInfo `json:"deletedLayers"`
+		total         int64              `json:"total"`
+	}
+)
+
+// Workspace API - 需要普通用户认证
+@server (
+	group:  workspace
+	prefix: /api/v1
+	jwt:    Auth
+)
+service sparkx-api {
+	// 画布管理
+	@handler GetCanvas
+	get /projects/:projectId/canvas (GetCanvasReq) returns (CanvasWithLayersResp)
+
+	@handler CreateCanvas
+	post /projects/:projectId/canvas (CreateCanvasReq) returns (CreateCanvasResp)
+
+	// 图层管理
+	@handler SyncLayers
+	post /projects/:projectId/layers/sync (SyncLayersReq) returns (SyncLayersResp)
+
+	@handler UpdateLayer
+	put /layers/:id (UpdateLayerReq) returns (BaseResp)
+
+	@handler DeleteLayer
+	delete /layers/:id (DeleteLayerReq) returns (DeleteLayerResp)
+
+	@handler RestoreLayer
+	post /layers/:id/restore (RestoreLayerReq) returns (RestoreLayerResp)
+
+	@handler GetDeletedLayers
+	get /layers/deleted (GetDeletedLayersReq) returns (DeletedLayersResp)
+}
+

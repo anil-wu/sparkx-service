@@ -15,6 +15,7 @@ import (
 	projects "github.com/anil-wu/spark-x/internal/handler/projects"
 	softwares "github.com/anil-wu/spark-x/internal/handler/softwares"
 	users "github.com/anil-wu/spark-x/internal/handler/users"
+	workspace "github.com/anil-wu/spark-x/internal/handler/workspace"
 	"github.com/anil-wu/spark-x/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -461,6 +462,48 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/users/email/:email",
 				Handler: users.GetUserByEmailHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPut,
+				Path:    "/layers/:id",
+				Handler: workspace.UpdateLayerHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/layers/:id",
+				Handler: workspace.DeleteLayerHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/layers/:id/restore",
+				Handler: workspace.RestoreLayerHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/layers/deleted",
+				Handler: workspace.GetDeletedLayersHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/projects/:projectId/canvas",
+				Handler: workspace.GetCanvasHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/projects/:projectId/canvas",
+				Handler: workspace.CreateCanvasHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/projects/:projectId/layers/sync",
+				Handler: workspace.SyncLayersHandler(serverCtx),
 			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),

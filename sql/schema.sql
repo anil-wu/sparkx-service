@@ -270,3 +270,62 @@ CREATE TABLE IF NOT EXISTS `agent_llm_bindings` (
   UNIQUE KEY `uk_agent_llm_bindings_agent_id` (`agent_id`),
   KEY `idx_agent_llm_bindings_model_id` (`llm_model_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- workspace_canvas (工作空间画布)
+CREATE TABLE IF NOT EXISTS `workspace_canvas` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `project_id` BIGINT UNSIGNED NOT NULL,
+  `name` VARCHAR(128) NOT NULL DEFAULT 'Main Canvas',
+  `background_color` VARCHAR(32) NOT NULL DEFAULT '#ffffff',
+  `metadata` JSON,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_by` BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_project_canvas` (`project_id`),
+  KEY `idx_workspace_canvas_project_id` (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- workspace_layer (工作空间图层)
+CREATE TABLE IF NOT EXISTS `workspace_layer` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `canvas_id` BIGINT UNSIGNED NOT NULL,
+  
+  -- 基础信息
+  `layer_type` ENUM('image', 'rectangle', 'circle', 'triangle', 'star', 'text', 'chat-bubble', 'arrow-left', 'arrow-right', 'rectangle-text', 'circle-text', 'pencil', 'pen') NOT NULL,
+  `name` VARCHAR(256) NOT NULL,
+  
+  -- 变换属性（公共）
+  `z_index` INT NOT NULL DEFAULT 0,
+  `position_x` DECIMAL(10,2) NOT NULL DEFAULT 0,
+  `position_y` DECIMAL(10,2) NOT NULL DEFAULT 0,
+  `width` DECIMAL(10,2) NOT NULL DEFAULT 0,
+  `height` DECIMAL(10,2) NOT NULL DEFAULT 0,
+  `rotation` DECIMAL(6,2) NOT NULL DEFAULT 0,
+  
+  -- 状态属性（公共）
+  `visible` BOOLEAN NOT NULL DEFAULT TRUE,
+  `locked` BOOLEAN NOT NULL DEFAULT FALSE,
+  
+  -- 软删除标记
+  `deleted` BOOLEAN NOT NULL DEFAULT FALSE,
+  `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+  `deleted_by` BIGINT UNSIGNED,
+  
+  -- 私有数据
+  `properties` JSON NOT NULL,
+  
+  -- 关联
+  `file_id` BIGINT UNSIGNED,
+  
+  -- 审计
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_by` BIGINT UNSIGNED NOT NULL,
+  
+  PRIMARY KEY (`id`),
+  KEY `idx_workspace_layer_canvas_id` (`canvas_id`),
+  KEY `idx_workspace_layer_z_index` (`z_index`),
+  KEY `idx_workspace_layer_type` (`layer_type`),
+  KEY `idx_workspace_layer_deleted` (`deleted`, `deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -152,6 +152,27 @@ type BuildVersionListResp struct {
 	Page PageResp           `json:"page"`
 }
 
+type CanvasMetadata struct {
+	GridSize    int64 `json:"gridSize,optional"`
+	SnapEnabled bool  `json:"snapEnabled,optional"`
+}
+
+type CanvasResp struct {
+	Id              int64           `json:"id"`
+	ProjectId       int64           `json:"projectId"`
+	Name            string          `json:"name"`
+	BackgroundColor string          `json:"backgroundColor"`
+	Metadata        *CanvasMetadata `json:"metadata,optional"`
+	CreatedAt       string          `json:"createdAt"`
+	UpdatedAt       string          `json:"updatedAt"`
+	CreatedBy       int64           `json:"createdBy"`
+}
+
+type CanvasWithLayersResp struct {
+	Canvas CanvasResp  `json:"canvas"`
+	Layers []LayerResp `json:"layers"`
+}
+
 type CreateAdminReq struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -192,6 +213,17 @@ type CreateBuildVersionResp struct {
 	BuildVersionFileVersionId int64  `json:"buildVersionFileVersionId"`
 	CreatedBy                 int64  `json:"createdBy"`
 	CreatedAt                 string `json:"createdAt"`
+}
+
+type CreateCanvasReq struct {
+	ProjectId       int64           `json:"projectId"`
+	Name            string          `json:"name,optional"`
+	BackgroundColor string          `json:"backgroundColor,optional"`
+	Metadata        *CanvasMetadata `json:"metadata,optional"`
+}
+
+type CreateCanvasResp struct {
+	CanvasId int64 `json:"canvasId"`
 }
 
 type CreateLlmModelReq struct {
@@ -315,6 +347,16 @@ type DeleteFileReq struct {
 	Id int64 `path:"id"`
 }
 
+type DeleteLayerReq struct {
+	Id int64 `path:"id"`
+}
+
+type DeleteLayerResp struct {
+	LayerId   int64  `json:"layerId"`
+	Deleted   bool   `json:"deleted"`
+	DeletedAt string `json:"deletedAt"`
+}
+
 type DeleteLlmModelReq struct {
 	Id int64 `path:"id"`
 }
@@ -329,6 +371,19 @@ type DeleteProjectReq struct {
 
 type DeleteSoftwareTemplateReq struct {
 	Id int64 `path:"id"`
+}
+
+type DeletedLayerInfo struct {
+	Id        int64  `json:"id"`
+	Name      string `json:"name"`
+	LayerType string `json:"layerType"`
+	DeletedAt string `json:"deletedAt"`
+	DeletedBy int64  `json:"deletedBy"`
+}
+
+type DeletedLayersResp struct {
+	DeletedLayers []DeletedLayerInfo `json:"deletedLayers"`
+	Total         int64              `json:"total"`
 }
 
 type DownloadFileReq struct {
@@ -365,6 +420,19 @@ type GetAgentByNameReq struct {
 
 type GetAgentReq struct {
 	Id int64 `path:"id"`
+}
+
+type GetCanvasReq struct {
+	ProjectId int64 `path:"projectId"`
+}
+
+type GetCanvasWithLayersReq struct {
+	ProjectId int64 `path:"projectId"`
+}
+
+type GetDeletedLayersReq struct {
+	CanvasId int64 `form:"canvasId"`
+	Limit    int64 `form:"limit,default=50"`
 }
 
 type GetFileContentReq struct {
@@ -416,6 +484,72 @@ type LatestSoftwareManifestItem struct {
 
 type LatestSoftwareManifestListResp struct {
 	List []LatestSoftwareManifestItem `json:"list"`
+}
+
+type LayerInput struct {
+	Id         string           `json:"id,optional"`
+	LayerType  string           `json:"layerType"`
+	Name       string           `json:"name"`
+	ZIndex     int64            `json:"zIndex"`
+	X          float64          `json:"x"`
+	Y          float64          `json:"y"`
+	Width      float64          `json:"width"`
+	Height     float64          `json:"height"`
+	Rotation   float64          `json:"rotation"`
+	Visible    bool             `json:"visible"`
+	Locked     bool             `json:"locked"`
+	Properties *LayerProperties `json:"properties"`
+	FileId     *int64           `json:"fileId,optional"`
+}
+
+type LayerProperties struct {
+	Src             string    `json:"src,optional"`
+	Opacity         float64   `json:"opacity,optional"`
+	BlendMode       string    `json:"blendMode,optional"`
+	Color           string    `json:"color,optional"`
+	Stroke          string    `json:"stroke,optional"`
+	StrokeWidth     float64   `json:"strokeWidth,optional"`
+	StrokeStyle     string    `json:"strokeStyle,optional"`
+	CornerRadius    float64   `json:"cornerRadius,optional"`
+	Sides           int64     `json:"sides,optional"`
+	StarInnerRadius float64   `json:"starInnerRadius,optional"`
+	Text            string    `json:"text,optional"`
+	FontSize        float64   `json:"fontSize,optional"`
+	FontFamily      string    `json:"fontFamily,optional"`
+	TextColor       string    `json:"textColor,optional"`
+	FontStyle       string    `json:"fontStyle,optional"`
+	Align           string    `json:"align,optional"`
+	LineHeight      float64   `json:"lineHeight,optional"`
+	LetterSpacing   float64   `json:"letterSpacing,optional"`
+	TextDecoration  string    `json:"textDecoration,optional"`
+	TextTransform   string    `json:"textTransform,optional"`
+	TextStroke      string    `json:"textStroke,optional"`
+	TextStrokeWidth float64   `json:"textStrokeWidth,optional"`
+	Points          []float64 `json:"points,optional"`
+	Fill            string    `json:"fill,optional"`
+	Tension         float64   `json:"tension,optional"`
+}
+
+type LayerResp struct {
+	Id         int64            `json:"id"`
+	CanvasId   int64            `json:"canvasId"`
+	LayerType  string           `json:"layerType"`
+	Name       string           `json:"name"`
+	ZIndex     int64            `json:"zIndex"`
+	PositionX  float64          `json:"positionX"`
+	PositionY  float64          `json:"positionY"`
+	Width      float64          `json:"width"`
+	Height     float64          `json:"height"`
+	Rotation   float64          `json:"rotation"`
+	Visible    bool             `json:"visible"`
+	Locked     bool             `json:"locked"`
+	Properties *LayerProperties `json:"properties"`
+	FileId     *int64           `json:"fileId,optional"`
+	Deleted    bool             `json:"deleted"`
+	DeletedAt  *string          `json:"deletedAt,optional"`
+	CreatedAt  string           `json:"createdAt"`
+	UpdatedAt  string           `json:"updatedAt"`
+	CreatedBy  int64            `json:"createdBy"`
 }
 
 type ListAdminsReq struct {
@@ -609,6 +743,16 @@ type ProjectResp struct {
 	UpdatedAt   string `json:"updatedAt"`
 }
 
+type RestoreLayerReq struct {
+	Id int64 `path:"id"`
+}
+
+type RestoreLayerResp struct {
+	LayerId    int64  `json:"layerId"`
+	Restored   bool   `json:"restored"`
+	RestoredAt string `json:"restoredAt"`
+}
+
 type RollbackVersionReq struct {
 	Id            int64 `path:"id"`
 	VersionNumber int64 `json:"versionNumber"`
@@ -647,6 +791,18 @@ type SoftwareTemplateResp struct {
 	UpdatedAt     string `json:"updatedAt"`
 }
 
+type SyncLayersReq struct {
+	ProjectId int64        `path:"projectId"`
+	Layers    []LayerInput `json:"layers"`
+}
+
+type SyncLayersResp struct {
+	Uploaded     int64            `json:"uploaded"`
+	Updated      int64            `json:"updated"`
+	Skipped      int64            `json:"skipped"`
+	LayerMapping map[string]int64 `json:"layerMapping"`
+}
+
 type UpdateAdminReq struct {
 	Id       int64  `path:"id"`
 	Password string `json:"password,optional"`
@@ -667,6 +823,20 @@ type UpdateAgentReq struct {
 	Description string `json:"description,optional"`
 	Instruction string `json:"instruction,optional"`
 	AgentType   string `json:"agentType,optional"` // code | asset | design | test | build | ops | project
+}
+
+type UpdateLayerReq struct {
+	Id         int64            `path:"id"`
+	Name       *string          `json:"name,optional"`
+	X          *float64         `json:"x,optional"`
+	Y          *float64         `json:"y,optional"`
+	Width      *float64         `json:"width,optional"`
+	Height     *float64         `json:"height,optional"`
+	Rotation   *float64         `json:"rotation,optional"`
+	ZIndex     *int64           `json:"zIndex,optional"`
+	Visible    *bool            `json:"visible,optional"`
+	Locked     *bool            `json:"locked,optional"`
+	Properties *LayerProperties `json:"properties,optional"`
 }
 
 type UpdateLlmModelReq struct {

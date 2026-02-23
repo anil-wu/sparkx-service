@@ -239,6 +239,44 @@ type AgentLlmBindingsTable struct {
 
 func (AgentLlmBindingsTable) TableName() string { return "agent_llm_bindings" }
 
+type WorkspaceCanvasTable struct {
+	Id              uint64         `gorm:"column:id;primaryKey;autoIncrement"`
+	ProjectId       uint64         `gorm:"column:project_id;not null;uniqueIndex:uk_workspace_canvas_project_id"`
+	Name            string         `gorm:"column:name;type:varchar(255);not null"`
+	BackgroundColor string         `gorm:"column:background_color;type:varchar(50);not null;default:'#ffffff'"`
+	Metadata        sql.NullString `gorm:"column:metadata;type:json"`
+	CreatedAt       time.Time      `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt       time.Time      `gorm:"column:updated_at;autoUpdateTime"`
+	CreatedBy       uint64         `gorm:"column:created_by;not null"`
+}
+
+func (WorkspaceCanvasTable) TableName() string { return "workspace_canvas" }
+
+type WorkspaceLayerTable struct {
+	Id         uint64        `gorm:"column:id;primaryKey;autoIncrement"`
+	CanvasId   uint64        `gorm:"column:canvas_id;not null;index:idx_workspace_layer_canvas_id"`
+	LayerType  string        `gorm:"column:layer_type;type:varchar(50);not null"`
+	Name       string        `gorm:"column:name;type:varchar(255);not null"`
+	ZIndex     int32         `gorm:"column:z_index;not null;default:0"`
+	PositionX  float64       `gorm:"column:position_x;not null;default:0"`
+	PositionY  float64       `gorm:"column:position_y;not null;default:0"`
+	Width      float64       `gorm:"column:width;not null;default:0"`
+	Height     float64       `gorm:"column:height;not null;default:0"`
+	Rotation   float64       `gorm:"column:rotation;not null;default:0"`
+	Visible    bool          `gorm:"column:visible;not null;default:true"`
+	Locked     bool          `gorm:"column:locked;not null;default:false"`
+	Deleted    bool          `gorm:"column:deleted;not null;default:false"`
+	DeletedAt  sql.NullTime  `gorm:"column:deleted_at"`
+	DeletedBy  sql.NullInt64 `gorm:"column:deleted_by"`
+	Properties string        `gorm:"column:properties;type:json"`
+	FileId     sql.NullInt64 `gorm:"column:file_id"`
+	CreatedAt  time.Time     `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt  time.Time     `gorm:"column:updated_at;autoUpdateTime"`
+	CreatedBy  uint64        `gorm:"column:created_by;not null"`
+}
+
+func (WorkspaceLayerTable) TableName() string { return "workspace_layer" }
+
 func cleanupDuplicateAgentBindings(db *gorm.DB) error {
 	if !db.Migrator().HasTable("agent_llm_bindings") {
 		return nil
@@ -413,6 +451,8 @@ func migrateWithRetry(targetDSN string) error {
 				&LlmUsageLogsTable{},
 				&AgentsTable{},
 				&AgentLlmBindingsTable{},
+				&WorkspaceCanvasTable{},
+				&WorkspaceLayerTable{},
 			)
 			if err == nil {
 				if err := enforceSingleBindingPerAgent(db); err == nil {

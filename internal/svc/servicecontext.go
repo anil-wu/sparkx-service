@@ -32,6 +32,8 @@ type ServiceContext struct {
 	FileVersionsModel      model.FileVersionsModel
 	AdminsModel            model.AdminsModel
 	SoftwareTemplatesModel model.SoftwareTemplatesModel
+	WorkspaceCanvasModel   model.WorkspaceCanvasModel
+	WorkspaceLayerModel    model.WorkspaceLayerModel
 
 	OSSClient *oss.Client
 	OSSBucket *oss.Bucket
@@ -114,6 +116,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	var fileVersionsModel model.FileVersionsModel
 	var adminsModel model.AdminsModel
 	var softwareTemplatesModel model.SoftwareTemplatesModel
+	var workspaceCanvasModel model.WorkspaceCanvasModel
+	var workspaceLayerModel model.WorkspaceLayerModel
 	if db != nil && conn != nil {
 		usersModel = model.NewUsersModel(db, conn)
 		userIdentitiesModel = model.NewUserIdentitiesModel(db, conn)
@@ -124,6 +128,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		fileVersionsModel = model.NewFileVersionsModel(db, conn)
 		adminsModel = model.NewAdminsModel(db, conn)
 		softwareTemplatesModel = model.NewSoftwareTemplatesModel(db, conn)
+		workspaceCanvasModel = model.NewWorkspaceCanvasModel(db, conn)
+		workspaceLayerModel = model.NewWorkspaceLayerModel(db, conn)
 	}
 
 	// init oss
@@ -155,6 +161,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		FileVersionsModel:      fileVersionsModel,
 		AdminsModel:            adminsModel,
 		SoftwareTemplatesModel: softwareTemplatesModel,
+		WorkspaceCanvasModel:   workspaceCanvasModel,
+		WorkspaceLayerModel:    workspaceLayerModel,
 		OSSClient:              ossClient,
 		OSSBucket:              bucket,
 	}
