@@ -64,7 +64,24 @@ func (l *SyncLayersLogic) SyncLayers(req *types.SyncLayersReq) (resp *types.Sync
 		}
 	}
 
-	// 遍历所有图层进行同步
+	// 步骤 1: 先将画布的所有现有图层标记为已删除
+	existingLayers, err := l.svcCtx.WorkspaceLayerModel.FindByCanvasId(l.ctx, canvas.Id)
+	if err != nil {
+		l.Logger.Errorf("failed to find existing layers: %v", err)
+		return nil, err
+	}
+
+	l.Logger.Infof("Found %d existing layers for canvas %d, marking all as deleted", len(existingLayers), canvas.Id)
+
+	for _, existing := range existingLayers {
+		_, err := l.svcCtx.WorkspaceLayerModel.SoftDelete(l.ctx, existing.Id, existing.CreatedBy)
+		if err != nil {
+			l.Logger.Errorf("soft delete existing layer %d error: %v", existing.Id, err)
+			return nil, err
+		}
+	}
+
+	// 步骤 2: 遍历所有需要同步的图层，恢复或创建新图层
 	for _, layerInput := range req.Layers {
 		// Debug log
 		l.Logger.Infof("Processing layer: id=%s, name=%s, type=%s, zIndex=%d",
@@ -101,51 +118,17 @@ func (l *SyncLayersLogic) SyncLayers(req *types.SyncLayersReq) (resp *types.Sync
 			layer.FileId.Int64 = *layerInput.FileId
 		}
 
-		// 检查是否已存在（通过本地 ID 映射，实际应该通过某种唯一标识）
-		// 这里简化处理，假设所有传入的图层都是新的或需要更新的
-		// 实际生产中应该通过 layerInput.Id 来查找现有图层
-
-		// 尝试查找是否有同名图层（简化逻辑）
-		existingLayers, err := l.svcCtx.WorkspaceLayerModel.FindByCanvasId(l.ctx, canvas.Id)
+		// 插入新图层（因为所有旧图层已被标记为删除）
+		layer.CreatedBy = 1 // 暂时硬编码，实际应该从 JWT 获取
+		layerId, err := l.svcCtx.WorkspaceLayerModel.Insert(l.ctx, layer)
 		if err != nil {
-			l.Logger.Errorf("failed to find existing layers: %v", err)
+			l.Logger.Errorf("insert layer error: %v", err)
+			resp.Skipped++
+			continue
 		}
-		l.Logger.Infof("Found %d existing layers for canvas %d", len(existingLayers), canvas.Id)
-
-		found := false
-		for _, existing := range existingLayers {
-			l.Logger.Infof("Checking existing layer: id=%d, name=%s, type=%s",
-				existing.Id, existing.Name, existing.LayerType)
-			if existing.Name == layerInput.Name && existing.LayerType == layerInput.LayerType {
-				// 更新现有图层
-				layer.Id = existing.Id
-				rowsAffected, err := l.svcCtx.WorkspaceLayerModel.Update(l.ctx, int64(layer.Id), layer)
-				if err != nil {
-					l.Logger.Errorf("update layer error: %v", err)
-					resp.Skipped++
-					continue
-				}
-				l.Logger.Infof("Updated layer id=%d, rowsAffected=%d", layer.Id, rowsAffected)
-				resp.Updated++
-				resp.LayerMapping[layerInput.Id] = int64(layer.Id)
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			// 插入新图层
-			layer.CreatedBy = 1 // 暂时硬编码，实际应该从 JWT 获取
-			layerId, err := l.svcCtx.WorkspaceLayerModel.Insert(l.ctx, layer)
-			if err != nil {
-				l.Logger.Errorf("insert layer error: %v", err)
-				resp.Skipped++
-				continue
-			}
-			l.Logger.Infof("Inserted layer id=%d", layerId)
-			resp.Uploaded++
-			resp.LayerMapping[layerInput.Id] = layerId
-		}
+		l.Logger.Infof("Inserted layer id=%d", layerId)
+		resp.Uploaded++
+		resp.LayerMapping[layerInput.Id] = layerId
 	}
 
 	return
