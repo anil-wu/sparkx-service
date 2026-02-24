@@ -5,6 +5,7 @@ package workspace
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/anil-wu/spark-x/internal/model"
 	"github.com/anil-wu/spark-x/internal/svc"
@@ -93,8 +94,10 @@ func (l *GetCanvasLogic) GetCanvas(req *types.GetCanvasReq) (resp *types.CanvasW
 
 			// 解析 Properties JSON
 			if layer.Properties != "" {
-				// 这里需要解析 JSON 到 LayerProperties，暂时留空
 				layerResp.Properties = &types.LayerProperties{}
+				if err := json.Unmarshal([]byte(layer.Properties), layerResp.Properties); err != nil {
+					l.Logger.Errorf("unmarshal layer properties error: %v", err)
+				}
 			}
 
 			// 处理 FileId
