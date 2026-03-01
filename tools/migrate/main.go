@@ -166,6 +166,8 @@ type BuildVersionsTable struct {
 	Description               sql.NullString `gorm:"column:description;type:text"`
 	BuildVersionFileId        uint64         `gorm:"column:build_version_file_id;type:bigint;not null;default:0"`
 	BuildVersionFileVersionId uint64         `gorm:"column:build_version_file_version_id;type:bigint;not null;default:0"`
+	PreviewStoragePrefix      string         `gorm:"column:preview_storage_prefix;type:varchar(512);not null;default:''"`
+	EntryPath                 string         `gorm:"column:entry_path;type:varchar(255);not null;default:'index.html'"`
 	CreatedAt                 time.Time      `gorm:"column:created_at;autoCreateTime;index:idx_build_versions_created_at"`
 	CreatedBy                 uint64         `gorm:"column:created_by;not null"`
 }

@@ -872,6 +872,91 @@
         }
       }
     },
+    "/api/v1/admin/files/preupload": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "PreUploadFileAdmin",
+        "operationId": "filesPreUploadFileAdmin",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "projectId",
+                "name",
+                "fileCategory",
+                "fileFormat",
+                "sizeBytes",
+                "hash"
+              ],
+              "properties": {
+                "contentType": {
+                  "description": "上传文件的 Content-Type，如 text/plain, image/png 等",
+                  "type": "string"
+                },
+                "fileCategory": {
+                  "description": "text | image | video | audio | binary | archive",
+                  "type": "string"
+                },
+                "fileFormat": {
+                  "description": "文件格式，如 png, jpg, mp4, mp3, txt 等",
+                  "type": "string"
+                },
+                "hash": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "projectId": {
+                  "type": "integer"
+                },
+                "sizeBytes": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "contentType": {
+                  "description": "上传时必须使用的 Content-Type",
+                  "type": "string"
+                },
+                "fileId": {
+                  "type": "integer"
+                },
+                "uploadUrl": {
+                  "type": "string"
+                },
+                "versionId": {
+                  "type": "integer"
+                },
+                "versionNumber": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/llm/models": {
       "get": {
         "produces": [
@@ -3007,7 +3092,7 @@
         }
       }
     },
-    "/api/v1/agents/{id}": {
+    "/api/v1/agents/id/{id}": {
       "get": {
         "produces": [
           "application/json"
@@ -3254,6 +3339,9 @@
                 },
                 "softwareManifestId": {
                   "type": "integer"
+                },
+                "versionNumber": {
+                  "type": "integer"
                 }
               }
             }
@@ -3287,6 +3375,9 @@
                   "type": "integer"
                 },
                 "softwareManifestId": {
+                  "type": "integer"
+                },
+                "versionNumber": {
                   "type": "integer"
                 }
               }
@@ -3493,6 +3584,54 @@
         }
       }
     },
+    "/api/v1/files/{id}/download-template": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "DownloadTemplate",
+        "operationId": "filesDownloadTemplate",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "name": "versionId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "name": "versionNumber",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "downloadUrl": {
+                  "type": "string"
+                },
+                "expiresAt": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/files/{id}/rollback": {
       "post": {
         "consumes": [
@@ -3650,6 +3789,317 @@
                       "type": "integer"
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/layers/deleted": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "GetDeletedLayers",
+        "operationId": "workspaceGetDeletedLayers",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "canvasId",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 50,
+            "name": "limit",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "deletedLayers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "name",
+                      "layerType",
+                      "deletedAt",
+                      "deletedBy"
+                    ],
+                    "properties": {
+                      "deletedAt": {
+                        "type": "string"
+                      },
+                      "deletedBy": {
+                        "type": "integer"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "layerType": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "total": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/layers/{id}": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "UpdateLayer",
+        "operationId": "workspaceUpdateLayer",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "height": {
+                  "type": "number"
+                },
+                "locked": {
+                  "type": "boolean"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "align": {
+                      "type": "string"
+                    },
+                    "blendMode": {
+                      "type": "string"
+                    },
+                    "color": {
+                      "type": "string"
+                    },
+                    "cornerRadius": {
+                      "type": "number"
+                    },
+                    "fill": {
+                      "type": "string"
+                    },
+                    "fontFamily": {
+                      "type": "string"
+                    },
+                    "fontSize": {
+                      "type": "number"
+                    },
+                    "fontStyle": {
+                      "type": "string"
+                    },
+                    "letterSpacing": {
+                      "type": "number"
+                    },
+                    "lineHeight": {
+                      "type": "number"
+                    },
+                    "opacity": {
+                      "type": "number"
+                    },
+                    "points": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    },
+                    "sides": {
+                      "type": "integer"
+                    },
+                    "src": {
+                      "type": "string"
+                    },
+                    "starInnerRadius": {
+                      "type": "number"
+                    },
+                    "stroke": {
+                      "type": "string"
+                    },
+                    "strokeStyle": {
+                      "type": "string"
+                    },
+                    "strokeWidth": {
+                      "type": "number"
+                    },
+                    "tension": {
+                      "type": "number"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "textColor": {
+                      "type": "string"
+                    },
+                    "textDecoration": {
+                      "type": "string"
+                    },
+                    "textStroke": {
+                      "type": "string"
+                    },
+                    "textStrokeWidth": {
+                      "type": "number"
+                    },
+                    "textTransform": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "rotation": {
+                  "type": "number"
+                },
+                "visible": {
+                  "type": "boolean"
+                },
+                "width": {
+                  "type": "number"
+                },
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                },
+                "zIndex": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "DeleteLayer",
+        "operationId": "workspaceDeleteLayer",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "deleted": {
+                  "type": "boolean"
+                },
+                "deletedAt": {
+                  "type": "string"
+                },
+                "layerId": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/layers/{id}/restore": {
+      "post": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "RestoreLayer",
+        "operationId": "workspaceRestoreLayer",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "layerId": {
+                  "type": "integer"
+                },
+                "restored": {
+                  "type": "boolean"
+                },
+                "restoredAt": {
+                  "type": "string"
                 }
               }
             }
@@ -4049,6 +4499,416 @@
         }
       }
     },
+    "/api/v1/projects/{projectId}/build-versions": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListBuildVersions",
+        "operationId": "buildsListBuildVersions",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "projectId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "buildVersionId",
+                      "projectId",
+                      "softwareManifestId",
+                      "versionNumber",
+                      "description",
+                      "buildVersionFileId",
+                      "buildVersionFileVersionId",
+                      "createdBy",
+                      "createdAt"
+                    ],
+                    "properties": {
+                      "buildVersionFileId": {
+                        "type": "integer"
+                      },
+                      "buildVersionFileVersionId": {
+                        "type": "integer"
+                      },
+                      "buildVersionId": {
+                        "type": "integer"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "createdBy": {
+                        "type": "integer"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "projectId": {
+                        "type": "integer"
+                      },
+                      "softwareManifestId": {
+                        "type": "integer"
+                      },
+                      "versionNumber": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectId}/canvas": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "GetCanvas",
+        "operationId": "workspaceGetCanvas",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "projectId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "canvas": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "projectId",
+                    "name",
+                    "backgroundColor",
+                    "createdAt",
+                    "updatedAt",
+                    "createdBy"
+                  ],
+                  "properties": {
+                    "backgroundColor": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "createdBy": {
+                      "type": "integer"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "properties": {
+                        "gridSize": {
+                          "type": "integer"
+                        },
+                        "snapEnabled": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "projectId": {
+                      "type": "integer"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "layers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "canvasId",
+                      "layerType",
+                      "name",
+                      "zIndex",
+                      "positionX",
+                      "positionY",
+                      "width",
+                      "height",
+                      "rotation",
+                      "visible",
+                      "locked",
+                      "properties",
+                      "deleted",
+                      "createdAt",
+                      "updatedAt",
+                      "createdBy"
+                    ],
+                    "properties": {
+                      "canvasId": {
+                        "type": "integer"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "createdBy": {
+                        "type": "integer"
+                      },
+                      "deleted": {
+                        "type": "boolean"
+                      },
+                      "deletedAt": {
+                        "type": "string"
+                      },
+                      "fileId": {
+                        "type": "integer"
+                      },
+                      "height": {
+                        "type": "number"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "layerType": {
+                        "type": "string"
+                      },
+                      "locked": {
+                        "type": "boolean"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "positionX": {
+                        "type": "number"
+                      },
+                      "positionY": {
+                        "type": "number"
+                      },
+                      "properties": {
+                        "type": "object",
+                        "properties": {
+                          "align": {
+                            "type": "string"
+                          },
+                          "blendMode": {
+                            "type": "string"
+                          },
+                          "color": {
+                            "type": "string"
+                          },
+                          "cornerRadius": {
+                            "type": "number"
+                          },
+                          "fill": {
+                            "type": "string"
+                          },
+                          "fontFamily": {
+                            "type": "string"
+                          },
+                          "fontSize": {
+                            "type": "number"
+                          },
+                          "fontStyle": {
+                            "type": "string"
+                          },
+                          "letterSpacing": {
+                            "type": "number"
+                          },
+                          "lineHeight": {
+                            "type": "number"
+                          },
+                          "opacity": {
+                            "type": "number"
+                          },
+                          "points": {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            }
+                          },
+                          "sides": {
+                            "type": "integer"
+                          },
+                          "src": {
+                            "type": "string"
+                          },
+                          "starInnerRadius": {
+                            "type": "number"
+                          },
+                          "stroke": {
+                            "type": "string"
+                          },
+                          "strokeStyle": {
+                            "type": "string"
+                          },
+                          "strokeWidth": {
+                            "type": "number"
+                          },
+                          "tension": {
+                            "type": "number"
+                          },
+                          "text": {
+                            "type": "string"
+                          },
+                          "textColor": {
+                            "type": "string"
+                          },
+                          "textDecoration": {
+                            "type": "string"
+                          },
+                          "textStroke": {
+                            "type": "string"
+                          },
+                          "textStrokeWidth": {
+                            "type": "number"
+                          },
+                          "textTransform": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "rotation": {
+                        "type": "number"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      },
+                      "visible": {
+                        "type": "boolean"
+                      },
+                      "width": {
+                        "type": "number"
+                      },
+                      "zIndex": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "CreateCanvas",
+        "operationId": "workspaceCreateCanvas",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "projectId"
+              ],
+              "properties": {
+                "backgroundColor": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "type": "object",
+                  "properties": {
+                    "gridSize": {
+                      "type": "integer"
+                    },
+                    "snapEnabled": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "name": {
+                  "type": "string"
+                },
+                "projectId": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "canvasId": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectId}/files": {
       "get": {
         "produces": [
@@ -4170,6 +5030,207 @@
         }
       }
     },
+    "/api/v1/projects/{projectId}/layers/sync": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "SyncLayers",
+        "operationId": "workspaceSyncLayers",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "projectId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "layers"
+              ],
+              "properties": {
+                "layers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "layerType",
+                      "name",
+                      "zIndex",
+                      "x",
+                      "y",
+                      "width",
+                      "height",
+                      "rotation",
+                      "visible",
+                      "locked",
+                      "properties"
+                    ],
+                    "properties": {
+                      "fileId": {
+                        "type": "integer"
+                      },
+                      "height": {
+                        "type": "number"
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "layerType": {
+                        "type": "string"
+                      },
+                      "locked": {
+                        "type": "boolean"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "properties": {
+                        "type": "object",
+                        "properties": {
+                          "align": {
+                            "type": "string"
+                          },
+                          "blendMode": {
+                            "type": "string"
+                          },
+                          "color": {
+                            "type": "string"
+                          },
+                          "cornerRadius": {
+                            "type": "number"
+                          },
+                          "fill": {
+                            "type": "string"
+                          },
+                          "fontFamily": {
+                            "type": "string"
+                          },
+                          "fontSize": {
+                            "type": "number"
+                          },
+                          "fontStyle": {
+                            "type": "string"
+                          },
+                          "letterSpacing": {
+                            "type": "number"
+                          },
+                          "lineHeight": {
+                            "type": "number"
+                          },
+                          "opacity": {
+                            "type": "number"
+                          },
+                          "points": {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            }
+                          },
+                          "sides": {
+                            "type": "integer"
+                          },
+                          "src": {
+                            "type": "string"
+                          },
+                          "starInnerRadius": {
+                            "type": "number"
+                          },
+                          "stroke": {
+                            "type": "string"
+                          },
+                          "strokeStyle": {
+                            "type": "string"
+                          },
+                          "strokeWidth": {
+                            "type": "number"
+                          },
+                          "tension": {
+                            "type": "number"
+                          },
+                          "text": {
+                            "type": "string"
+                          },
+                          "textColor": {
+                            "type": "string"
+                          },
+                          "textDecoration": {
+                            "type": "string"
+                          },
+                          "textStroke": {
+                            "type": "string"
+                          },
+                          "textStrokeWidth": {
+                            "type": "number"
+                          },
+                          "textTransform": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "rotation": {
+                        "type": "number"
+                      },
+                      "visible": {
+                        "type": "boolean"
+                      },
+                      "width": {
+                        "type": "number"
+                      },
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "zIndex": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "layerMapping": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer"
+                  }
+                },
+                "skipped": {
+                  "type": "integer"
+                },
+                "updated": {
+                  "type": "integer"
+                },
+                "uploaded": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectId}/software_manifests": {
       "get": {
         "produces": [
@@ -4210,6 +5271,7 @@
                       "manifestId",
                       "manifestFileId",
                       "manifestFileVersionId",
+                      "versionNumber",
                       "versionDescription",
                       "createdBy",
                       "createdAt"
@@ -4238,6 +5300,9 @@
                       },
                       "versionDescription": {
                         "type": "string"
+                      },
+                      "versionNumber": {
+                        "type": "integer"
                       }
                     }
                   }
@@ -4649,6 +5714,206 @@
                 },
                 "versionDescription": {
                   "type": "string"
+                },
+                "versionNumber": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/software-templates": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "ListSoftwareTemplatesPublic",
+        "operationId": "softwaresListSoftwareTemplatesPublic",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "archiveFileId",
+                      "createdBy",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "properties": {
+                      "archiveFileId": {
+                        "type": "integer"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "createdBy": {
+                        "type": "integer"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "object",
+                  "required": [
+                    "page",
+                    "pageSize",
+                    "total"
+                  ],
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/software-templates/by-name/{name}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "GetSoftwareTemplateByNamePublic",
+        "operationId": "softwaresGetSoftwareTemplateByNamePublic",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "archiveFileId": {
+                  "type": "integer"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "createdBy": {
+                  "type": "integer"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/software-templates/{id}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "GetSoftwareTemplatePublic",
+        "operationId": "softwaresGetSoftwareTemplatePublic",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "archiveFileId": {
+                  "type": "integer"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "createdBy": {
+                  "type": "integer"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
                 }
               }
             }
@@ -4851,7 +6116,7 @@
       }
     }
   },
-  "x-date": "2026-02-12 15:08:17",
+  "x-date": "2026-02-28 11:38:34",
   "x-description": "This is a goctl generated swagger file.",
   "x-github": "https://github.com/zeromicro/go-zero",
   "x-go-zero-doc": "https://go-zero.dev/",

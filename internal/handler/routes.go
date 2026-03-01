@@ -12,6 +12,7 @@ import (
 	auth "github.com/anil-wu/spark-x/internal/handler/auth"
 	builds "github.com/anil-wu/spark-x/internal/handler/builds"
 	files "github.com/anil-wu/spark-x/internal/handler/files"
+	previews "github.com/anil-wu/spark-x/internal/handler/previews"
 	projects "github.com/anil-wu/spark-x/internal/handler/projects"
 	softwares "github.com/anil-wu/spark-x/internal/handler/softwares"
 	users "github.com/anil-wu/spark-x/internal/handler/users"
@@ -281,6 +282,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: builds.CreateBuildVersionHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodPost,
+				Path:    "/build-versions/draft",
+				Handler: builds.CreateBuildVersionDraftHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/build-versions/:id",
+				Handler: builds.UpdateBuildVersionHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodGet,
 				Path:    "/projects/:projectId/build-versions",
 				Handler: builds.ListBuildVersionsHandler(serverCtx),
@@ -289,6 +300,33 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/releases",
 				Handler: builds.CreateReleaseHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/previews/builds/:buildVersionId/preupload",
+				Handler: previews.PreviewBuildPreuploadHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/previews/builds/:buildVersionId/",
+				Handler: previews.PreviewBuildEntryHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/previews/builds/:buildVersionId/asset",
+				Handler: previews.PreviewBuildAssetQueryHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/previews/builds/:buildVersionId/*assetPath",
+				Handler: previews.PreviewBuildAssetHandler(serverCtx),
 			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),

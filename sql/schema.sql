@@ -164,6 +164,8 @@ CREATE TABLE IF NOT EXISTS `build_versions` (
   `description` TEXT,
   `build_version_file_id` BIGINT UNSIGNED NOT NULL DEFAULT 0,
   `build_version_file_version_id` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  `preview_storage_prefix` VARCHAR(512) NOT NULL DEFAULT '',
+  `entry_path` VARCHAR(255) NOT NULL DEFAULT 'index.html',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `created_by` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),

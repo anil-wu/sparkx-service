@@ -42,6 +42,8 @@ type BuildVersions struct {
 	Description               sql.NullString `db:"description" gorm:"column:description"`
 	BuildVersionFileId        uint64         `db:"build_version_file_id" gorm:"column:build_version_file_id"`
 	BuildVersionFileVersionId uint64         `db:"build_version_file_version_id" gorm:"column:build_version_file_version_id"`
+	PreviewStoragePrefix      string         `db:"preview_storage_prefix" gorm:"column:preview_storage_prefix"`
+	EntryPath                 string         `db:"entry_path" gorm:"column:entry_path"`
 	CreatedAt                 time.Time      `db:"created_at" gorm:"column:created_at"`
 	CreatedBy                 uint64         `db:"created_by" gorm:"column:created_by"`
 }

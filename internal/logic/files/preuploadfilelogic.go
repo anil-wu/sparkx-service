@@ -50,12 +50,26 @@ func getContentTypeByFormat(format string) string {
 	switch strings.ToLower(format) {
 	case "txt":
 		return "text/plain"
+	case "html", "htm":
+		return "text/html"
+	case "css":
+		return "text/css"
+	case "js", "mjs":
+		return "application/javascript"
+	case "wasm":
+		return "application/wasm"
 	case "png":
 		return "image/png"
 	case "jpg", "jpeg":
 		return "image/jpeg"
 	case "gif":
 		return "image/gif"
+	case "webp":
+		return "image/webp"
+	case "svg":
+		return "image/svg+xml"
+	case "ico":
+		return "image/x-icon"
 	case "mp4":
 		return "video/mp4"
 	case "mp3":
@@ -64,8 +78,18 @@ func getContentTypeByFormat(format string) string {
 		return "application/pdf"
 	case "json":
 		return "application/json"
+	case "map":
+		return "application/json"
 	case "xml":
 		return "application/xml"
+	case "woff":
+		return "font/woff"
+	case "woff2":
+		return "font/woff2"
+	case "ttf":
+		return "font/ttf"
+	case "otf":
+		return "font/otf"
 	case "zip":
 		return "application/zip"
 	default:
