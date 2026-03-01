@@ -356,6 +356,21 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/files/preupload",
 				Handler: files.PreUploadFileAdminHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/files/upload",
+				Handler: files.UploadFileAdminHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/files/:id/versions",
+				Handler: files.ListFileVersionsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/files/:id/download",
+				Handler: files.DownloadFileHandler(serverCtx),
+			},
 		},
 		rest.WithJwt(serverCtx.Config.AdminAuth.AccessSecret),
 		rest.WithPrefix("/api/v1/admin"),

@@ -22,6 +22,7 @@ import (
 	"github.com/anil-wu/spark-x/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"gorm.io/gorm"
 )
 
 // generateStoragePath 生成 OSS 存储路径
@@ -171,8 +172,23 @@ func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types
 	}
 	userId, _ := userIdNumber.Int64()
 
-	if req == nil || req.Name == "" || req.FileCategory == "" || req.FileFormat == "" {
-		return nil, model.InputParamInvalid
+	if req == nil {
+		return nil, errors.New("request body is required")
+	}
+	if strings.TrimSpace(req.Name) == "" {
+		return nil, errors.New("name is required")
+	}
+	if strings.TrimSpace(req.FileCategory) == "" {
+		return nil, errors.New("fileCategory is required")
+	}
+	if strings.TrimSpace(req.FileFormat) == "" {
+		return nil, errors.New("fileFormat is required")
+	}
+	if strings.TrimSpace(req.Hash) == "" {
+		return nil, errors.New("hash is required")
+	}
+	if req.SizeBytes <= 0 {
+		return nil, errors.New("sizeBytes is required")
 	}
 	if req.ProjectId < 0 || (!isAdmin && req.ProjectId <= 0) {
 		return nil, model.InputParamInvalid
@@ -196,6 +212,9 @@ func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types
 		Where("project_files.project_id = ? AND files.name = ?", req.ProjectId, req.Name).
 		First(&file).Error
 	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
 		// create new file
 		newFile := &model.Files{
 			Name:         req.Name,
