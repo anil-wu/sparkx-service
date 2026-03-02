@@ -69,6 +69,7 @@ func (l *ListProjectsLogic) ListProjects(req *types.PageReq) (resp *types.Projec
 			Id:          int64(p.Id),
 			Name:        p.Name,
 			Description: p.Description.String,
+			CoverFileId: int64(p.CoverFileId),
 			OwnerId:     int64(p.OwnerId),
 			Status:      p.Status,
 			CreatedAt:   p.CreatedAt.Format("2006-01-02 15:04:05"),
