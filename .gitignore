@@ -11,3 +11,8 @@ Thumbs.db
 # Local dev configs (may contain secrets)
 etc/*-dev.yaml
 etc/*-dev.yml
+etc/super.env.example.ps1
+etc/*.env.ps1
+etc/*.env
+*.env.ps1
+*.env

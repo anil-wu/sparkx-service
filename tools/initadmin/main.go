@@ -3,9 +3,11 @@ package main
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/anil-wu/spark-x/internal/config"
 	"github.com/anil-wu/spark-x/internal/model"
@@ -16,7 +18,7 @@ import (
 
 var (
 	configFile = flag.String("f", "etc/sparkx-api.yaml", "the config file")
-	username   = flag.String("u", "admin", "admin username")
+	email      = flag.String("u", "admin@example.com", "admin email")
 	password   = flag.String("p", "admin123", "admin password")
 	role       = flag.String("r", "super_admin", "admin role (super_admin or admin)")
 )
@@ -36,30 +38,61 @@ func main() {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 
-	// check if admin already exists
-	var existingAdmin model.Admins
-	result := db.Where("username = ?", *username).First(&existingAdmin)
-	if result.Error == nil {
-		log.Fatalf("admin with username '%s' already exists", *username)
-	}
-
 	// md5 hash
 	sum := md5.Sum([]byte(*password))
 	passHash := hex.EncodeToString(sum[:])
 
-	admin := &model.Admins{
-		Username:     *username,
-		PasswordHash: passHash,
-		Role:         *role,
-		Status:       "active",
+	username := *email
+	if at := strings.Index(username, "@"); at > 0 {
+		username = username[:at]
 	}
 
-	result = db.Create(admin)
-	if result.Error != nil {
-		log.Fatalf("failed to create admin: %v", result.Error)
+	isSuper := *role == "super_admin"
+
+	if err := db.Transaction(func(tx *gorm.DB) error {
+		var count int64
+		if err := tx.Raw(
+			"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'is_super'",
+		).Scan(&count).Error; err != nil {
+			return err
+		}
+		if count == 0 {
+			if err := tx.Exec("ALTER TABLE `users` ADD COLUMN `is_super` TINYINT(1) NOT NULL DEFAULT 0").Error; err != nil {
+				return err
+			}
+		}
+
+		if isSuper {
+			if err := tx.Model(&model.Users{}).Where("is_super = ?", true).Update("is_super", false).Error; err != nil {
+				return err
+			}
+		}
+
+		var existingUser model.Users
+		findErr := tx.Where("email = ?", *email).First(&existingUser).Error
+		if findErr != nil && !errors.Is(findErr, gorm.ErrRecordNotFound) {
+			return findErr
+		}
+
+		if errors.Is(findErr, gorm.ErrRecordNotFound) {
+			return tx.Create(&model.Users{
+				Username:     username,
+				Email:        *email,
+				PasswordHash: passHash,
+				IsSuper:      isSuper,
+			}).Error
+		}
+
+		return tx.Model(&model.Users{}).Where("id = ?", existingUser.Id).Updates(map[string]interface{}{
+			"username":      username,
+			"password_hash": passHash,
+			"is_super":      isSuper,
+		}).Error
+	}); err != nil {
+		log.Fatalf("failed to ensure user: %v", err)
 	}
 
 	fmt.Printf("Admin created successfully!\n")
-	fmt.Printf("Username: %s\n", *username)
+	fmt.Printf("Email: %s\n", *email)
 	fmt.Printf("Role: %s\n", *role)
 }

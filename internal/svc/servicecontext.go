@@ -7,6 +7,7 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"net/url"
 	"os"
 	"strings"
@@ -212,45 +213,51 @@ func ensureSuperUserFromEnv(db *gorm.DB, usersModel model.UsersModel) {
 
 	ensureUsersIsSuperColumn(db)
 
-	u, err := usersModel.FindOneByEmail(context.Background(), email)
-	if err != nil && err != model.ErrNotFound {
-		logx.Errorf("ensure super user lookup failed: %v", err)
-		return
-	}
+	ctx := context.Background()
+	err := db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&model.Users{}).
+			Where("is_super = ?", true).
+			Where("email <> ?", email).
+			Update("is_super", false).Error; err != nil {
+			return err
+		}
 
-	if u == nil {
-		if username == "" {
+		var u model.Users
+		findErr := tx.Where("email = ?", email).First(&u).Error
+		if findErr != nil && !errors.Is(findErr, gorm.ErrRecordNotFound) {
+			return findErr
+		}
+
+		targetUsername := strings.TrimSpace(username)
+		if targetUsername == "" {
 			if idx := strings.Index(email, "@"); idx > 0 {
-				username = email[:idx]
+				targetUsername = email[:idx]
 			} else {
-				username = email
+				targetUsername = email
 			}
 		}
-		newUser := &model.Users{
-			Username:     username,
-			Email:        email,
-			PasswordHash: md5HexLower(password),
-			IsSuper:      true,
-		}
-		if _, err := usersModel.Insert(context.Background(), newUser); err != nil {
-			logx.Errorf("ensure super user create failed: %v", err)
-			return
-		}
-		return
-	}
+		targetPasswordHash := md5HexLower(password)
 
-	needsUpdate := false
-	if !u.IsSuper {
-		u.IsSuper = true
-		needsUpdate = true
-	}
-	if strings.TrimSpace(u.PasswordHash) == "" {
-		u.PasswordHash = md5HexLower(password)
-		needsUpdate = true
-	}
-	if needsUpdate {
-		if _, err := usersModel.Update(context.Background(), int64(u.Id), u); err != nil {
-			logx.Errorf("ensure super user update failed: %v", err)
+		if errors.Is(findErr, gorm.ErrRecordNotFound) {
+			return tx.Create(&model.Users{
+				Username:     targetUsername,
+				Email:        email,
+				PasswordHash: targetPasswordHash,
+				IsSuper:      true,
+			}).Error
 		}
+
+		updates := map[string]interface{}{
+			"is_super":      true,
+			"password_hash": targetPasswordHash,
+		}
+		if strings.TrimSpace(username) != "" {
+			updates["username"] = targetUsername
+		}
+
+		return tx.Model(&model.Users{}).Where("id = ?", u.Id).Updates(updates).Error
+	})
+	if err != nil {
+		logx.Errorf("ensure super user failed: %v", err)
 	}
 }

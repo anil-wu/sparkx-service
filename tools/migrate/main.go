@@ -25,6 +25,7 @@ type UsersTable struct {
 	Email        string    `gorm:"column:email;type:varchar(128);not null;uniqueIndex:uk_users_email"`
 	PasswordHash string    `gorm:"column:password_hash;type:char(32);not null"`
 	Avatar       string    `gorm:"column:avatar;type:varchar(255);default:''"`
+	IsSuper      bool      `gorm:"column:is_super;not null;default:false"`
 	CreatedAt    time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt    time.Time `gorm:"column:updated_at;autoUpdateTime"`
 }
