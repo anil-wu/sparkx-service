@@ -186,6 +186,20 @@ func md5HexLower(value string) string {
 	return hex.EncodeToString(sum[:])
 }
 
+func isHex32(value string) bool {
+	if len(value) != 32 {
+		return false
+	}
+	for i := 0; i < len(value); i++ {
+		c := value[i]
+		if (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') {
+			continue
+		}
+		return false
+	}
+	return true
+}
+
 func ensureUsersIsSuperColumn(db *gorm.DB) {
 	var count int64
 	if err := db.Raw(
@@ -205,13 +219,25 @@ func ensureUsersIsSuperColumn(db *gorm.DB) {
 func ensureSuperUserFromEnv(db *gorm.DB, usersModel model.UsersModel) {
 	email := strings.TrimSpace(os.Getenv("SPARKX_SUPER_EMAIL"))
 	password := os.Getenv("SPARKX_SUPER_PASSWORD")
+	passwordHash := strings.TrimSpace(os.Getenv("SPARKX_SUPER_PASSWORD_HASH"))
 	username := strings.TrimSpace(os.Getenv("SPARKX_SUPER_USERNAME"))
 
-	if email == "" || strings.TrimSpace(password) == "" {
+	if email == "" || (strings.TrimSpace(password) == "" && passwordHash == "") {
 		return
 	}
 
 	ensureUsersIsSuperColumn(db)
+
+	targetPasswordHash := ""
+	if passwordHash != "" {
+		if !isHex32(passwordHash) {
+			logx.Errorf("invalid SPARKX_SUPER_PASSWORD_HASH: must be 32-char hex md5")
+			return
+		}
+		targetPasswordHash = strings.ToLower(passwordHash)
+	} else {
+		targetPasswordHash = md5HexLower(password)
+	}
 
 	ctx := context.Background()
 	err := db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
@@ -236,7 +262,6 @@ func ensureSuperUserFromEnv(db *gorm.DB, usersModel model.UsersModel) {
 				targetUsername = email
 			}
 		}
-		targetPasswordHash := md5HexLower(password)
 
 		if errors.Is(findErr, gorm.ErrRecordNotFound) {
 			return tx.Create(&model.Users{
