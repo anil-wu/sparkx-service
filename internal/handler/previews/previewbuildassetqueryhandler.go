@@ -1,7 +1,9 @@
 package previews
 
 import (
+	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/anil-wu/spark-x/internal/logic/previews"
@@ -20,14 +22,20 @@ func PreviewBuildAssetQueryHandler(svcCtx *svc.ServiceContext) http.HandlerFunc 
 
 		requestedPath := strings.TrimPrefix(strings.TrimSpace(req.Path), "/")
 		l := previews.NewPreviewBuildLogic(r.Context(), svcCtx)
-		redirectUrl, err := l.GetAssetRedirectURL(req.BuildVersionId, requestedPath)
+		reader, contentType, contentLength, err := l.OpenAssetObject(req.BuildVersionId, requestedPath)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
+		defer func() { _ = reader.Close() }()
 
 		w.Header().Set("Cache-Control", "no-store")
-		w.Header().Set("Location", redirectUrl)
-		w.WriteHeader(http.StatusFound)
+		if strings.TrimSpace(contentType) != "" {
+			w.Header().Set("Content-Type", contentType)
+		}
+		if contentLength > 0 {
+			w.Header().Set("Content-Length", strconv.FormatInt(contentLength, 10))
+		}
+		_, _ = io.Copy(w, reader)
 	}
 }

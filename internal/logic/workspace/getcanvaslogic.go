@@ -29,6 +29,11 @@ func NewGetCanvasLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetCanv
 }
 
 func (l *GetCanvasLogic) GetCanvas(req *types.GetCanvasReq) (resp *types.CanvasWithLayersResp, err error) {
+	_, err = ensureProjectMember(l.ctx, l.svcCtx, req.ProjectId)
+	if err != nil {
+		return nil, err
+	}
+
 	// 查找画布
 	canvas, err := l.svcCtx.WorkspaceCanvasModel.FindOneByProjectId(l.ctx, uint64(req.ProjectId))
 	if err != nil && err != model.ErrNotFound {
@@ -55,8 +60,10 @@ func (l *GetCanvasLogic) GetCanvas(req *types.GetCanvasReq) (resp *types.CanvasW
 
 		// 解析 Metadata
 		if canvas.Metadata.Valid && canvas.Metadata.String != "" {
-			// 这里可以解析 JSON，暂时简单处理
-			resp.Canvas.Metadata = &types.CanvasMetadata{}
+			var meta types.CanvasMetadata
+			if err := json.Unmarshal([]byte(canvas.Metadata.String), &meta); err == nil {
+				resp.Canvas.Metadata = &meta
+			}
 		}
 
 		// 查找所有未删除的图层

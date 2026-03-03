@@ -29,6 +29,18 @@ func NewRestoreLayerLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Rest
 }
 
 func (l *RestoreLayerLogic) RestoreLayer(req *types.RestoreLayerReq) (resp *types.RestoreLayerResp, err error) {
+	layer, err := l.svcCtx.WorkspaceLayerModel.FindOne(l.ctx, uint64(req.Id))
+	if err != nil {
+		return nil, err
+	}
+	canvas, err := l.svcCtx.WorkspaceCanvasModel.FindOne(l.ctx, layer.CanvasId)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := ensureProjectMember(l.ctx, l.svcCtx, int64(canvas.ProjectId)); err != nil {
+		return nil, err
+	}
+
 	// 恢复已删除的图层
 	affected, err := l.svcCtx.WorkspaceLayerModel.Restore(l.ctx, uint64(req.Id))
 	if err != nil {

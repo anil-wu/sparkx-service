@@ -40,6 +40,14 @@ func (l *UpdateLayerLogic) UpdateLayer(req *types.UpdateLayerReq) (resp *types.B
 		return nil, err
 	}
 
+	canvas, err := l.svcCtx.WorkspaceCanvasModel.FindOne(l.ctx, layer.CanvasId)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := ensureProjectMember(l.ctx, l.svcCtx, int64(canvas.ProjectId)); err != nil {
+		return nil, err
+	}
+
 	// 更新字段
 	if req.Name != nil {
 		layer.Name = *req.Name

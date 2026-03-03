@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/anil-wu/spark-x/internal/model"
 	"github.com/anil-wu/spark-x/internal/svc"
@@ -32,12 +33,24 @@ func (l *DeleteAdminLogic) DeleteAdmin(req *types.DeleteAdminReq) (resp *types.B
 	}
 
 	// prevent delete self
-	adminId := l.ctx.Value("adminId").(int64)
-	if adminId == req.Id {
+	adminIdNumber, ok := l.ctx.Value("adminId").(json.Number)
+	if ok {
+		adminId, _ := adminIdNumber.Int64()
+		if adminId == req.Id {
+			return nil, model.InputParamInvalid
+		}
+	}
+
+	u, err := l.svcCtx.UsersModel.FindOne(l.ctx, uint64(req.Id))
+	if err != nil {
+		return nil, err
+	}
+	if !u.IsSuper {
 		return nil, model.InputParamInvalid
 	}
 
-	_, err = l.svcCtx.AdminsModel.Delete(l.ctx, uint64(req.Id))
+	u.IsSuper = false
+	_, err = l.svcCtx.UsersModel.Update(l.ctx, req.Id, u)
 	if err != nil {
 		return nil, err
 	}

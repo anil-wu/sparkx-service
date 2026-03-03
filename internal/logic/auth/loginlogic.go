@@ -71,7 +71,7 @@ func (l *LoginLogic) loginByEmail(req *types.LoginReq) (*types.LoginResp, error)
 		}
 
 		// generate token
-		token, err := l.generateToken(int64(newUser.Id))
+		token, err := l.generateToken(int64(newUser.Id), newUser.IsSuper)
 		if err != nil {
 			return nil, err
 		}
@@ -80,6 +80,7 @@ func (l *LoginLogic) loginByEmail(req *types.LoginReq) (*types.LoginResp, error)
 			UserId:  int64(newUser.Id),
 			Created: true,
 			Token:   token,
+			IsSuper: newUser.IsSuper,
 		}, nil
 	}
 
@@ -89,7 +90,7 @@ func (l *LoginLogic) loginByEmail(req *types.LoginReq) (*types.LoginResp, error)
 	}
 
 	// generate token
-	token, err := l.generateToken(int64(user.Id))
+	token, err := l.generateToken(int64(user.Id), user.IsSuper)
 	if err != nil {
 		return nil, err
 	}
@@ -98,6 +99,7 @@ func (l *LoginLogic) loginByEmail(req *types.LoginReq) (*types.LoginResp, error)
 		UserId:  int64(user.Id),
 		Created: false,
 		Token:   token,
+		IsSuper: user.IsSuper,
 	}, nil
 }
 
@@ -205,7 +207,7 @@ func (l *LoginLogic) loginByGoogle(req *types.LoginReq) (*types.LoginResp, error
 	}
 
 	// 3. Generate JWT
-	token, err := l.generateToken(int64(user.Id))
+	token, err := l.generateToken(int64(user.Id), user.IsSuper)
 	if err != nil {
 		return nil, err
 	}
@@ -214,10 +216,11 @@ func (l *LoginLogic) loginByGoogle(req *types.LoginReq) (*types.LoginResp, error
 		UserId:  int64(user.Id),
 		Created: created,
 		Token:   token,
+		IsSuper: user.IsSuper,
 	}, nil
 }
 
-func (l *LoginLogic) generateToken(userId int64) (string, error) {
+func (l *LoginLogic) generateToken(userId int64, isSuper bool) (string, error) {
 	now := time.Now().Unix()
 	accessExpire := l.svcCtx.Config.Auth.AccessExpire
 	secretKey := l.svcCtx.Config.Auth.AccessSecret
@@ -226,6 +229,7 @@ func (l *LoginLogic) generateToken(userId int64) (string, error) {
 	claims["exp"] = now + accessExpire
 	claims["iat"] = now
 	claims["userId"] = userId
+	claims["isSuper"] = isSuper
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims = claims
 	return token.SignedString([]byte(secretKey))

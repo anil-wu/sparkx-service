@@ -184,15 +184,14 @@ func NewPreUploadFileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Pre
 }
 
 func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types.PreUploadResp, err error) {
-	userIdNumber, ok := l.ctx.Value("userId").(json.Number)
-	isAdmin := false
+	adminIdNumber, ok := l.ctx.Value("adminId").(json.Number)
+	isAdmin := ok
+	userIdNumber := adminIdNumber
 	if !ok {
-		adminIdNumber, ok2 := l.ctx.Value("adminId").(json.Number)
-		if !ok2 {
+		userIdNumber, ok = l.ctx.Value("userId").(json.Number)
+		if !ok {
 			return nil, errors.New("unauthorized")
 		}
-		userIdNumber = adminIdNumber
-		isAdmin = true
 	}
 	userId, _ := userIdNumber.Int64()
 

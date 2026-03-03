@@ -4,7 +4,11 @@
 package handler
 
 import (
+	"context"
+	"encoding/json"
 	"net/http"
+	"strconv"
+	"strings"
 
 	admin "github.com/anil-wu/spark-x/internal/handler/admin"
 	admin_auth "github.com/anil-wu/spark-x/internal/handler/admin_auth"
@@ -22,201 +26,284 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 )
 
+func parseInt64ContextValue(value interface{}) (int64, bool) {
+	switch v := value.(type) {
+	case json.Number:
+		n, err := v.Int64()
+		return n, err == nil
+	case int64:
+		return v, true
+	case int:
+		return int64(v), true
+	case float64:
+		return int64(v), true
+	case string:
+		n, err := strconv.ParseInt(strings.TrimSpace(v), 10, 64)
+		return n, err == nil
+	default:
+		return 0, false
+	}
+}
+
+func parseBoolContextValue(value interface{}) (bool, bool) {
+	switch v := value.(type) {
+	case bool:
+		return v, true
+	case string:
+		s := strings.TrimSpace(strings.ToLower(v))
+		if s == "true" || s == "1" || s == "yes" {
+			return true, true
+		}
+		if s == "false" || s == "0" || s == "no" {
+			return false, true
+		}
+		return false, false
+	case float64:
+		return v != 0, true
+	case int64:
+		return v != 0, true
+	case json.Number:
+		n, err := v.Int64()
+		if err != nil {
+			return false, false
+		}
+		return n != 0, true
+	default:
+		return false, false
+	}
+}
+
+func writeAuthError(w http.ResponseWriter, status int, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_, _ = w.Write([]byte(`{"message":` + strconv.Quote(message) + `}`))
+}
+
+func withSuperUser(svcCtx *svc.ServiceContext, next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userId, ok := parseInt64ContextValue(r.Context().Value("userId"))
+		if !ok || userId <= 0 {
+			writeAuthError(w, http.StatusUnauthorized, "unauthorized")
+			return
+		}
+
+		isSuper, hasIsSuper := parseBoolContextValue(r.Context().Value("isSuper"))
+		if !hasIsSuper {
+			if svcCtx.UsersModel != nil {
+				u, err := svcCtx.UsersModel.FindOne(r.Context(), uint64(userId))
+				if err == nil && u != nil {
+					isSuper = u.IsSuper
+				}
+			}
+		}
+
+		if !isSuper {
+			writeAuthError(w, http.StatusForbidden, "permission denied")
+			return
+		}
+
+		ctx := r.Context()
+		ctx = context.WithValue(ctx, "adminId", json.Number(strconv.FormatInt(userId, 10)))
+		ctx = context.WithValue(ctx, "role", "super_admin")
+		next(w, r.WithContext(ctx))
+	}
+}
+
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
 				Method:  http.MethodPost,
 				Path:    "/admins",
-				Handler: admin.CreateAdminHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.CreateAdminHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/admins",
-				Handler: admin.ListAdminsHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.ListAdminsHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPut,
 				Path:    "/admins/:id",
-				Handler: admin.UpdateAdminHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.UpdateAdminHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodDelete,
 				Path:    "/admins/:id",
-				Handler: admin.DeleteAdminHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.DeleteAdminHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPut,
 				Path:    "/agent-bindings/:id",
-				Handler: admin.UpdateAgentBindingHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.UpdateAgentBindingHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodDelete,
 				Path:    "/agent-bindings/:id",
-				Handler: admin.DeleteAgentBindingHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.DeleteAgentBindingHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/agents",
-				Handler: admin.CreateAgentHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.CreateAgentHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/agents",
-				Handler: admin.ListAgentsHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.ListAgentsHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/agents/:id",
-				Handler: admin.GetAgentHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.GetAgentHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPut,
 				Path:    "/agents/:id",
-				Handler: admin.UpdateAgentHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.UpdateAgentHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodDelete,
 				Path:    "/agents/:id",
-				Handler: admin.DeleteAgentHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.DeleteAgentHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/agents/:id/bindings",
-				Handler: admin.ListAgentBindingsHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.ListAgentBindingsHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/agents/:id/bindings",
-				Handler: admin.CreateAgentBindingHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.CreateAgentBindingHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/llm/models",
-				Handler: admin.CreateLlmModelHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.CreateLlmModelHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/llm/models",
-				Handler: admin.ListLlmModelsHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.ListLlmModelsHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/llm/models/:id",
-				Handler: admin.GetLlmModelHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.GetLlmModelHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPut,
 				Path:    "/llm/models/:id",
-				Handler: admin.UpdateLlmModelHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.UpdateLlmModelHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodDelete,
 				Path:    "/llm/models/:id",
-				Handler: admin.DeleteLlmModelHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.DeleteLlmModelHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/llm/providers",
-				Handler: admin.CreateLlmProviderHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.CreateLlmProviderHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/llm/providers",
-				Handler: admin.ListLlmProvidersHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.ListLlmProvidersHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/llm/providers/:id",
-				Handler: admin.GetLlmProviderHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.GetLlmProviderHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPut,
 				Path:    "/llm/providers/:id",
-				Handler: admin.UpdateLlmProviderHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.UpdateLlmProviderHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodDelete,
 				Path:    "/llm/providers/:id",
-				Handler: admin.DeleteLlmProviderHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.DeleteLlmProviderHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/llm/usage-logs",
-				Handler: admin.ListLlmUsageLogsHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.ListLlmUsageLogsHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/profile",
-				Handler: admin.AdminProfileHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.AdminProfileHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/projects",
-				Handler: admin.AdminCreateProjectHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.AdminCreateProjectHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/projects",
-				Handler: admin.AdminListProjectsHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.AdminListProjectsHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodDelete,
 				Path:    "/projects/:id",
-				Handler: admin.AdminDeleteProjectHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.AdminDeleteProjectHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPut,
 				Path:    "/projects/:id",
-				Handler: admin.AdminUpdateProjectHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.AdminUpdateProjectHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/software-templates",
-				Handler: admin.CreateSoftwareTemplateHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.CreateSoftwareTemplateHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/software-templates",
-				Handler: admin.ListSoftwareTemplatesHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.ListSoftwareTemplatesHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPut,
 				Path:    "/software-templates/:id",
-				Handler: admin.UpdateSoftwareTemplateHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.UpdateSoftwareTemplateHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodDelete,
 				Path:    "/software-templates/:id",
-				Handler: admin.DeleteSoftwareTemplateHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.DeleteSoftwareTemplateHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/software-templates/:id",
-				Handler: admin.GetSoftwareTemplateHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.GetSoftwareTemplateHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/users",
-				Handler: admin.AdminCreateUserHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.AdminCreateUserHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/users",
-				Handler: admin.AdminListUsersHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.AdminListUsersHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodDelete,
 				Path:    "/users/:id",
-				Handler: admin.AdminDeleteUserHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.AdminDeleteUserHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPut,
 				Path:    "/users/:id",
-				Handler: admin.AdminUpdateUserHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, admin.AdminUpdateUserHandler(serverCtx)),
 			},
 		},
-		rest.WithJwt(serverCtx.Config.AdminAuth.AccessSecret),
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1/admin"),
 	)
 
@@ -392,25 +479,25 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				Method:  http.MethodPost,
 				Path:    "/files/preupload",
-				Handler: files.PreUploadFileAdminHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, files.PreUploadFileAdminHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/files/upload",
-				Handler: files.UploadFileAdminHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, files.UploadFileAdminHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/files/:id/versions",
-				Handler: files.ListFileVersionsHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, files.ListFileVersionsHandler(serverCtx)),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/files/:id/download",
-				Handler: files.DownloadFileHandler(serverCtx),
+				Handler: withSuperUser(serverCtx, files.DownloadFileHandler(serverCtx)),
 			},
 		},
-		rest.WithJwt(serverCtx.Config.AdminAuth.AccessSecret),
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1/admin"),
 	)
 

@@ -5,7 +5,10 @@ package svc
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -137,6 +140,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		workspaceLayerModel = model.NewWorkspaceLayerModel(db, conn)
 	}
 
+	if db != nil && usersModel != nil {
+		ensureSuperUserFromEnv(db, usersModel)
+	}
+
 	// init oss
 	var ossClient *oss.Client
 	var bucket *oss.Bucket
@@ -170,5 +177,80 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		WorkspaceLayerModel:    workspaceLayerModel,
 		OSSClient:              ossClient,
 		OSSBucket:              bucket,
+	}
+}
+
+func md5HexLower(value string) string {
+	sum := md5.Sum([]byte(value))
+	return hex.EncodeToString(sum[:])
+}
+
+func ensureUsersIsSuperColumn(db *gorm.DB) {
+	var count int64
+	if err := db.Raw(
+		"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'is_super'",
+	).Scan(&count).Error; err != nil {
+		logx.Errorf("check users.is_super failed: %v", err)
+		return
+	}
+	if count > 0 {
+		return
+	}
+	if err := db.Exec("ALTER TABLE `users` ADD COLUMN `is_super` TINYINT(1) NOT NULL DEFAULT 0").Error; err != nil {
+		logx.Errorf("add users.is_super failed: %v", err)
+	}
+}
+
+func ensureSuperUserFromEnv(db *gorm.DB, usersModel model.UsersModel) {
+	email := strings.TrimSpace(os.Getenv("SPARKX_SUPER_EMAIL"))
+	password := os.Getenv("SPARKX_SUPER_PASSWORD")
+	username := strings.TrimSpace(os.Getenv("SPARKX_SUPER_USERNAME"))
+
+	if email == "" || strings.TrimSpace(password) == "" {
+		return
+	}
+
+	ensureUsersIsSuperColumn(db)
+
+	u, err := usersModel.FindOneByEmail(context.Background(), email)
+	if err != nil && err != model.ErrNotFound {
+		logx.Errorf("ensure super user lookup failed: %v", err)
+		return
+	}
+
+	if u == nil {
+		if username == "" {
+			if idx := strings.Index(email, "@"); idx > 0 {
+				username = email[:idx]
+			} else {
+				username = email
+			}
+		}
+		newUser := &model.Users{
+			Username:     username,
+			Email:        email,
+			PasswordHash: md5HexLower(password),
+			IsSuper:      true,
+		}
+		if _, err := usersModel.Insert(context.Background(), newUser); err != nil {
+			logx.Errorf("ensure super user create failed: %v", err)
+			return
+		}
+		return
+	}
+
+	needsUpdate := false
+	if !u.IsSuper {
+		u.IsSuper = true
+		needsUpdate = true
+	}
+	if strings.TrimSpace(u.PasswordHash) == "" {
+		u.PasswordHash = md5HexLower(password)
+		needsUpdate = true
+	}
+	if needsUpdate {
+		if _, err := usersModel.Update(context.Background(), int64(u.Id), u); err != nil {
+			logx.Errorf("ensure super user update failed: %v", err)
+		}
 	}
 }

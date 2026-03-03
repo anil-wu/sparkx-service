@@ -29,11 +29,21 @@ func NewDeleteLayerLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delet
 }
 
 func (l *DeleteLayerLogic) DeleteLayer(req *types.DeleteLayerReq) (resp *types.DeleteLayerResp, err error) {
-	// 执行软删除
-	// 注意：这里需要获取当前用户 ID，暂时硬编码为 1
-	userId := uint64(1)
+	layer, err := l.svcCtx.WorkspaceLayerModel.FindOne(l.ctx, uint64(req.Id))
+	if err != nil {
+		return nil, err
+	}
+	canvas, err := l.svcCtx.WorkspaceCanvasModel.FindOne(l.ctx, layer.CanvasId)
+	if err != nil {
+		return nil, err
+	}
+	userId, err := ensureProjectMember(l.ctx, l.svcCtx, int64(canvas.ProjectId))
+	if err != nil {
+		return nil, err
+	}
 
-	affected, err := l.svcCtx.WorkspaceLayerModel.SoftDelete(l.ctx, uint64(req.Id), userId)
+	// 执行软删除
+	affected, err := l.svcCtx.WorkspaceLayerModel.SoftDelete(l.ctx, uint64(req.Id), uint64(userId))
 	if err != nil {
 		l.Logger.Errorf("soft delete layer error: %v", err)
 		return nil, err

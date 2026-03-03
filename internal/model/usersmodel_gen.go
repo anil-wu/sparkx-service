@@ -49,6 +49,7 @@ type (
 		Email        string    `db:"email" gorm:"column:email"`
 		PasswordHash string    `db:"password_hash" gorm:"column:password_hash"`
 		Avatar       string    `db:"avatar" gorm:"column:avatar"`
+		IsSuper      bool      `db:"is_super" gorm:"column:is_super"`
 		CreatedAt    time.Time `db:"created_at" gorm:"column:created_at"`
 		UpdatedAt    time.Time `db:"updated_at" gorm:"column:updated_at"`
 	}

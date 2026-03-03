@@ -5,6 +5,7 @@ package workspace
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/anil-wu/spark-x/internal/model"
 	"github.com/anil-wu/spark-x/internal/svc"
@@ -28,6 +29,11 @@ func NewCreateCanvasLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Crea
 }
 
 func (l *CreateCanvasLogic) CreateCanvas(req *types.CreateCanvasReq) (resp *types.CreateCanvasResp, err error) {
+	userId, err := ensureProjectMember(l.ctx, l.svcCtx, req.ProjectId)
+	if err != nil {
+		return nil, err
+	}
+
 	// 检查是否已经存在画布
 	existingCanvas, err := l.svcCtx.WorkspaceCanvasModel.FindOneByProjectId(l.ctx, uint64(req.ProjectId))
 	if err == nil && existingCanvas != nil {
@@ -42,14 +48,17 @@ func (l *CreateCanvasLogic) CreateCanvas(req *types.CreateCanvasReq) (resp *type
 		ProjectId:       uint64(req.ProjectId),
 		Name:            req.Name,
 		BackgroundColor: req.BackgroundColor,
-		CreatedBy:       uint64(req.ProjectId), // 暂时使用 projectId 作为 createdBy，实际应该从 JWT 获取
+		CreatedBy:       uint64(userId),
 	}
 
 	// 如果有 metadata，转换为 JSON 字符串
 	if req.Metadata != nil {
-		// 这里需要序列化 JSON，暂时简单处理
+		metadataBytes, err := json.Marshal(req.Metadata)
+		if err != nil {
+			return nil, err
+		}
 		canvas.Metadata.Valid = true
-		canvas.Metadata.String = "{}"
+		canvas.Metadata.String = string(metadataBytes)
 	}
 
 	canvasId, err := l.svcCtx.WorkspaceCanvasModel.Insert(l.ctx, canvas)

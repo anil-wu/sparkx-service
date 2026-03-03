@@ -676,6 +676,7 @@ type LoginResp struct {
 	UserId  int64  `json:"userId"`
 	Created bool   `json:"created"` // 如果是注册逻辑则为 true
 	Token   string `json:"token"`
+	IsSuper bool   `json:"isSuper"`
 }
 
 type PageReq struct {

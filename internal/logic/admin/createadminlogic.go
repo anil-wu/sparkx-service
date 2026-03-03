@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"strings"
 	"time"
 
 	"github.com/anil-wu/spark-x/internal/model"
@@ -38,8 +39,8 @@ func (l *CreateAdminLogic) CreateAdmin(req *types.CreateAdminReq) (resp *types.A
 		return nil, model.InputParamInvalid
 	}
 
-	// check if username already exists
-	_, err = l.svcCtx.AdminsModel.FindOneByUsername(l.ctx, req.Username)
+	email := strings.TrimSpace(req.Username)
+	_, err = l.svcCtx.UsersModel.FindOneByEmail(l.ctx, email)
 	if err == nil {
 		return nil, model.InputParamInvalid
 	}
@@ -60,24 +61,29 @@ func (l *CreateAdminLogic) CreateAdmin(req *types.CreateAdminReq) (resp *types.A
 		return nil, model.InputParamInvalid
 	}
 
-	newAdmin := &model.Admins{
-		Username:     req.Username,
-		PasswordHash: passHash,
-		Role:         adminRole,
-		Status:       "active",
+	username := email
+	if idx := strings.Index(email, "@"); idx > 0 {
+		username = email[:idx]
 	}
 
-	_, err = l.svcCtx.AdminsModel.Insert(l.ctx, newAdmin)
+	newUser := &model.Users{
+		Username:     username,
+		Email:        email,
+		PasswordHash: passHash,
+		IsSuper:      adminRole == "super_admin",
+	}
+
+	_, err = l.svcCtx.UsersModel.Insert(l.ctx, newUser)
 	if err != nil {
 		return nil, err
 	}
 
 	return &types.AdminInfoResp{
-		Id:        int64(newAdmin.Id),
-		Username:  newAdmin.Username,
-		Role:      newAdmin.Role,
-		Status:    newAdmin.Status,
-		CreatedAt: newAdmin.CreatedAt.Format(time.RFC3339),
-		UpdatedAt: newAdmin.UpdatedAt.Format(time.RFC3339),
+		Id:        int64(newUser.Id),
+		Username:  newUser.Email,
+		Role:      adminRole,
+		Status:    "active",
+		CreatedAt: newUser.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: newUser.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }

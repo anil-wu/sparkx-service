@@ -6,6 +6,8 @@ package workspace
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"strings"
 
 	"github.com/anil-wu/spark-x/internal/model"
 	"github.com/anil-wu/spark-x/internal/svc"
@@ -29,6 +31,11 @@ func NewSyncLayersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SyncLa
 }
 
 func (l *SyncLayersLogic) SyncLayers(req *types.SyncLayersReq) (resp *types.SyncLayersResp, err error) {
+	userId, err := ensureProjectMember(l.ctx, l.svcCtx, req.ProjectId)
+	if err != nil {
+		return nil, err
+	}
+
 	resp = &types.SyncLayersResp{
 		Uploaded:     0,
 		Updated:      0,
@@ -74,7 +81,7 @@ func (l *SyncLayersLogic) SyncLayers(req *types.SyncLayersReq) (resp *types.Sync
 	l.Logger.Infof("Found %d existing layers for canvas %d, marking all as deleted", len(existingLayers), canvas.Id)
 
 	for _, existing := range existingLayers {
-		_, err := l.svcCtx.WorkspaceLayerModel.SoftDelete(l.ctx, existing.Id, existing.CreatedBy)
+		_, err := l.svcCtx.WorkspaceLayerModel.SoftDelete(l.ctx, existing.Id, uint64(userId))
 		if err != nil {
 			l.Logger.Errorf("soft delete existing layer %d error: %v", existing.Id, err)
 			return nil, err
@@ -119,7 +126,7 @@ func (l *SyncLayersLogic) SyncLayers(req *types.SyncLayersReq) (resp *types.Sync
 		}
 
 		// 插入新图层（因为所有旧图层已被标记为删除）
-		layer.CreatedBy = 1 // 暂时硬编码，实际应该从 JWT 获取
+		layer.CreatedBy = uint64(userId)
 		layerId, err := l.svcCtx.WorkspaceLayerModel.Insert(l.ctx, layer)
 		if err != nil {
 			l.Logger.Errorf("insert layer error: %v", err)
@@ -132,4 +139,62 @@ func (l *SyncLayersLogic) SyncLayers(req *types.SyncLayersReq) (resp *types.Sync
 	}
 
 	return
+}
+
+func parseBoolContextValue(value interface{}) (bool, bool) {
+	switch v := value.(type) {
+	case bool:
+		return v, true
+	case string:
+		s := strings.TrimSpace(strings.ToLower(v))
+		if s == "true" || s == "1" || s == "yes" {
+			return true, true
+		}
+		if s == "false" || s == "0" || s == "no" {
+			return false, true
+		}
+		return false, false
+	case float64:
+		return v != 0, true
+	case int64:
+		return v != 0, true
+	case json.Number:
+		n, err := v.Int64()
+		if err != nil {
+			return false, false
+		}
+		return n != 0, true
+	default:
+		return false, false
+	}
+}
+
+func isSuperFromContext(ctx context.Context) bool {
+	v, ok := parseBoolContextValue(ctx.Value("isSuper"))
+	return ok && v
+}
+
+func ensureProjectMember(ctx context.Context, svcCtx *svc.ServiceContext, projectId int64) (int64, error) {
+	userIdNumber, ok := ctx.Value("userId").(json.Number)
+	if !ok {
+		return 0, errors.New("unauthorized")
+	}
+	userId, _ := userIdNumber.Int64()
+	if userId <= 0 {
+		return 0, errors.New("unauthorized")
+	}
+	if isSuperFromContext(ctx) {
+		return userId, nil
+	}
+	if projectId <= 0 {
+		return 0, model.InputParamInvalid
+	}
+	var count int64
+	if err := svcCtx.DB.WithContext(ctx).Model(&model.ProjectMembers{}).Where("project_id = ? AND user_id = ?", projectId, userId).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	if count == 0 {
+		return 0, errors.New("project not found or permission denied")
+	}
+	return userId, nil
 }

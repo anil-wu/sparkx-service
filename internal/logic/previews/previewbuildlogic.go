@@ -347,6 +347,108 @@ func (l *PreviewBuildLogic) GetAssetRedirectURL(buildVersionId int64, requestedP
 	return l.signGetURL(storageKey)
 }
 
+func (l *PreviewBuildLogic) ResolveAssetStorageKey(buildVersionId int64, requestedPath string) (string, error) {
+	bv, err := l.requireBuildVersionAccess(buildVersionId)
+	if err != nil {
+		return "", err
+	}
+
+	reqPath := normalizeBuildPath(requestedPath)
+	if reqPath == "" {
+		return "", model.InputParamInvalid
+	}
+
+	prefix := strings.TrimSpace(bv.PreviewStoragePrefix)
+	if prefix != "" {
+		return prefix + reqPath, nil
+	}
+
+	manifest, err := l.loadBuildVersionManifest(bv)
+	if err != nil {
+		if l.svcCtx.OSSBucket != nil {
+			prefix, err := l.ensurePreviewStoragePrefix(bv)
+			if err != nil {
+				return "", err
+			}
+			return prefix + reqPath, nil
+		}
+		return "", err
+	}
+
+	entry := l.findManifestEntry(manifest, reqPath)
+	if entry == nil {
+		if l.svcCtx.OSSBucket != nil {
+			prefix, err := l.ensurePreviewStoragePrefix(bv)
+			if err != nil {
+				return "", err
+			}
+			return prefix + reqPath, nil
+		}
+		return "", model.ErrNotFound
+	}
+
+	if entry.FileId <= 0 && l.svcCtx.OSSBucket != nil {
+		prefix, err := l.ensurePreviewStoragePrefix(bv)
+		if err != nil {
+			return "", err
+		}
+		return prefix + reqPath, nil
+	}
+
+	storageKey, err := l.resolveFileVersionStorageKey(entry.FileId, entry.VersionId, entry.VersionNumber)
+	if err != nil {
+		if l.svcCtx.OSSBucket != nil {
+			prefix, err := l.ensurePreviewStoragePrefix(bv)
+			if err != nil {
+				return "", err
+			}
+			return prefix + reqPath, nil
+		}
+		return "", err
+	}
+	return storageKey, nil
+}
+
+func (l *PreviewBuildLogic) OpenAssetObject(buildVersionId int64, requestedPath string) (io.ReadCloser, string, int64, error) {
+	if l.svcCtx.OSSBucket == nil {
+		return nil, "", 0, errors.New("OSS not configured")
+	}
+
+	reqPath := normalizeBuildPath(requestedPath)
+	if reqPath == "" {
+		return nil, "", 0, model.InputParamInvalid
+	}
+
+	storageKey, err := l.ResolveAssetStorageKey(buildVersionId, reqPath)
+	if err != nil {
+		return nil, "", 0, err
+	}
+
+	var contentType string
+	var contentLength int64
+
+	if meta, err := l.svcCtx.OSSBucket.GetObjectMeta(storageKey); err == nil && meta != nil {
+		contentType = strings.TrimSpace(meta.Get("Content-Type"))
+		if rawLen := strings.TrimSpace(meta.Get("Content-Length")); rawLen != "" {
+			if n, parseErr := strconv.ParseInt(rawLen, 10, 64); parseErr == nil {
+				contentLength = n
+			}
+		}
+	}
+
+	if contentType == "" {
+		if idx := strings.LastIndex(reqPath, "."); idx >= 0 && idx+1 < len(reqPath) {
+			contentType = getContentTypeByFormat(reqPath[idx+1:])
+		}
+	}
+
+	reader, err := l.svcCtx.OSSBucket.GetObject(storageKey)
+	if err != nil {
+		return nil, "", 0, err
+	}
+	return reader, contentType, contentLength, nil
+}
+
 func (l *PreviewBuildLogic) ensurePreviewStoragePrefix(bv *model.BuildVersions) (string, error) {
 	prefix := strings.TrimSpace(bv.PreviewStoragePrefix)
 	if prefix != "" {

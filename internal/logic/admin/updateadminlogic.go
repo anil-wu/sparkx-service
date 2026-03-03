@@ -33,7 +33,7 @@ func (l *UpdateAdminLogic) UpdateAdmin(req *types.UpdateAdminReq) (resp *types.B
 		return nil, model.InputParamInvalid
 	}
 
-	admin, err := l.svcCtx.AdminsModel.FindOne(l.ctx, uint64(req.Id))
+	u, err := l.svcCtx.UsersModel.FindOne(l.ctx, uint64(req.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (l *UpdateAdminLogic) UpdateAdmin(req *types.UpdateAdminReq) (resp *types.B
 	// update password
 	if req.Password != "" {
 		sum := md5.Sum([]byte(req.Password))
-		admin.PasswordHash = hex.EncodeToString(sum[:])
+		u.PasswordHash = hex.EncodeToString(sum[:])
 	}
 
 	// update role
@@ -49,7 +49,7 @@ func (l *UpdateAdminLogic) UpdateAdmin(req *types.UpdateAdminReq) (resp *types.B
 		if req.Role != "super_admin" && req.Role != "admin" {
 			return nil, model.InputParamInvalid
 		}
-		admin.Role = req.Role
+		u.IsSuper = req.Role == "super_admin"
 	}
 
 	// update status
@@ -57,10 +57,9 @@ func (l *UpdateAdminLogic) UpdateAdmin(req *types.UpdateAdminReq) (resp *types.B
 		if req.Status != "active" && req.Status != "disabled" {
 			return nil, model.InputParamInvalid
 		}
-		admin.Status = req.Status
 	}
 
-	_, err = l.svcCtx.AdminsModel.Update(l.ctx, req.Id, admin)
+	_, err = l.svcCtx.UsersModel.Update(l.ctx, req.Id, u)
 	if err != nil {
 		return nil, err
 	}

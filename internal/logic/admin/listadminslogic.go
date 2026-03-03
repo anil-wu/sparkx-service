@@ -32,39 +32,47 @@ func (l *ListAdminsLogic) ListAdmins(req *types.ListAdminsReq) (resp *types.Admi
 		return nil, model.InputParamInvalid
 	}
 
-	// get all admins using GORM
-	var admins []model.Admins
-	result := l.svcCtx.DB.Order("id DESC").Offset(int((req.Page - 1) * req.PageSize)).Limit(int(req.PageSize)).Find(&admins)
-	if result.Error != nil {
-		return nil, result.Error
+	page := req.Page
+	pageSize := req.PageSize
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	if pageSize > 100 {
+		pageSize = 100
 	}
 
-	// get total count
+	query := l.svcCtx.DB.WithContext(l.ctx).Model(&model.Users{}).Where("`is_super` = TRUE")
 	var total int64
-	l.svcCtx.DB.Model(&model.Admins{}).Count(&total)
+	if err := query.Count(&total).Error; err != nil {
+		return nil, err
+	}
 
-	list := make([]types.AdminInfoResp, 0, len(admins))
-	for _, admin := range admins {
-		lastLoginAt := ""
-		if admin.LastLoginAt.Valid {
-			lastLoginAt = admin.LastLoginAt.Time.Format(time.RFC3339)
-		}
+	var users []model.Users
+	if err := query.Order("`id` DESC").Offset(int((page - 1) * pageSize)).Limit(int(pageSize)).Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	list := make([]types.AdminInfoResp, 0, len(users))
+	for _, u := range users {
 		list = append(list, types.AdminInfoResp{
-			Id:          int64(admin.Id),
-			Username:    admin.Username,
-			Role:        admin.Role,
-			Status:      admin.Status,
-			LastLoginAt: lastLoginAt,
-			CreatedAt:   admin.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:   admin.UpdatedAt.Format(time.RFC3339),
+			Id:          int64(u.Id),
+			Username:    u.Email,
+			Role:        "super_admin",
+			Status:      "active",
+			LastLoginAt: "",
+			CreatedAt:   u.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:   u.UpdatedAt.Format(time.RFC3339),
 		})
 	}
 
 	return &types.AdminListResp{
 		List: list,
 		Page: types.PageResp{
-			Page:     req.Page,
-			PageSize: req.PageSize,
+			Page:     page,
+			PageSize: pageSize,
 			Total:    total,
 		},
 	}, nil

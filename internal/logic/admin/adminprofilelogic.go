@@ -2,6 +2,8 @@ package admin
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/anil-wu/spark-x/internal/svc"
@@ -25,25 +27,29 @@ func NewAdminProfileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Admi
 }
 
 func (l *AdminProfileLogic) AdminProfile() (resp *types.AdminInfoResp, err error) {
-	adminId := l.ctx.Value("adminId").(int64)
+	adminIdNumber, ok := l.ctx.Value("adminId").(json.Number)
+	if !ok {
+		return nil, errors.New("unauthorized")
+	}
+	adminId, _ := adminIdNumber.Int64()
 
-	admin, err := l.svcCtx.AdminsModel.FindOne(l.ctx, uint64(adminId))
+	u, err := l.svcCtx.UsersModel.FindOne(l.ctx, uint64(adminId))
 	if err != nil {
 		return nil, err
 	}
 
-	lastLoginAt := ""
-	if admin.LastLoginAt.Valid {
-		lastLoginAt = admin.LastLoginAt.Time.Format(time.RFC3339)
+	role := "admin"
+	if u.IsSuper {
+		role = "super_admin"
 	}
 
 	return &types.AdminInfoResp{
-		Id:          int64(admin.Id),
-		Username:    admin.Username,
-		Role:        admin.Role,
-		Status:      admin.Status,
-		LastLoginAt: lastLoginAt,
-		CreatedAt:   admin.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:   admin.UpdatedAt.Format(time.RFC3339),
+		Id:          int64(u.Id),
+		Username:    u.Email,
+		Role:        role,
+		Status:      "active",
+		LastLoginAt: "",
+		CreatedAt:   u.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:   u.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }

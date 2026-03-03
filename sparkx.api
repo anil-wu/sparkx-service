@@ -733,7 +733,7 @@ service sparkx-api {
 @server (
 	group:  files
 	prefix: /api/v1/admin
-	jwt:    AdminAuth
+	jwt:    Auth
 )
 service sparkx-api {
 	@handler PreUploadFileAdmin
@@ -824,7 +824,7 @@ service sparkx-api {
 @server (
 	group:  admin
 	prefix: /api/v1/admin
-	jwt:    AdminAuth
+	jwt:    Auth
 )
 service sparkx-api {
 	@handler AdminProfile
@@ -1132,4 +1132,3 @@ service sparkx-api {
 	@handler GetDeletedLayers
 	get /layers/deleted (GetDeletedLayersReq) returns (DeletedLayersResp)
 }
-

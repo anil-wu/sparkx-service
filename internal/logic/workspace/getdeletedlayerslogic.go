@@ -27,6 +27,14 @@ func NewGetDeletedLayersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *GetDeletedLayersLogic) GetDeletedLayers(req *types.GetDeletedLayersReq) (resp *types.DeletedLayersResp, err error) {
+	canvas, err := l.svcCtx.WorkspaceCanvasModel.FindOne(l.ctx, uint64(req.CanvasId))
+	if err != nil {
+		return nil, err
+	}
+	if _, err := ensureProjectMember(l.ctx, l.svcCtx, int64(canvas.ProjectId)); err != nil {
+		return nil, err
+	}
+
 	// 查找已删除的图层
 	deletedLayers, err := l.svcCtx.WorkspaceLayerModel.FindDeletedByCanvasId(l.ctx, uint64(req.CanvasId), req.Limit)
 	if err != nil {

@@ -3,7 +3,6 @@ package admin_auth
 import (
 	"context"
 	"crypto/md5"
-	"database/sql"
 	"encoding/hex"
 	"strings"
 	"time"
@@ -35,50 +34,41 @@ func (l *AdminLoginLogic) AdminLogin(req *types.AdminLoginReq) (resp *types.Admi
 		return nil, model.InputParamInvalid
 	}
 
-	// find admin by username
-	admin, findErr := l.svcCtx.AdminsModel.FindOneByUsername(l.ctx, req.Username)
+	user, findErr := l.svcCtx.UsersModel.FindOneByEmail(l.ctx, strings.TrimSpace(req.Username))
 	if findErr != nil {
 		if findErr == model.ErrNotFound {
 			return nil, model.InputParamInvalid
 		}
 		return nil, findErr
 	}
-
-	// check password
-	if !passwordMatches(admin.PasswordHash, req.Password) {
+	if user == nil || !user.IsSuper {
 		return nil, model.InputParamInvalid
 	}
 
-	// check status
-	if !statusAllowsLogin(admin.Status) {
+	if !passwordMatches(user.PasswordHash, req.Password) {
 		return nil, model.InputParamInvalid
 	}
 
-	// update last login time
-	admin.LastLoginAt = sql.NullTime{Time: time.Now(), Valid: true}
-	_, _ = l.svcCtx.AdminsModel.Update(l.ctx, int64(admin.Id), admin)
-
-	// generate token
-	token, err := l.generateToken(int64(admin.Id), admin.Role)
+	token, err := l.generateToken(int64(user.Id), user.IsSuper)
 	if err != nil {
 		return nil, err
 	}
 
 	return &types.AdminLoginResp{
-		AdminId: int64(admin.Id),
-		Role:    admin.Role,
+		AdminId: int64(user.Id),
+		Role:    "super_admin",
 		Token:   token,
 	}, nil
 }
 
-func (l *AdminLoginLogic) generateToken(adminId int64, role string) (string, error) {
+func (l *AdminLoginLogic) generateToken(userId int64, isSuper bool) (string, error) {
 	now := time.Now().Unix()
-	accessExpire := l.svcCtx.Config.AdminAuth.AccessExpire
-	accessSecret := l.svcCtx.Config.AdminAuth.AccessSecret
+	accessExpire := l.svcCtx.Config.Auth.AccessExpire
+	accessSecret := l.svcCtx.Config.Auth.AccessSecret
 
 	claims := jwt.MapClaims{
-		"adminId": adminId,
-		"role":    role,
+		"userId":  userId,
+		"isSuper": isSuper,
 		"iat":     now,
 		"exp":     now + accessExpire,
 	}
