@@ -206,11 +206,6 @@ func NewGetLlmProviderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GetLlmProviderLogic) GetLlmProvider(req *types.GetLlmProviderReq) (resp *types.LlmProviderResp, err error) {
-	_, ok := l.ctx.Value("adminId").(json.Number)
-	if !ok {
-		return nil, errors.New("unauthorized")
-	}
-
 	if req.Id <= 0 {
 		return nil, model.InputParamInvalid
 	}
@@ -246,11 +241,6 @@ func NewListLlmProvidersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *ListLlmProvidersLogic) ListLlmProviders(req *types.PageReq) (resp *types.LlmProviderListResp, err error) {
-	_, ok := l.ctx.Value("adminId").(json.Number)
-	if !ok {
-		return nil, errors.New("unauthorized")
-	}
-
 	page := req.Page
 	pageSize := req.PageSize
 	if page <= 0 {
@@ -491,11 +481,6 @@ func NewGetLlmModelLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetLl
 }
 
 func (l *GetLlmModelLogic) GetLlmModel(req *types.GetLlmModelReq) (resp *types.LlmModelResp, err error) {
-	_, ok := l.ctx.Value("adminId").(json.Number)
-	if !ok {
-		return nil, errors.New("unauthorized")
-	}
-
 	if req.Id <= 0 {
 		return nil, model.InputParamInvalid
 	}
@@ -536,11 +521,6 @@ func NewListLlmModelsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Lis
 }
 
 func (l *ListLlmModelsLogic) ListLlmModels(req *types.ListLlmModelsReq) (resp *types.LlmModelListResp, err error) {
-	_, ok := l.ctx.Value("adminId").(json.Number)
-	if !ok {
-		return nil, errors.New("unauthorized")
-	}
-
 	page := req.Page
 	pageSize := req.PageSize
 	if page <= 0 {

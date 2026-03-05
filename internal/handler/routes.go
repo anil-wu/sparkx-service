@@ -16,6 +16,7 @@ import (
 	auth "github.com/anil-wu/spark-x/internal/handler/auth"
 	builds "github.com/anil-wu/spark-x/internal/handler/builds"
 	files "github.com/anil-wu/spark-x/internal/handler/files"
+	opencode "github.com/anil-wu/spark-x/internal/handler/opencode"
 	previews "github.com/anil-wu/spark-x/internal/handler/previews"
 	projects "github.com/anil-wu/spark-x/internal/handler/projects"
 	softwares "github.com/anil-wu/spark-x/internal/handler/softwares"
@@ -110,6 +111,17 @@ func withSuperUser(svcCtx *svc.ServiceContext, next http.HandlerFunc) http.Handl
 }
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/.well-known/opencode",
+				Handler: opencode.WellKnownOpenCodeHandler(serverCtx),
+			},
+		},
+		rest.WithPrefix(""),
+	)
+
 	server.AddRoutes(
 		[]rest.Route{
 			{
@@ -344,6 +356,63 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/agents/id/:id",
 				Handler: agents.GetAvailableAgentHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/llm/models",
+				Handler: withSuperUser(serverCtx, admin.CreateLlmModelHandler(serverCtx)),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/llm/models",
+				Handler: admin.ListLlmModelsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/llm/models/:id",
+				Handler: admin.GetLlmModelHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/llm/models/:id",
+				Handler: withSuperUser(serverCtx, admin.UpdateLlmModelHandler(serverCtx)),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/llm/models/:id",
+				Handler: withSuperUser(serverCtx, admin.DeleteLlmModelHandler(serverCtx)),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/llm/providers",
+				Handler: withSuperUser(serverCtx, admin.CreateLlmProviderHandler(serverCtx)),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/llm/providers",
+				Handler: admin.ListLlmProvidersHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/llm/providers/:id",
+				Handler: admin.GetLlmProviderHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/llm/providers/:id",
+				Handler: withSuperUser(serverCtx, admin.UpdateLlmProviderHandler(serverCtx)),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/llm/providers/:id",
+				Handler: withSuperUser(serverCtx, admin.DeleteLlmProviderHandler(serverCtx)),
 			},
 		},
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
