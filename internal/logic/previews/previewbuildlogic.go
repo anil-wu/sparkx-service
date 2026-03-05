@@ -2,15 +2,10 @@ package previews
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha1"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
@@ -99,10 +94,10 @@ func (l *PreviewBuildLogic) requireBuildVersionAccess(buildVersionId int64) (*mo
 }
 
 func (l *PreviewBuildLogic) readObject(storageKey string) ([]byte, error) {
-	if l.svcCtx.OSSBucket == nil {
-		return nil, errors.New("OSS not configured")
+	if l.svcCtx.ObjectStore == nil {
+		return nil, errors.New("object store not configured")
 	}
-	reader, err := l.svcCtx.OSSBucket.GetObject(storageKey)
+	reader, err := l.svcCtx.ObjectStore.GetObject(l.ctx, storageKey)
 	if err != nil {
 		return nil, err
 	}
@@ -111,10 +106,14 @@ func (l *PreviewBuildLogic) readObject(storageKey string) ([]byte, error) {
 }
 
 func (l *PreviewBuildLogic) signGetURL(storageKey string) (string, error) {
-	if l.svcCtx.OSSBucket == nil {
-		return "", errors.New("OSS not configured")
+	if l.svcCtx.ObjectStore == nil {
+		return "", errors.New("object store not configured")
 	}
-	return l.svcCtx.OSSBucket.SignURL(storageKey, "GET", int64(l.svcCtx.Config.OSS.ExpireSeconds))
+	return l.svcCtx.ObjectStore.PresignGetObject(
+		l.ctx,
+		storageKey,
+		time.Duration(l.svcCtx.StorageExpireSeconds())*time.Second,
+	)
 }
 
 func (l *PreviewBuildLogic) loadBuildVersionManifest(bv *model.BuildVersions) (*buildVersionJson, error) {
@@ -243,7 +242,7 @@ func (l *PreviewBuildLogic) GetEntryHTML(buildVersionId int64) (string, error) {
 
 	entry := l.findManifestEntry(manifest, entryPath)
 	if entry == nil {
-		if l.svcCtx.OSSBucket != nil {
+		if l.svcCtx.ObjectStore != nil {
 			prefix, err := l.ensurePreviewStoragePrefix(bv)
 			if err != nil {
 				return "", err
@@ -257,7 +256,7 @@ func (l *PreviewBuildLogic) GetEntryHTML(buildVersionId int64) (string, error) {
 		return "", model.ErrNotFound
 	}
 
-	if entry.FileId <= 0 && l.svcCtx.OSSBucket != nil {
+	if entry.FileId <= 0 && l.svcCtx.ObjectStore != nil {
 		prefix, err := l.ensurePreviewStoragePrefix(bv)
 		if err != nil {
 			return "", err
@@ -303,7 +302,7 @@ func (l *PreviewBuildLogic) GetAssetRedirectURL(buildVersionId int64, requestedP
 
 	manifest, err := l.loadBuildVersionManifest(bv)
 	if err != nil {
-		if l.svcCtx.OSSBucket != nil {
+		if l.svcCtx.ObjectStore != nil {
 			prefix, err := l.ensurePreviewStoragePrefix(bv)
 			if err != nil {
 				return "", err
@@ -315,7 +314,7 @@ func (l *PreviewBuildLogic) GetAssetRedirectURL(buildVersionId int64, requestedP
 
 	entry := l.findManifestEntry(manifest, reqPath)
 	if entry == nil {
-		if l.svcCtx.OSSBucket != nil {
+		if l.svcCtx.ObjectStore != nil {
 			prefix, err := l.ensurePreviewStoragePrefix(bv)
 			if err != nil {
 				return "", err
@@ -325,7 +324,7 @@ func (l *PreviewBuildLogic) GetAssetRedirectURL(buildVersionId int64, requestedP
 		return "", model.ErrNotFound
 	}
 
-	if entry.FileId <= 0 && l.svcCtx.OSSBucket != nil {
+	if entry.FileId <= 0 && l.svcCtx.ObjectStore != nil {
 		prefix, err := l.ensurePreviewStoragePrefix(bv)
 		if err != nil {
 			return "", err
@@ -335,7 +334,7 @@ func (l *PreviewBuildLogic) GetAssetRedirectURL(buildVersionId int64, requestedP
 
 	storageKey, err := l.resolveFileVersionStorageKey(entry.FileId, entry.VersionId, entry.VersionNumber)
 	if err != nil {
-		if l.svcCtx.OSSBucket != nil {
+		if l.svcCtx.ObjectStore != nil {
 			prefix, err := l.ensurePreviewStoragePrefix(bv)
 			if err != nil {
 				return "", err
@@ -365,7 +364,7 @@ func (l *PreviewBuildLogic) ResolveAssetStorageKey(buildVersionId int64, request
 
 	manifest, err := l.loadBuildVersionManifest(bv)
 	if err != nil {
-		if l.svcCtx.OSSBucket != nil {
+		if l.svcCtx.ObjectStore != nil {
 			prefix, err := l.ensurePreviewStoragePrefix(bv)
 			if err != nil {
 				return "", err
@@ -377,7 +376,7 @@ func (l *PreviewBuildLogic) ResolveAssetStorageKey(buildVersionId int64, request
 
 	entry := l.findManifestEntry(manifest, reqPath)
 	if entry == nil {
-		if l.svcCtx.OSSBucket != nil {
+		if l.svcCtx.ObjectStore != nil {
 			prefix, err := l.ensurePreviewStoragePrefix(bv)
 			if err != nil {
 				return "", err
@@ -387,7 +386,7 @@ func (l *PreviewBuildLogic) ResolveAssetStorageKey(buildVersionId int64, request
 		return "", model.ErrNotFound
 	}
 
-	if entry.FileId <= 0 && l.svcCtx.OSSBucket != nil {
+	if entry.FileId <= 0 && l.svcCtx.ObjectStore != nil {
 		prefix, err := l.ensurePreviewStoragePrefix(bv)
 		if err != nil {
 			return "", err
@@ -397,7 +396,7 @@ func (l *PreviewBuildLogic) ResolveAssetStorageKey(buildVersionId int64, request
 
 	storageKey, err := l.resolveFileVersionStorageKey(entry.FileId, entry.VersionId, entry.VersionNumber)
 	if err != nil {
-		if l.svcCtx.OSSBucket != nil {
+		if l.svcCtx.ObjectStore != nil {
 			prefix, err := l.ensurePreviewStoragePrefix(bv)
 			if err != nil {
 				return "", err
@@ -410,8 +409,8 @@ func (l *PreviewBuildLogic) ResolveAssetStorageKey(buildVersionId int64, request
 }
 
 func (l *PreviewBuildLogic) OpenAssetObject(buildVersionId int64, requestedPath string) (io.ReadCloser, string, int64, error) {
-	if l.svcCtx.OSSBucket == nil {
-		return nil, "", 0, errors.New("OSS not configured")
+	if l.svcCtx.ObjectStore == nil {
+		return nil, "", 0, errors.New("object store not configured")
 	}
 
 	reqPath := normalizeBuildPath(requestedPath)
@@ -427,13 +426,9 @@ func (l *PreviewBuildLogic) OpenAssetObject(buildVersionId int64, requestedPath 
 	var contentType string
 	var contentLength int64
 
-	if meta, err := l.svcCtx.OSSBucket.GetObjectMeta(storageKey); err == nil && meta != nil {
-		contentType = strings.TrimSpace(meta.Get("Content-Type"))
-		if rawLen := strings.TrimSpace(meta.Get("Content-Length")); rawLen != "" {
-			if n, parseErr := strconv.ParseInt(rawLen, 10, 64); parseErr == nil {
-				contentLength = n
-			}
-		}
+	if stat, err := l.svcCtx.ObjectStore.StatObject(l.ctx, storageKey); err == nil && stat != nil {
+		contentType = strings.TrimSpace(stat.ContentType)
+		contentLength = stat.SizeBytes
 	}
 
 	if contentType == "" {
@@ -442,7 +437,7 @@ func (l *PreviewBuildLogic) OpenAssetObject(buildVersionId int64, requestedPath 
 		}
 	}
 
-	reader, err := l.svcCtx.OSSBucket.GetObject(storageKey)
+	reader, err := l.svcCtx.ObjectStore.GetObject(l.ctx, storageKey)
 	if err != nil {
 		return nil, "", 0, err
 	}
@@ -499,14 +494,14 @@ func (l *PreviewBuildLogic) PreuploadBuildFile(buildVersionId int64, relativePat
 	}
 
 	storageKey := prefix + p
-	uploadUrl, err := presignOSSPutURL(
-		l.svcCtx.Config.OSS.Endpoint,
-		l.svcCtx.Config.OSS.Bucket,
-		l.svcCtx.Config.OSS.AccessKeyId,
-		l.svcCtx.Config.OSS.AccessKeySecret,
+	if l.svcCtx.ObjectStore == nil {
+		return "", "", "", errors.New("object store not configured")
+	}
+	uploadUrl, err := l.svcCtx.ObjectStore.PresignPutObject(
+		l.ctx,
 		storageKey,
 		ct,
-		int64(l.svcCtx.Config.OSS.ExpireSeconds),
+		time.Duration(l.svcCtx.StorageExpireSeconds())*time.Second,
 	)
 	if err != nil {
 		return "", "", "", err
@@ -566,83 +561,4 @@ func getContentTypeByFormat(format string) string {
 	default:
 		return "application/octet-stream"
 	}
-}
-
-func normalizeOSSEndpointForSign(rawEndpoint, bucket string) (scheme string, host string, err error) {
-	raw := strings.TrimSpace(rawEndpoint)
-	if raw == "" {
-		return "", "", errors.New("empty OSS endpoint")
-	}
-
-	u, parseErr := url.Parse(raw)
-	if parseErr == nil && u.Host != "" {
-		scheme = strings.TrimSpace(u.Scheme)
-		host = strings.TrimSpace(u.Host)
-	} else {
-		u2, parseErr2 := url.Parse("https://" + raw)
-		if parseErr2 != nil || u2.Host == "" {
-			return "", "", errors.New("invalid OSS endpoint")
-		}
-		scheme = "https"
-		host = strings.TrimSpace(u2.Host)
-	}
-
-	b := strings.TrimSpace(bucket)
-	if b != "" {
-		prefix := b + "."
-		for strings.HasPrefix(host, prefix) {
-			host = strings.TrimPrefix(host, prefix)
-		}
-	}
-
-	if scheme == "" {
-		scheme = "https"
-	}
-	if host == "" {
-		return "", "", errors.New("invalid OSS endpoint host")
-	}
-	return scheme, host, nil
-}
-
-func escapeOSSObjectKeyPath(objectKey string) string {
-	if objectKey == "" {
-		return ""
-	}
-	parts := strings.Split(objectKey, "/")
-	for i := range parts {
-		parts[i] = url.PathEscape(parts[i])
-	}
-	return strings.Join(parts, "/")
-}
-
-func presignOSSPutURL(endpoint, bucket, accessKeyId, accessKeySecret, objectKey, contentType string, expireSeconds int64) (string, error) {
-	if bucket == "" || accessKeyId == "" || accessKeySecret == "" || endpoint == "" {
-		return "", errors.New("OSS not configured")
-	}
-
-	scheme, host, err := normalizeOSSEndpointForSign(endpoint, bucket)
-	if err != nil {
-		return "", err
-	}
-
-	expires := timeNowUnix() + expireSeconds
-	canonicalResource := "/" + bucket + "/" + objectKey
-	stringToSign := "PUT\n\n" + contentType + "\n" + strconv.FormatInt(expires, 10) + "\n" + canonicalResource
-
-	signature := hmacSha1Base64(accessKeySecret, stringToSign)
-	escapedObjectKey := escapeOSSObjectKeyPath(objectKey)
-	return scheme + "://" + bucket + "." + host + "/" + escapedObjectKey +
-		"?Expires=" + strconv.FormatInt(expires, 10) +
-		"&OSSAccessKeyId=" + url.QueryEscape(accessKeyId) +
-		"&Signature=" + url.QueryEscape(signature), nil
-}
-
-func timeNowUnix() int64 {
-	return time.Now().Unix()
-}
-
-func hmacSha1Base64(secret string, data string) string {
-	mac := hmac.New(sha1.New, []byte(secret))
-	_, _ = mac.Write([]byte(data))
-	return base64.StdEncoding.EncodeToString(mac.Sum(nil))
 }

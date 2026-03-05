@@ -81,9 +81,12 @@ func (l *DeleteFileLogic) DeleteFile(req *types.DeleteFileReq) (resp *types.Base
 	}
 
 	// 从 OSS 删除所有版本的文件
+	if l.svcCtx.ObjectStore == nil {
+		return nil, errors.New("object store not configured")
+	}
 	for _, version := range versions {
 		if version.StorageKey != "" {
-			if err := l.svcCtx.OSSBucket.DeleteObject(version.StorageKey); err != nil {
+			if err := l.svcCtx.ObjectStore.DeleteObject(l.ctx, version.StorageKey); err != nil {
 				l.Errorf("[DeleteFile] Failed to delete OSS object %s: %v", version.StorageKey, err)
 				// 继续删除其他版本，记录错误但不中断
 			}

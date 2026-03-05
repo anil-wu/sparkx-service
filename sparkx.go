@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/anil-wu/spark-x/internal/config"
 	"github.com/anil-wu/spark-x/internal/handler"
@@ -44,6 +45,41 @@ func main() {
 	if expireSeconds := os.Getenv("OSS_EXPIRE_SECONDS"); expireSeconds != "" {
 		if v, err := strconv.ParseInt(expireSeconds, 10, 64); err == nil {
 			c.OSS.ExpireSeconds = v
+		}
+	}
+
+	if provider := strings.TrimSpace(os.Getenv("STORAGE_PROVIDER")); provider != "" {
+		c.Storage.Provider = provider
+	}
+	if expireSeconds := strings.TrimSpace(os.Getenv("STORAGE_EXPIRE_SECONDS")); expireSeconds != "" {
+		if v, err := strconv.ParseInt(expireSeconds, 10, 64); err == nil {
+			c.Storage.ExpireSeconds = v
+		}
+	}
+
+	if endpoint := strings.TrimSpace(os.Getenv("S3_ENDPOINT")); endpoint != "" {
+		c.S3.Endpoint = endpoint
+	}
+	if accessKeyId := strings.TrimSpace(os.Getenv("S3_ACCESS_KEY_ID")); accessKeyId != "" {
+		c.S3.AccessKeyId = accessKeyId
+	}
+	if accessKeySecret := os.Getenv("S3_ACCESS_KEY_SECRET"); strings.TrimSpace(accessKeySecret) != "" {
+		c.S3.AccessKeySecret = accessKeySecret
+	}
+	if bucket := strings.TrimSpace(os.Getenv("S3_BUCKET")); bucket != "" {
+		c.S3.Bucket = bucket
+	}
+	if region := strings.TrimSpace(os.Getenv("S3_REGION")); region != "" {
+		c.S3.Region = region
+	}
+	if rawUseSSL := strings.TrimSpace(os.Getenv("S3_USE_SSL")); rawUseSSL != "" {
+		if v, err := strconv.ParseBool(rawUseSSL); err == nil {
+			c.S3.UseSSL = v
+		}
+	}
+	if expireSeconds := strings.TrimSpace(os.Getenv("S3_EXPIRE_SECONDS")); expireSeconds != "" {
+		if v, err := strconv.ParseInt(expireSeconds, 10, 64); err == nil {
+			c.S3.ExpireSeconds = v
 		}
 	}
 

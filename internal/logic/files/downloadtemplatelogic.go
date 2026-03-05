@@ -68,13 +68,20 @@ func (l *DownloadTemplateLogic) DownloadTemplate(req *types.DownloadFileReq) (re
 	}
 
 	// 生成 OSS 临时访问 URL（GET 方法）
-	url, err := l.svcCtx.OSSBucket.SignURL(version.StorageKey, "GET", int64(l.svcCtx.Config.OSS.ExpireSeconds))
+	if l.svcCtx.ObjectStore == nil {
+		return nil, errors.New("object store not configured")
+	}
+	url, err := l.svcCtx.ObjectStore.PresignGetObject(
+		l.ctx,
+		version.StorageKey,
+		time.Duration(l.svcCtx.StorageExpireSeconds())*time.Second,
+	)
 	if err != nil {
 		l.Errorf("[DownloadTemplate] Failed to sign URL: %v", err)
 		return nil, err
 	}
 
-	expiresAt := time.Now().Add(time.Duration(l.svcCtx.Config.OSS.ExpireSeconds) * time.Second).Format(time.RFC3339)
+	expiresAt := time.Now().Add(time.Duration(l.svcCtx.StorageExpireSeconds()) * time.Second).Format(time.RFC3339)
 	l.Infof("[DownloadTemplate] Generated download URL for fileId=%d, versionId=%d, expiresAt=%s", req.Id, version.Id, expiresAt)
 
 	resp = &types.DownloadFileResp{

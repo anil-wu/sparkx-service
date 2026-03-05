@@ -5,15 +5,10 @@ package files
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha1"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/url"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -95,78 +90,6 @@ func getContentTypeByFormat(format string) string {
 	default:
 		return "application/octet-stream"
 	}
-}
-
-func normalizeOSSEndpointForSign(rawEndpoint, bucket string) (scheme string, host string, err error) {
-	raw := strings.TrimSpace(rawEndpoint)
-	if raw == "" {
-		return "", "", errors.New("empty OSS endpoint")
-	}
-
-	u, parseErr := url.Parse(raw)
-	if parseErr == nil && u.Host != "" {
-		scheme = strings.TrimSpace(u.Scheme)
-		host = strings.TrimSpace(u.Host)
-	} else {
-		u2, parseErr2 := url.Parse("https://" + raw)
-		if parseErr2 != nil || u2.Host == "" {
-			return "", "", errors.New("invalid OSS endpoint")
-		}
-		scheme = "https"
-		host = strings.TrimSpace(u2.Host)
-	}
-
-	b := strings.TrimSpace(bucket)
-	if b != "" {
-		prefix := b + "."
-		for strings.HasPrefix(host, prefix) {
-			host = strings.TrimPrefix(host, prefix)
-		}
-	}
-
-	if scheme == "" {
-		scheme = "https"
-	}
-	if host == "" {
-		return "", "", errors.New("invalid OSS endpoint host")
-	}
-	return scheme, host, nil
-}
-
-func escapeOSSObjectKeyPath(objectKey string) string {
-	if objectKey == "" {
-		return ""
-	}
-	parts := strings.Split(objectKey, "/")
-	for i := range parts {
-		parts[i] = url.PathEscape(parts[i])
-	}
-	return strings.Join(parts, "/")
-}
-
-func presignOSSPutURL(endpoint, bucket, accessKeyId, accessKeySecret, objectKey, contentType string, expireSeconds int64) (string, error) {
-	if bucket == "" || accessKeyId == "" || accessKeySecret == "" || endpoint == "" {
-		return "", errors.New("OSS not configured")
-	}
-
-	scheme, host, err := normalizeOSSEndpointForSign(endpoint, bucket)
-	if err != nil {
-		return "", err
-	}
-
-	expires := time.Now().Unix() + expireSeconds
-	canonicalResource := "/" + bucket + "/" + objectKey
-	stringToSign := "PUT\n\n" + contentType + "\n" + strconv.FormatInt(expires, 10) + "\n" + canonicalResource
-
-	mac := hmac.New(sha1.New, []byte(accessKeySecret))
-	_, _ = mac.Write([]byte(stringToSign))
-	signature := base64.StdEncoding.EncodeToString(mac.Sum(nil))
-
-	escapedObjectKey := escapeOSSObjectKeyPath(objectKey)
-	return scheme + "://" + bucket + "." + host + "/" + escapedObjectKey +
-		"?Expires=" + strconv.FormatInt(expires, 10) +
-		"&OSSAccessKeyId=" + url.QueryEscape(accessKeyId) +
-		"&Signature=" + url.QueryEscape(signature), nil
 }
 
 type PreUploadFileLogic struct {
@@ -295,9 +218,9 @@ func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types
 		return nil, err
 	}
 	// 检查 OSS 是否已配置
-	if l.svcCtx.OSSBucket == nil {
-		l.Errorf("[PreUpload] OSS not configured")
-		return nil, errors.New("OSS not configured")
+	if l.svcCtx.ObjectStore == nil {
+		l.Errorf("[PreUpload] Object store not configured")
+		return nil, errors.New("object store not configured")
 	}
 
 	// 确定 Content-Type
@@ -307,20 +230,17 @@ func (l *PreUploadFileLogic) PreUploadFile(req *types.PreUploadReq) (resp *types
 		contentType = getContentTypeByFormat(req.FileFormat)
 	}
 
-	url, err := presignOSSPutURL(
-		l.svcCtx.Config.OSS.Endpoint,
-		l.svcCtx.Config.OSS.Bucket,
-		l.svcCtx.Config.OSS.AccessKeyId,
-		l.svcCtx.Config.OSS.AccessKeySecret,
+	url, err := l.svcCtx.ObjectStore.PresignPutObject(
+		l.ctx,
 		objectPath,
 		contentType,
-		int64(l.svcCtx.Config.OSS.ExpireSeconds),
+		time.Duration(l.svcCtx.StorageExpireSeconds())*time.Second,
 	)
 	if err != nil {
 		l.Errorf("[PreUpload] Failed to sign URL: %v", err)
 		return nil, err
 	}
-	l.Infof("[PreUpload] Signed URL generated successfully, expires in %d seconds", l.svcCtx.Config.OSS.ExpireSeconds)
+	l.Infof("[PreUpload] Signed URL generated successfully, expires in %d seconds", l.svcCtx.StorageExpireSeconds())
 	resp = &types.PreUploadResp{
 		UploadUrl:     url,
 		FileId:        int64(file.Id),

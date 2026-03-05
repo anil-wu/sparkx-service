@@ -81,7 +81,10 @@ func (l *GetFileContentLogic) GetFileContent(req *types.GetFileContentReq) (io.R
 	}
 
 	// 从 OSS 获取文件内容
-	reader, err := l.svcCtx.OSSBucket.GetObject(version.StorageKey)
+	if l.svcCtx.ObjectStore == nil {
+		return nil, "", errors.New("object store not configured")
+	}
+	reader, err := l.svcCtx.ObjectStore.GetObject(l.ctx, version.StorageKey)
 	if err != nil {
 		l.Errorf("[GetFileContent] Failed to get object from OSS: %v", err)
 		return nil, "", err

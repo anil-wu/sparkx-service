@@ -21,11 +21,24 @@ type Config struct {
 	Google struct {
 		ClientID string
 	}
+	Storage struct {
+		Provider      string
+		ExpireSeconds int64
+	}
 	OSS struct {
 		Endpoint        string
 		AccessKeyId     string
 		AccessKeySecret string
 		Bucket          string
+		ExpireSeconds   int64
+	}
+	S3 struct {
+		Endpoint        string
+		AccessKeyId     string
+		AccessKeySecret string
+		Bucket          string
+		Region          string
+		UseSSL          bool
 		ExpireSeconds   int64
 	}
 }

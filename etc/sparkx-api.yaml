@@ -4,7 +4,7 @@ Port: 8890
 CertFile: etc/server.crt
 KeyFile: etc/server.key
 MySQL:
-  DSN: "sparkplay:sparkplay@tcp(47.112.97.49:6003)/sparkplay?charset=utf8mb4&parseTime=true&loc=Local&timeout=5s&readTimeout=5s&writeTimeout=5s"
+  DSN: "${MYSQL_DSN}"
 Timeout: 10000
 Auth:
   AccessSecret: "uKq94b4X9v5y7n8r2z3p"
@@ -14,9 +14,20 @@ AdminAuth:
   AccessExpire: 86400
 Google:
   ClientID: "537084280912-5j6ig7r95rnisbtjlagkbc8f4lijub25.apps.googleusercontent.com"
+Storage:
+  Provider: "${STORAGE_PROVIDER}"
+  ExpireSeconds: 1800
 OSS:
   Endpoint: "${OSS_ENDPOINT}"
   AccessKeyId: "${OSS_ACCESS_KEY_ID}"
   AccessKeySecret: "${OSS_ACCESS_KEY_SECRET}"
   Bucket: "${OSS_BUCKET}"
+  ExpireSeconds: 1800
+S3:
+  Endpoint: "${S3_ENDPOINT}"
+  AccessKeyId: "${S3_ACCESS_KEY_ID}"
+  AccessKeySecret: "${S3_ACCESS_KEY_SECRET}"
+  Bucket: "${S3_BUCKET}"
+  Region: "${S3_REGION}"
+  UseSSL: false
   ExpireSeconds: 1800

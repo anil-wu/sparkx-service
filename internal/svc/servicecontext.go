@@ -16,6 +16,7 @@ import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/anil-wu/spark-x/internal/config"
 	"github.com/anil-wu/spark-x/internal/model"
+	"github.com/anil-wu/spark-x/internal/storage"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"gorm.io/driver/mysql"
@@ -39,6 +40,8 @@ type ServiceContext struct {
 	SoftwareTemplatesModel model.SoftwareTemplatesModel
 	WorkspaceCanvasModel   model.WorkspaceCanvasModel
 	WorkspaceLayerModel    model.WorkspaceLayerModel
+
+	ObjectStore storage.ObjectStore
 
 	OSSClient *oss.Client
 	OSSBucket *oss.Bucket
@@ -82,6 +85,47 @@ func normalizeOSSEndpoint(rawEndpoint, bucket string) string {
 		return scheme + "://" + host
 	}
 	return host
+}
+
+func (s *ServiceContext) StorageProvider() string {
+	provider := strings.ToLower(strings.TrimSpace(s.Config.Storage.Provider))
+	if provider == "" {
+		if strings.TrimSpace(s.Config.S3.Endpoint) != "" && strings.TrimSpace(s.Config.S3.Bucket) != "" {
+			return "s3"
+		}
+		return "oss"
+	}
+	if provider == "minio" {
+		return "s3"
+	}
+	return provider
+}
+
+func (s *ServiceContext) StorageExpireSeconds() int64 {
+	if s == nil {
+		return 1800
+	}
+	if s.Config.Storage.ExpireSeconds > 0 {
+		return s.Config.Storage.ExpireSeconds
+	}
+
+	switch s.StorageProvider() {
+	case "s3":
+		if s.Config.S3.ExpireSeconds > 0 {
+			return s.Config.S3.ExpireSeconds
+		}
+	default:
+		if s.Config.OSS.ExpireSeconds > 0 {
+			return s.Config.OSS.ExpireSeconds
+		}
+	}
+	if s.Config.OSS.ExpireSeconds > 0 {
+		return s.Config.OSS.ExpireSeconds
+	}
+	if s.Config.S3.ExpireSeconds > 0 {
+		return s.Config.S3.ExpireSeconds
+	}
+	return 1800
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -145,23 +189,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ensureSuperUserFromEnv(db, usersModel)
 	}
 
-	// init oss
-	var ossClient *oss.Client
-	var bucket *oss.Bucket
-	if c.OSS.Endpoint != "" && c.OSS.Bucket != "" {
-		endpoint := normalizeOSSEndpoint(c.OSS.Endpoint, c.OSS.Bucket)
-		ossClient, err = oss.New(endpoint, c.OSS.AccessKeyId, c.OSS.AccessKeySecret)
-		if err != nil {
-			logx.Errorf("oss init failed: %v", err)
-		} else {
-			bucket, err = ossClient.Bucket(c.OSS.Bucket)
-			if err != nil {
-				logx.Errorf("oss bucket init failed: %v", err)
-			}
-		}
-	}
-
-	return &ServiceContext{
+	ctx := &ServiceContext{
 		Config:                 c,
 		DB:                     db,
 		Conn:                   conn,
@@ -176,9 +204,52 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		SoftwareTemplatesModel: softwareTemplatesModel,
 		WorkspaceCanvasModel:   workspaceCanvasModel,
 		WorkspaceLayerModel:    workspaceLayerModel,
-		OSSClient:              ossClient,
-		OSSBucket:              bucket,
 	}
+
+	provider := ctx.StorageProvider()
+	expireSeconds := ctx.StorageExpireSeconds()
+
+	// init object store
+	var ossClient *oss.Client
+	var bucket *oss.Bucket
+
+	if provider == "s3" {
+		if strings.TrimSpace(c.S3.Endpoint) != "" && strings.TrimSpace(c.S3.Bucket) != "" {
+			s3Store, err := storage.NewS3Store(
+				c.S3.Endpoint,
+				c.S3.UseSSL,
+				c.S3.Region,
+				c.S3.AccessKeyId,
+				c.S3.AccessKeySecret,
+				c.S3.Bucket,
+				expireSeconds,
+			)
+			if err != nil {
+				logx.Errorf("s3 init failed: %v", err)
+			} else {
+				ctx.ObjectStore = s3Store
+			}
+		}
+	} else {
+		if c.OSS.Endpoint != "" && c.OSS.Bucket != "" {
+			endpoint := normalizeOSSEndpoint(c.OSS.Endpoint, c.OSS.Bucket)
+			ossClient, err = oss.New(endpoint, c.OSS.AccessKeyId, c.OSS.AccessKeySecret)
+			if err != nil {
+				logx.Errorf("oss init failed: %v", err)
+			} else {
+				bucket, err = ossClient.Bucket(c.OSS.Bucket)
+				if err != nil {
+					logx.Errorf("oss bucket init failed: %v", err)
+				}
+			}
+		}
+		ctx.ObjectStore = storage.NewOSSStore(bucket, c.OSS.Endpoint, c.OSS.Bucket, c.OSS.AccessKeyId, c.OSS.AccessKeySecret, expireSeconds)
+	}
+
+	ctx.OSSClient = ossClient
+	ctx.OSSBucket = bucket
+
+	return ctx
 }
 
 func md5HexLower(value string) string {
